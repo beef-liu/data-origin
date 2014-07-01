@@ -1,0 +1,277 @@
+.my-navibar {
+	height: 44px; 
+	width: 100%; 
+	/*background: url('../img/header_bg.jpg') repeat 0 0 #204077;*/
+	position: fixed; 
+	top: 0; 
+	left: 0;
+	line-height: 44px;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.my-footbar {
+	height: 32px; 
+	width: 100%; 
+	position: fixed; 
+	bottom: 0; 
+	left: 0;
+	line-height: 34px;
+	border-top: 1px solid #e5e5e5;
+}
+
+.my-container {
+	position: absolute; 
+	top: 44px; 
+	padding: 0px; 
+	width: 100%;
+	bottom: 30px;	
+}
+
+.my-left-menu {
+	float: left;
+	position: relative;
+	width: 200px;
+	height: 100%;
+	/*border-right: 1px solid #e5e5e5;*/
+}
+
+.my-main-content {
+	position:relative;
+	height: 100%;
+	overflow: hidden;
+}
+
+.my-table {
+	/*border: 1px solid #e5e5e5;*/
+}
+
+.my-thead {
+	border-top: 1px solid #e5e5e5;
+}
+
+.my-head-tr {
+	background: #f3f3f3;
+	border-top: 1px solid #e5e5e5;
+	border-bottom: 1px solid #e5e5e5;
+	height: 40px;
+}
+
+.my-th {
+	text-align: center;
+	cursor: pointer;
+	border: 1px solid #e5e5e5;
+}
+
+.my-th-sort {
+	text-align: center;
+	cursor: pointer;
+}
+.my-th-sort img {
+	width: 18px;
+	height: 18px;
+}
+.my-th-sort.asc img {
+	background: url(../myimg/arrow-up.png) 0 0 no-repeat;
+	background-size: 18px 18px;
+}
+.my-th-sort.desc img {
+	background: url(../myimg/arrow-down.png) 0 0 no-repeat;
+	background-size: 18px 18px;
+}
+.my-th-sort.nosort img {
+	background: url(../myimg/empty.png) 0 0 no-repeat;
+	background-size: 18px 18px;
+}
+
+
+.my-tr {
+	text-align: center;
+	font-size: smaller;
+	border-bottom: 1px solid #e5e5e5;
+	height: 40px;
+}
+
+.my-tr:hover {
+  background-color: #8dc1ff;
+  text-decoration: none;
+}
+
+.my-td {
+	text-align: center;
+	cursor: pointer;
+	border: 1px solid #e5e5e5;
+}
+
+.my-table-search {
+	/*border-bottom: 1px solid #e5e5e5;*/
+}
+.my-td-search {
+	text-align: left;
+	/*border: 1px solid #e5e5e5;*/
+}
+.my-td-search div {
+	float:left;
+	margin-right: 16px;	
+}
+.my-td-search label {
+	padding-top: 4px;
+	font-weight: bold;
+	/*background-color: #f3f3f3;*/
+}
+.my-td-search input {
+	text-align: left;
+	vertical-align: baseline; 
+	border: 1px solid #e5e5e5;
+	margin-left: 8px;
+	height: 34px;
+	width: 120px;
+}
+
+.my-table-page-controller {
+	/*border-bottom: 1px solid #e5e5e5;*/
+}
+.my-td-page-controller {
+	text-align: left;
+	/*border: 1px solid #e5e5e5;*/
+}
+.my-td-page-controller div {
+	float:left;
+	margin-right: 2px;	
+}
+
+.my-button-s {
+	display: table-cell;
+}
+.my-button-bk-default a {
+	background: #BDC3C7;
+}
+.my-button-bk-danger a {
+	background: #C0392B;
+}
+.my-button-bk-info a {
+	background: #3498DB;
+}
+.my-button-bk-inverse a {
+	background: #2C3E50;
+}
+.my-button-bk-default a:hover {
+  background-color: #1abc9c;
+  text-decoration: none;
+}
+
+.my-button-s a {
+  border: none;
+  font-size: 15px;
+  font-weight: normal;
+  line-height: 1.4;
+  border-radius: 4px;
+  padding: 10px 15px;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-transition: border .2s linear, color .2s linear, background-color .2s linear;
+  transition: border .2s linear, color .2s linear, background-color .2s linear;
+	
+  white-space: normal;
+  
+  font-size: 13px;
+  line-height: 1.385;
+  border-radius: 4px;
+
+  color: #ffffff;
+  
+  padding:10px; 
+}
+.my-button-s a > img {
+	width: 16px; height:16px;
+}
+.my-button-s a > span {
+	width: 16px; height:16px;
+}
+
+
+.my-pagination ul {
+  border-radius: 4px;
+}
+.my-pagination ul > li {
+  padding:6px;
+}
+.my-pagination ul > li > span {
+  padding:0px;
+}
+.my-pagination ul li > span:hover {
+  background-color: #1abc9c;
+}
+
+.my-menu-group {
+  color: #9e9e9e;
+  text-decoration: none;
+}
+
+.my-menu-item {
+	padding: 4px;
+}
+.my-menu-item a {
+  color: black;
+  text-decoration: none;
+  -webkit-transition: 0.25s;
+  transition: 0.25s;
+}
+.my-menu-item:hover {
+  color: black;
+  background-color: #8dc1ff;
+  text-decoration: none;
+}
+
+.dropdown-info {
+  background-color: #3498DB;
+  color: #cccccc;
+  padding: 4px 0 6px;
+}
+.dropdown-info li {
+  margin: 0 4px -2px;
+}
+.dropdown-info li:first-child > a,
+.dropdown-info li:last-child > a {
+  border-radius: 2px;
+  padding-bottom: 7px;
+  padding-top: 5px;
+}
+.dropdown-info li:first-child dt + a,
+.dropdown-info li:last-child dt + a {
+  border-radius: 2px;
+}
+.dropdown-info li.active > a,
+.dropdown-info li.selected > a {
+  background: #1abc9c;
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+}
+.dropdown-info li dt {
+  padding-left: 11px;
+  padding-right: 11px;
+}
+.dropdown-info li .divider {
+  margin-left: 11px;
+  margin-right: 11px;
+}
+.dropdown-info li > a {
+  border-radius: 2px;
+  color: #ffffff;
+  padding: 5px 11px 7px;
+}
+.dropdown-info li > a:hover,
+.dropdown-info li > a:active,
+.dropdown-info li > a:focus {
+  background: #2c3e50;
+}
+.dropdown-info li > a.highlighted {
+  background: #526476;
+}
+.dropdown-info li > a.highlighted:hover,
+.dropdown-info li > a.highlighted:focus {
+  background: #677786;
+}
+.dropdown-info li .divider {
+  background-color: #526476;
+  border-bottom-color: #526476;
+}
