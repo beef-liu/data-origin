@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceContext>
+  <Contexts>
+    <ContextSetting>
+      <ConfigLocation>/WEB-INF/salama/ServletServiceContext.xml</ConfigLocation>
+      <ContextClass>com.salama.server.servlet.ServiceContext</ContextClass>
+    </ContextSetting>
+    <ContextSetting>
+      <ConfigLocation>/WEB-INF/salama/CloudDataServiceContext.xml</ConfigLocation>
+      <ContextClass>com.salama.service.clouddata.CloudDataServiceContext</ContextClass>
+    </ContextSetting>
+  </Contexts>
+</ServiceContext>

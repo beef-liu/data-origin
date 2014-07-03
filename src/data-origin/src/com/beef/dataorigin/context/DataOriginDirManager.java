@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 public class DataOriginDirManager {
 	private final static Logger logger = Logger.getLogger(DataOriginDirManager.class);
 	
-	public final static String SUB_DIR_DB_DATA_GENERATE = "dbdata-generate";
+	//public final static String SUB_DIR_DB_DATA_GENERATE = "dbdata-generate";
 	public final static String SUB_DIR_DB_TABLES = "dbtables";
 
 	public final static String SUB_DIR_META = "meta";
@@ -15,7 +15,7 @@ public class DataOriginDirManager {
 	public final static String SUB_DIR_META_DATA_UI_SETTING = "data-ui-setting";
 
 	private File _baseDir;
-	private File _dbDataClassDir;
+	//private File _dbDataClassDir;
 	private File _dbTablesDir;
 	private File _metaDir;
 	private File _metaDataImportSettingDir;
@@ -25,9 +25,11 @@ public class DataOriginDirManager {
 		return _baseDir;
 	}
 
+	/*
 	public File getDbDataClassDir() {
 		return _dbDataClassDir;
 	}
+	*/
 
 	public File getDbTablesDir() {
 		return _dbTablesDir;
@@ -53,8 +55,10 @@ public class DataOriginDirManager {
 			throw new RuntimeException("DataOriginGenerator makeBaseDir() failed");
 		}
 
+		/*
 		_dbDataClassDir = new File(_baseDir, SUB_DIR_DB_DATA_GENERATE);
 		checkDirExists(_dbDataClassDir);
+		*/
 		
 		_dbTablesDir = new File(_baseDir, SUB_DIR_DB_TABLES);
 		checkDirExists(_dbTablesDir);

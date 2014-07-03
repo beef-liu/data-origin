@@ -15,6 +15,10 @@ public class MetaDataUISetting {
 	
 	private List<MetaDataField> _fieldList = new ArrayList<MetaDataField>();
 
+	public final static String defaultFileNameOfTable(String tableName) {
+		return "DataUISetting_" + tableName.toLowerCase() + ".xml";
+	}
+
 	public String getDataTableName() {
 		return _dataTableName;
 	}

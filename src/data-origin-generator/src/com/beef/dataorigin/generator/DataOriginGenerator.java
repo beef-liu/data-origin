@@ -17,10 +17,15 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
 import MetoXML.XmlSerializer;
+import MetoXML.Base.XmlParseException;
 
 import com.beef.dataorigin.context.DataOriginDirManager;
-import com.beef.dataorigin.generator.imp.DBDataClassGenerator;
-import com.beef.dataorigin.generator.imp.MetaDataImportSettingGenerator;
+import com.beef.dataorigin.generator.imp.settings.DBDataClassGenerator;
+import com.beef.dataorigin.generator.imp.settings.MetaDataImportSettingGenerator;
+import com.beef.dataorigin.generator.imp.settings.MetaDataUISettingGenerator;
+import com.beef.dataorigin.generator.imp.web.WebGenerator;
+import com.beef.dataorigin.generator.util.DataOriginGeneratorUtil;
+import com.beef.dataorigin.setting.DataOriginSetting;
 import com.salama.modeldriven.util.db.DBTable;
 import com.salama.modeldriven.util.db.mysql.MysqlTableInfoUtil;
 import com.salama.util.ResourceUtil;
@@ -29,147 +34,94 @@ public class DataOriginGenerator {
 	private final static Logger logger = Logger.getLogger(DataOriginGenerator.class);
 	
 	public final static Charset DefaultCharset = Charset.forName("utf-8");
-	
-	public final static String PROP_KEY_DATA_ORIGIN_BASE_DIR = "data-origin.base.dir";
 
-	public final static String PROP_KEY_DB_DRIVER = "db.driver";
-	
-	public final static String PROP_KEY_PRODUCTION_DB_URL = "production.db.url";
-	public final static String PROP_KEY_PRODUCTION_DB_USER = "production.db.user";
-	public final static String PROP_KEY_PRODUCTION_DB_PASSWORD = "production.db.password";
-	
-	public final static String PROP_KEY_ONEDITING_DB_URL = "onediting.db.url";
-	public final static String PROP_KEY_ONEDITING_DB_USER = "onediting.db.user";
-	public final static String PROP_KEY_ONEDITING_DB_PASSWORD = "onediting.db.password";
+//	public final static String DIR_SRC = "src";
+//	public final static String DIR_WEBAPP = "webapp";
+//	public final static String DIR_WEB_INF = "WEB-INF";
 
-	public final static String PROP_KEY_DB_DATA_JAVA_PACKAGE = "dbdata.java.package";
+	//public final static String PROP_KEY_DB_DATA_JAVA_PACKAGE = "dbdata.java.package";
 	
 	///////////////////////// private variables //////////////////////////////
-	private Properties _dataOriginProperties = null;
-	
-	private List<String> _dbTableNameList = null;
-	private List<DBTable> _dbTableList = new ArrayList<DBTable>();
-	
-	private DataOriginDirManager _dataOriginDirManager = null;
+	private DataOriginGeneratorContext _generatorContext;
 	
 	public static void main(String[] args) {
 		try {
 			DataOriginGenerator generator = new DataOriginGenerator();
-			generator.generateAll();
+
+			if(args == null || args.length == 0) {
+				generator.generateAllSettings();
+			} else {
+				String taskType = args[0];
+				if(taskType.equals("web")) {
+					
+					boolean isOverwrite = false;
+					if(args.length >= 2 && args[1].equals("overwrite")) {
+						isOverwrite = true;
+					}
+					
+					generator.generateWeb(isOverwrite);
+				}
+			}
 		} catch(Throwable e) {
 			logger.error(null, e);
 		}
 	}
 	
-	protected DataOriginGenerator() {
-		_dataOriginProperties = ResourceUtil.getProperties("/data-origin-generator.properties");
-		makeBaseDir();
+	protected DataOriginGenerator() throws ClassNotFoundException, SQLException {
+		_generatorContext = new DataOriginGeneratorContext();
 	}
 	
-	private String getValueByPropertyKey(String key) {
-		return _dataOriginProperties.getProperty(key);
-	}
 	
-	protected void generateAll() throws ResourceNotFoundException, ParseErrorException, Exception {
+	protected void generateAllSettings() throws ResourceNotFoundException, ParseErrorException, Exception {
 		generateDBTableDefinition();
 		
 		generateDBDataClass();
 		
 		generateMeta();
+		
 	}
 	
-	protected void makeBaseDir() {
-		String baseDirPath = getValueByPropertyKey(PROP_KEY_DATA_ORIGIN_BASE_DIR);
-		_dataOriginDirManager = new DataOriginDirManager(new File(baseDirPath));
+	protected void generateWeb(boolean isOverwrite) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, XmlParseException, InstantiationException, NoSuchMethodException {
+		WebGenerator.generateAll(_generatorContext, isOverwrite);
 	}
+	
 	
 	protected void generateDBTableDefinition() throws ClassNotFoundException, SQLException, IOException, IntrospectionException, IllegalAccessException, InvocationTargetException {
-		Connection conn = null;
-		
-		try {
-			conn = createConnectionOfProductionDB();
+		//output db tables xml
+		String dbTableName;
+		DBTable dbTable;
+		File dbTableFile; 
+		for(int i = 0; i < _generatorContext.getDbTableNameList().size(); i++) {
+			dbTable = _generatorContext.getDbTableList().get(i);
+			dbTableName = dbTable.getTableName();
 			
-			_dbTableNameList = MysqlTableInfoUtil.getAllTables(conn);
-			
-			//output db tables xml
-			String dbTableName = null;
-			DBTable dbTable = null;
-			File dbTableFile = null; 
-			for(int i = 0; i < _dbTableNameList.size(); i++) {
-				dbTableName = _dbTableNameList.get(i);
-				dbTable = MysqlTableInfoUtil.GetTable(conn, dbTableName);
-				
-				dbTableFile = new File(_dataOriginDirManager.getDbTablesDir(), dbTableName + ".xml");
-				XmlSerializer xmlSer = new XmlSerializer();
-				xmlSer.Serialize(dbTableFile.getAbsolutePath(), dbTable, DBTable.class, DefaultCharset);
-				
-				_dbTableList.add(dbTable);
-			}
-		} finally {
-			try {
-				conn.close();
-			} catch(Throwable e) {
-			}
+			dbTableFile = new File(_generatorContext.getDataOriginDirManager().getDbTablesDir(), dbTableName + ".xml");
+			XmlSerializer xmlSer = new XmlSerializer();
+			xmlSer.Serialize(dbTableFile.getAbsolutePath(), dbTable, DBTable.class, DefaultCharset);
 		}
 	}
 	
 	protected void generateDBDataClass() throws ResourceNotFoundException, ParseErrorException, Exception {
-		Connection conn = null;
-		
-		try {
-			conn = createConnectionOfProductionDB();
-
-			logger.debug("DBDataClassGenerator.generateAll() --------");
-			DBDataClassGenerator.generateAll(conn, _dataOriginDirManager.getDbDataClassDir(), getValueByPropertyKey(PROP_KEY_DB_DATA_JAVA_PACKAGE));
-		} finally {
-			try {
-				conn.close();
-			} catch(Throwable e) {
-			}
-		}
+		logger.debug("DBDataClassGenerator.generateAll() --------");
+		DBDataClassGenerator.generateAll(_generatorContext);
 	}
 	
 	protected void generateMeta() throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, ClassNotFoundException, SQLException {
-		//generate Data import setting
-		Connection conn = null;
-		
-		try {
-			conn = createConnectionOfProductionDB();
-			
-			logger.debug("MetaDataImportSettingGenerator.generateAll() --------");
-			MetaDataImportSettingGenerator.generateAll(conn, _dbTableList, _dataOriginDirManager.getMetaDataImportSettingDir());
-		} finally {
-			try {
-				conn.close();
-			} catch(Throwable e) {
-			}
+		//copy default DataOriginSetting.xml
+		String dataOriginSettingName = DataOriginSetting.class.getSimpleName() + ".xml";
+		File dataOriginSettingDest = new File(_generatorContext.getDataOriginDirManager().getBaseDir(), dataOriginSettingName);
+		if(!dataOriginSettingDest.exists()) {
+			File dataOriginSettingSrc = new File(new File(_generatorContext.getTemplateDir(), DataOriginGeneratorContext.DIR_DATA_ORIGIN_BASE), dataOriginSettingName);
+			DataOriginGeneratorUtil.copyFile(dataOriginSettingSrc, dataOriginSettingDest);
 		}
 		
-	}
-	
-	private Connection createConnectionOfProductionDB() throws ClassNotFoundException, SQLException {
-		return createConnection(
-				getValueByPropertyKey(PROP_KEY_DB_DRIVER), 
-				getValueByPropertyKey(PROP_KEY_PRODUCTION_DB_URL), 
-				getValueByPropertyKey(PROP_KEY_PRODUCTION_DB_USER), 
-				getValueByPropertyKey(PROP_KEY_PRODUCTION_DB_PASSWORD)
-				);
-	}
+		//generate Data import setting
+		logger.debug("MetaDataImportSettingGenerator.generateAll() --------");
+		MetaDataImportSettingGenerator.generateAll(_generatorContext);
 
-	private Connection createConnectionOfOnEditingDB() throws ClassNotFoundException, SQLException {
-		return createConnection(
-				getValueByPropertyKey(PROP_KEY_DB_DRIVER), 
-				getValueByPropertyKey(PROP_KEY_ONEDITING_DB_URL), 
-				getValueByPropertyKey(PROP_KEY_ONEDITING_DB_USER), 
-				getValueByPropertyKey(PROP_KEY_ONEDITING_DB_PASSWORD)
-				);
+		logger.debug("MetaDataUISettingGenerator.generateAll() --------");
+		MetaDataUISettingGenerator.generateAll(_generatorContext);
 	}
 	
-	private static Connection createConnection(
-			String dbDriver,
-			String dbUrl, String dbUser, String dbPassword) throws ClassNotFoundException, SQLException {
-		Class.forName(dbDriver);
-		return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-	}
 
 }

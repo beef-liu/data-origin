@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<!--#set(DBTable table)-->
+<html>
+    <div>${empty}</div>
+    <div>${empty}</div>
+    <div>a</div>
+    
+    <div>${table.tableName}</div>
+    <div><label>col count:${table.columns.size}</label></div>
+    <table>
+    	<tr>
+		    <!--#for(DBColumn col : table.columns)-->
+    		<td>${for.index} ${col.name} (${col.comment})</td>
+    		<!--#end-->
+    	</tr>
+    </table>
+</html>

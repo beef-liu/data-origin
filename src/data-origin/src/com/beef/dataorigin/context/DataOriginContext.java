@@ -44,34 +44,54 @@ public class DataOriginContext implements ClassFinder {
 	 * data-origin/dbtables/*.xml
 	 * key: table name (lowercase) value:DBTable
 	 */
-	private Map<String, MDBTable> _dbTableMap;
+	private Map<String, DBTable> _DBTableMap;
+	
+	/**
+	 * data-origin/dbtables/*.xml
+	 * key: table name (lowercase) value:MDBTable
+	 */
+	private Map<String, MDBTable> _mDBTableMap;
 
 	/**
 	 * data-origin/meta/data-import-setting/*.xml
 	 * key: table name (lowercase) value:MetaDataImportSetting
 	 */
-	private Map<String, MetaDataImportSetting> _metaDataImportSettingMap;
+	private Map<String, MetaDataImportSetting> _MetaDataImportSettingMap;
 	
 	/**
 	 * data-origin/meta/data-ui-setting/*.xml
 	 * key:table name (lowercase) value:MMetaDataUISetting
 	 */
-	private Map<String, MMetaDataUISetting> _metaDataUISettingMap;
+	private Map<String, MetaDataUISetting> _MetaDataUISettingMap;
+
+	/**
+	 * data-origin/meta/data-ui-setting/*.xml
+	 * key:table name (lowercase) value:MMetaDataUISetting
+	 */
+	private Map<String, MMetaDataUISetting> _mMetaDataUISettingMap;
 	
 	public DataOriginSetting getDataOriginSetting() {
 		return _dataOriginSetting;
 	}
 	
-	public MDBTable getDBTable(String tableName) {
-		return _dbTableMap.get(tableName.toLowerCase());
+	public DBTable getDBTable(String tableName) {
+		return _DBTableMap.get(tableName.toLowerCase());
+	}
+	
+	public MDBTable getMDBTable(String tableName) {
+		return _mDBTableMap.get(tableName.toLowerCase());
 	}
 	
 	public MetaDataImportSetting getMetaDataImportSetting(String tableName) {
-		return _metaDataImportSettingMap.get(tableName.toLowerCase());
+		return _MetaDataImportSettingMap.get(tableName.toLowerCase());
 	}
 	
-	public Map<String, MMetaDataUISetting> getMetaDataUISettingMap() {
-		return _metaDataUISettingMap;
+	public MetaDataUISetting getMetaDataUISetting(String tableName) {
+		return _MetaDataUISettingMap.get(tableName.toLowerCase());
+	}
+	
+	public MMetaDataUISetting getMMetaDataUISetting(String tableName) {
+		return _mMetaDataUISettingMap.get(tableName.toLowerCase());
 	}
 
 	public DataOriginContext(File baseDir, ClassFinder dataClassFinder) throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
@@ -109,7 +129,8 @@ public class DataOriginContext implements ClassFinder {
 	}
 	
 	private void loadDBTableSettings() throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
-		_dbTableMap = new HashMap<String, MDBTable>();
+		_DBTableMap = new HashMap<String, DBTable>();
+		_mDBTableMap = new HashMap<String, MDBTable>();
 		File[] files = _dataOriginDirManager.getDbTablesDir().listFiles(_xmlFileFilter);
 		
 		if(files != null) {
@@ -120,13 +141,14 @@ public class DataOriginContext implements ClassFinder {
 				dbTable = (DBTable) xmlDes.Deserialize(
 						files[i].getAbsolutePath(), DBTable.class, 
 						XmlDeserializer.DefaultCharset, this);
-				_dbTableMap.put(dbTable.getTableName().toLowerCase(), convertDBTable(dbTable));
+				_DBTableMap.put(dbTable.getTableName().toLowerCase(), dbTable);
+				_mDBTableMap.put(dbTable.getTableName().toLowerCase(), convertDBTable(dbTable));
 			}
 		}
 	}
 	
 	private void loadDataImportSetting() throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
-		_metaDataImportSettingMap = new HashMap<String, MetaDataImportSetting>();
+		_MetaDataImportSettingMap = new HashMap<String, MetaDataImportSetting>();
 		File[] files = _dataOriginDirManager.getMetaDataImportSettingDir().listFiles(_xmlFileFilter);
 		
 		if(files != null) {
@@ -137,13 +159,14 @@ public class DataOriginContext implements ClassFinder {
 				dataImpSetting = (MetaDataImportSetting) xmlDes.Deserialize(
 						files[i].getAbsolutePath(), MetaDataImportSetting.class, 
 						XmlDeserializer.DefaultCharset, this);
-				_metaDataImportSettingMap.put(dataImpSetting.getDataTableName().toLowerCase(), dataImpSetting);
+				_MetaDataImportSettingMap.put(dataImpSetting.getDataTableName().toLowerCase(), dataImpSetting);
 			}
 		}
 	}
 
 	private void loadDataUISetting() throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
-		_metaDataUISettingMap = new HashMap<String, MMetaDataUISetting>();
+		_MetaDataUISettingMap = new HashMap<String, MetaDataUISetting>();
+		_mMetaDataUISettingMap = new HashMap<String, MMetaDataUISetting>();
 		File[] files = _dataOriginDirManager.getMetaDataImportSettingDir().listFiles(_xmlFileFilter);
 		
 		if(files != null) {
@@ -154,7 +177,8 @@ public class DataOriginContext implements ClassFinder {
 				dataSetting = (MetaDataUISetting) xmlDes.Deserialize(
 						files[i].getAbsolutePath(), MetaDataUISetting.class, 
 						XmlDeserializer.DefaultCharset, this);
-				_metaDataUISettingMap.put(dataSetting.getDataTableName().toLowerCase(), convertMetaDataUISetting(dataSetting));
+				_MetaDataUISettingMap.put(dataSetting.getDataTableName().toLowerCase(), dataSetting);
+				_mMetaDataUISettingMap.put(dataSetting.getDataTableName().toLowerCase(), convertMetaDataUISetting(dataSetting));
 			}
 		}
 	}

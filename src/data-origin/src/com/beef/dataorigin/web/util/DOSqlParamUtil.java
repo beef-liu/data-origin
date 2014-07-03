@@ -44,6 +44,11 @@ public class DOSqlParamUtil {
 		
 		return false;
 	}
+
+	public static String wrapNameInSql(String name) {
+		return "`" + name + "`";
+	}
+	
 	
 	public static String verifyName(String name) {
 		if(name == null || name.length() == 0) {

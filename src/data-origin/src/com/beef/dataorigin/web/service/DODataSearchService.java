@@ -1,44 +1,43 @@
 package com.beef.dataorigin.web.service;
 
-import java.beans.IntrospectionException;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import java.sql.Connection;
 
 import org.apache.log4j.Logger;
 
 import MetoXML.XmlDeserializer;
-import MetoXML.XmlReader;
-import MetoXML.XmlSerializer;
 
 import com.beef.dataorigin.web.context.DataOriginWebContext;
+import com.beef.dataorigin.web.dao.DODataDao;
 import com.beef.dataorigin.web.data.DODataServiceError;
 import com.beef.dataorigin.web.data.DOSearchCondition;
-import com.salama.service.clouddata.CloudDataAppContext;
-import com.salama.service.clouddata.CloudDataServiceContext;
+import com.beef.dataorigin.web.util.DODataDaoUtil;
+import com.beef.dataorigin.web.util.DOServiceUtil;
 import com.salama.service.clouddata.core.AppContext;
 import com.salama.service.clouddata.core.AppServiceContext;
-import com.salama.service.clouddata.core.annotation.ReturnValueConverter;
 
 public class DODataSearchService <DataType> {
 	private final static Logger logger = Logger.getLogger(DODataSearchService.class);
 	
 	public final static int MAX_PAGE_SIZE = 500;
 	
-	@ReturnValueConverter(valueFromRequestParam = "responseType", 
-			jsonpReturnVariableNameFromRequestParam="jsonpReturn",
-			skipObjectConvert = false)
-	public String searchData(int beginIndex, int pageSize,
+	public String searchData(
+			int beginIndex, int pageSize,
 			String tableName,
-			String searchConditionXml) {
+			String searchConditionXml,
+			String orderByFields) {
 		AppContext appContext = AppServiceContext.getAppContext();
 		
+		Connection conn = null;
 		try {
 			
 			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
 					searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());
 			
-			return null;
+			String[] orderByFieldArray = DODataDaoUtil.splitByDelim(orderByFields, ",");
+			
+			conn = DOServiceUtil.getOnEditingDBConnection();
+			
+			return DODataDao.searchDataXmlBySearchCondition(conn, beginIndex, pageSize, tableName, searchCondition, orderByFieldArray);
 		} catch(Throwable e) {
 			logger.error(null, e);
 			
@@ -47,6 +46,11 @@ public class DODataSearchService <DataType> {
 				return appContext.objectToXml(error, DODataServiceError.class);
 			} catch (Throwable e1) {
 				throw new RuntimeException(e1);
+			}
+		} finally {
+			try {
+				conn.close();
+			} catch(Throwable e) {
 			}
 		}
 	} 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceContext>
+  <UploadSetting>
+    <!-- Max byte size of single file -->
+    <FileSizeMax>5242880</FileSizeMax>
+    
+    <!-- Max byte size of files submitted once -->
+    <SizeMax>20971520</SizeMax>
+    
+    <!-- Create temporary file when byte size of single file is bigger than this size -->
+    <SizeThreshold>524288</SizeThreshold>
+    
+    <!-- Directory path for writing temporary (If setting is empty, then /WEB-INF/temp will be used) -->
+    <TempDirPath></TempDirPath>
+  </UploadSetting>
+</ServiceContext>
