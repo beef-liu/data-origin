@@ -115,6 +115,7 @@ public class DataOriginContext implements ClassFinder {
 	
 	private void initClassFinder(ClassFinder dataClassFinder) {
 		_dataOriginDataClassFinder = new PreScanClassFinder();
+		_dataOriginDataClassFinder.loadClassOfPackage(DBColumn.class.getPackage().getName());
 		_dataOriginDataClassFinder.loadClassOfPackage(DataOriginSetting.class.getPackage().getName());
 		_dataOriginDataClassFinder.loadClassOfPackage(DODataServiceError.class.getPackage().getName());
 		
@@ -167,7 +168,7 @@ public class DataOriginContext implements ClassFinder {
 	private void loadDataUISetting() throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
 		_MetaDataUISettingMap = new HashMap<String, MetaDataUISetting>();
 		_mMetaDataUISettingMap = new HashMap<String, MMetaDataUISetting>();
-		File[] files = _dataOriginDirManager.getMetaDataImportSettingDir().listFiles(_xmlFileFilter);
+		File[] files = _dataOriginDirManager.getMetaDataUISettingDir().listFiles(_xmlFileFilter);
 		
 		if(files != null) {
 			MetaDataUISetting dataSetting;

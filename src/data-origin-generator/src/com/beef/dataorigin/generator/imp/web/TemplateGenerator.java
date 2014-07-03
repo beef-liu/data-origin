@@ -38,6 +38,9 @@ public class TemplateGenerator {
 	public final static String TEMPLATE_PARAM_NAME_DBTABLE = "dbTable";
 	public final static String TEMPLATE_PARAM_NAME_BASE_PACKAGE = "basePackage";
 	public final static String TEMPLATE_PARAM_NAME_WEB_CONTEXT_NAME = "webContextName";
+	public final static String TEMPLATE_PARAM_NAME_META_DATA_UI_SETTING = "dataUISetting";
+	public final static String TEMPLATE_PARAM_NAME_META_MDBTABLE = "mDBTable";
+	
 	
 	public final static String TEMPLATE_FILE_NAME_PATTERN_TABLE_NAME = "${" + TEMPLATE_PARAM_NAME_TABLE_NAME + "}";
 
@@ -103,7 +106,7 @@ public class TemplateGenerator {
 				fos = new FileOutputStream(destFile);
 				template.render(templateParamMap, fos);
 				
-				logger.debug("Generated template file:" + file.getAbsolutePath() + " dbTable:" + dbTable.getTableName());
+				logger.debug("Generated template file:" + file.getAbsolutePath());
 			} finally {
 				fos.close();
 			}
@@ -256,11 +259,16 @@ public class TemplateGenerator {
 		Map<String, Object> httlParams = new HashMap<String, Object>();
 		//httlParams.put(TEMPLATE_PARAM_NAME_EMPTY, "");
 		httlParams.put(TEMPLATE_PARAM_NAME_NULL, "");
-		httlParams.put(TEMPLATE_PARAM_NAME_TABLE_NAME, dbTable.getTableName().toLowerCase());
-		httlParams.put(TEMPLATE_PARAM_NAME_DATA_CLASS_NAME, dataOriginContext.getMetaDataUISetting(dbTable.getTableName()).getDataClassName());
-		httlParams.put(TEMPLATE_PARAM_NAME_DBTABLE, dbTable);
 		httlParams.put(TEMPLATE_PARAM_NAME_BASE_PACKAGE, generatorContext.getOutputWebProjectJavaPackage());
 		httlParams.put(TEMPLATE_PARAM_NAME_WEB_CONTEXT_NAME, generatorContext.getOutputWebContextName());
+
+		if(dbTable != null) {
+			httlParams.put(TEMPLATE_PARAM_NAME_TABLE_NAME, dbTable.getTableName().toLowerCase());
+			httlParams.put(TEMPLATE_PARAM_NAME_DBTABLE, dbTable);
+			httlParams.put(TEMPLATE_PARAM_NAME_DATA_CLASS_NAME, dataOriginContext.getMetaDataUISetting(dbTable.getTableName()).getDataClassName());
+			httlParams.put(TEMPLATE_PARAM_NAME_META_DATA_UI_SETTING, dataOriginContext.getMetaDataUISetting(dbTable.getTableName()));
+			httlParams.put(TEMPLATE_PARAM_NAME_META_MDBTABLE, dataOriginContext.getMDBTable(dbTable.getTableName()));
+		}
 		
 		return httlParams;
 	}

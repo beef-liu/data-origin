@@ -8,12 +8,16 @@ import com.beef.dataorigin.generator.DataOriginGenerator;
 
 public class DataOriginGeneratorTest {
 
-	@Test
 	public void testMain1() {
 		DataOriginGenerator.main(null);
 	}
 
+	@Test
 	public void testMain2() {
+		DataOriginGenerator.main(new String[]{"web"});
+	}
+
+	public void testMain3() {
 		DataOriginGenerator.main(new String[]{"web", "overwrite"});
 	}
 	

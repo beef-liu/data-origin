@@ -15,12 +15,12 @@ import com.beef.dataorigin.web.util.DOServiceUtil;
 import com.salama.service.clouddata.core.AppContext;
 import com.salama.service.clouddata.core.AppServiceContext;
 
-public class DODataSearchService <DataType> {
+public class DODataSearchService {
 	private final static Logger logger = Logger.getLogger(DODataSearchService.class);
 	
 	public final static int MAX_PAGE_SIZE = 500;
-	
-	public String searchData(
+		
+	public static String searchData(
 			int beginIndex, int pageSize,
 			String tableName,
 			String searchConditionXml,

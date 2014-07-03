@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+<!--#set(MetaDataUISetting dataUISetting, DBTable dbTable, MDBTable mDBTable)-->
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>${tableName}</title>
+    <title>$!{tableName}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Loading Bootstrap -->
@@ -36,8 +37,8 @@
     <script src="myjs/lib/salama/easyJsDomUtil.js"></script>
     <script src="myjs/lib/easyUpload.js"></script>
     
-    <script src="myjs/${null}myCommon.js"></script>
-    <script src="myjs/${tableName}_data_list.js"></script>
+    <script src="myjs/${empty}myCommon.js"></script>
+    <script src="myjs/$!{tableName}_data_list.js"></script>
   </head>
   <body>
   	<!-- Header #f3f3f3 #2f4154-->
@@ -83,14 +84,17 @@
 				<!-------- Search conditions ---------->		  		
 		  		<div id="content-search-region" style="line-height: 34px;">
 		  			<table class="my-table-search" style="width: 99%;">
-		  				<tbody id="search-tbody" style="">
+		  				<tbody id="search-tbody" style="" searchCondition="DOSearchCondition">
 		  					<tr class="">
-		  						<td class="my-td-search">
-		  							<div><label>condition0:</label><input type="text"/></div>
-		  							<div><label>condition0:</label><input type="text"/></div>
-		  							<div><label>condition0:</label><input type="text"/></div>
-		  							<div><label>condition0:</label><input type="text"/></div>
-		  							<div><label>condition0:</label><input type="text"/></div>
+		  						<td class="my-td-search" searchCondition="searchConditionItemList">
+		  							<!--#for(MetaSearchConditionItem searchCondItem : dataUISetting.searchCondition.searchConditionItemList)-->
+		  							<div searchCondition="DOSearchConditionItem">
+		  								<!--#set(DBColumn dbCol = mDBTable.columnMap.get(searchCondItem.fieldName))-->
+		  								<label>$!{dbCol.comment}:</label>
+		  								<input type="hidden" searchCondition="fieldName" value="$!{searchCondItem.fieldName}" />
+		  								<input type="text" searchCondition="fieldValue" />
+		  							</div>
+		  							<!--#end-->
 		  						</td>
 		  					</tr>
 		  				</tbody>
