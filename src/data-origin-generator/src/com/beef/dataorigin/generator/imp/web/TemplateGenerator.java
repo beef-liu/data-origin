@@ -32,7 +32,7 @@ public class TemplateGenerator {
 
 	public static enum TemplateCommentType {HtmlComment, JavaComment};
 
-	//public final static String TEMPLATE_PARAM_NAME_EMPTY = "empty";
+	public final static String TEMPLATE_PARAM_NAME_EMPTY = "empty";
 	public final static String TEMPLATE_PARAM_NAME_NULL = "null";
 	public final static String TEMPLATE_PARAM_NAME_TABLE_NAME = "tableName";
 	public final static String TEMPLATE_PARAM_NAME_DATA_CLASS_NAME = "dataClassName";
@@ -44,8 +44,8 @@ public class TemplateGenerator {
 	
 	
 	public final static String TEMPLATE_FILE_NAME_PATTERN_TABLE_NAME = "${" + TEMPLATE_PARAM_NAME_TABLE_NAME + "}";
+	public final static String TEMPLATE_FILE_NAME_PATTERN_DATA_CLASS_NAME = "${" + TEMPLATE_PARAM_NAME_DATA_CLASS_NAME + "}";
 
-	
 	public static void generateFile(
 			DataOriginContext dataOriginContext,
 			DataOriginGeneratorContext generatorContext,
@@ -57,7 +57,11 @@ public class TemplateGenerator {
 		if(!needGenerateFile) {
 			generateTemplateFile(dataOriginContext, generatorContext, file, overwriteFlg, isJavaFile, needGenerateFile, null);
 		} else {
-			if(needGenerateFile && file.getName().contains(TEMPLATE_FILE_NAME_PATTERN_TABLE_NAME)) {
+			if(needGenerateFile && 
+					(file.getName().contains(TEMPLATE_FILE_NAME_PATTERN_TABLE_NAME)
+						|| file.getName().contains(TEMPLATE_FILE_NAME_PATTERN_DATA_CLASS_NAME)
+						)
+					) {
 				//need enumerate table list
 				DBTable dbTable;
 				for(int i = 0; i < generatorContext.getDbTableList().size(); i++) {
@@ -82,12 +86,12 @@ public class TemplateGenerator {
 			) throws IOException, ParseException {
 		File destFile;
 		Template template;
-		Map<String, Object> templateParamMap;
+		Map<String, Object> templateParamMap = createTemplateParamMap(dataOriginContext, generatorContext, dbTable);
 
 		if(isJavaFile) {
-			destFile = getFileForJavaTemplateFile(dataOriginContext, generatorContext, dbTable, file, needGenerateFile);
+			destFile = getFileForJavaTemplateFile(dataOriginContext, generatorContext, dbTable, file, needGenerateFile, templateParamMap);
 		} else {
-			destFile = getFileForNotJavaTemplateFile(dataOriginContext, generatorContext, dbTable, file, needGenerateFile);
+			destFile = getFileForNotJavaTemplateFile(dataOriginContext, generatorContext, dbTable, file, needGenerateFile, templateParamMap);
 		}
 		
 		if(destFile.exists()) {
@@ -106,7 +110,6 @@ public class TemplateGenerator {
 		}
 
 		if(needGenerateFile) {
-			templateParamMap = createTemplateParamMap(dataOriginContext, generatorContext, dbTable);
 			template = createTemplate(generatorContext, dbTable, file);
 			
 			FileOutputStream fos = null;
@@ -130,14 +133,18 @@ public class TemplateGenerator {
 			DataOriginGeneratorContext generatorContext,
 			DBTable dbTable, 
 			File templateFile,
-			boolean needGenerateFileName
+			boolean needGenerateFileName,
+			Map<String, Object> templateParamMap
 			) throws IOException, ParseException {
 		String javaPackage = getJavaPackageOfFile(templateFile);
+		if(javaPackage.contains(TEMPLATE_FILE_NAME_PATTERN)) {
+			javaPackage = generateTemplateString(dataOriginContext, generatorContext, dbTable, javaPackage, templateParamMap);
+		}
 		
 		String destFileName; 
 		if(needGenerateFileName) {
 			//file name need be generated
-			destFileName = generateFileName(dataOriginContext, generatorContext, dbTable, templateFile.getName()); 
+			destFileName = generateTemplateString(dataOriginContext, generatorContext, dbTable, templateFile.getName(), templateParamMap); 
 		} else {
 			destFileName = templateFile.getName();
 		}
@@ -150,12 +157,13 @@ public class TemplateGenerator {
 			DataOriginGeneratorContext generatorContext,
 			DBTable dbTable, 
 			File templateFile,
-			boolean needGenerateFileName
+			boolean needGenerateFileName,
+			Map<String, Object> templateParamMap
 			) throws IOException, ParseException {
 		String destFileName; 
 		if(needGenerateFileName) {
 			//file name need be generated
-			destFileName = generateFileName(dataOriginContext, generatorContext, dbTable, templateFile.getName()); 
+			destFileName = generateTemplateString(dataOriginContext, generatorContext, dbTable, templateFile.getName(), templateParamMap); 
 		} else {
 			destFileName = templateFile.getName();
 		}
@@ -186,6 +194,9 @@ public class TemplateGenerator {
 				index = line.indexOf(JAVA_PACKAGE_PREFIX);
 				if(index >= 0) {
 					javaPackage = line.substring(JAVA_PACKAGE_PREFIX.length()).trim();
+					if(javaPackage.endsWith(";")) {
+						javaPackage = javaPackage.substring(0, javaPackage.length() - 1);
+					}
 					break;
 				}
 				
@@ -198,16 +209,18 @@ public class TemplateGenerator {
 		}
 	}
 	
-	private static String generateFileName(
+	private static String generateTemplateString(
 			DataOriginContext dataOriginContext,
 			DataOriginGeneratorContext generatorContext,
 			DBTable dbTable, 
-			String templateFileName) throws IOException, ParseException {
+			String templateFileName,
+			Map<String, Object> templateParamMap
+			) throws IOException, ParseException {
 		Template template = createTemplate(generatorContext, dbTable, templateFileName, TemplateCommentType.JavaComment);
-		Map<String, Object> paramMap = createTemplateParamMap(dataOriginContext, generatorContext, dbTable);
+		//Map<String, Object> paramMap = createTemplateParamMap(dataOriginContext, generatorContext, dbTable);
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		template.render(paramMap, bos);
+		template.render(templateParamMap, bos);
 		
 		return bos.toString(DataOriginGeneratorContext.DefaultCharsetName);
 	}
@@ -265,15 +278,16 @@ public class TemplateGenerator {
 			DataOriginGeneratorContext generatorContext,
 			DBTable dbTable) {
 		Map<String, Object> httlParams = new HashMap<String, Object>();
-		//httlParams.put(TEMPLATE_PARAM_NAME_EMPTY, "");
+		httlParams.put(TEMPLATE_PARAM_NAME_EMPTY, "");
 		httlParams.put(TEMPLATE_PARAM_NAME_NULL, "");
 		httlParams.put(TEMPLATE_PARAM_NAME_BASE_PACKAGE, generatorContext.getOutputWebProjectJavaPackage());
 		httlParams.put(TEMPLATE_PARAM_NAME_WEB_CONTEXT_NAME, generatorContext.getOutputWebContextName());
 
 		if(dbTable != null) {
 			httlParams.put(TEMPLATE_PARAM_NAME_TABLE_NAME, dbTable.getTableName().toLowerCase());
-			httlParams.put(TEMPLATE_PARAM_NAME_DBTABLE, dbTable);
 			httlParams.put(TEMPLATE_PARAM_NAME_DATA_CLASS_NAME, dataOriginContext.getMetaDataUISetting(dbTable.getTableName()).getDataClassName());
+			
+			httlParams.put(TEMPLATE_PARAM_NAME_DBTABLE, dbTable);
 			httlParams.put(TEMPLATE_PARAM_NAME_META_DATA_UI_SETTING, dataOriginContext.getMetaDataUISetting(dbTable.getTableName()));
 			httlParams.put(TEMPLATE_PARAM_NAME_META_MDBTABLE, dataOriginContext.getMDBTable(dbTable.getTableName()));
 		}

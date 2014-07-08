@@ -1,5 +1,7 @@
 package com.beef.dataorigin.generator.junittest;
 
-public class TemplateDataSearchService {
+import com.beef.dataorigin.web.service.DODataSearchService;
+
+public class TemplateDataSearchService extends DODataSearchService {
 
 }

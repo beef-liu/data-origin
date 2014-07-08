@@ -44,13 +44,13 @@
 
 	<resource-ref>
 		<description>Production DB</description>
-		<res-ref-name>jdbc/dataorigin_db</res-ref-name>
+		<res-ref-name>jdbc/dataorigin_test</res-ref-name>
 		<res-type>javax.sql.DataSource</res-type>
 		<res-auth>Container</res-auth>
 	</resource-ref>
 		<resource-ref>
 		<description>On Editing DB</description>
-		<res-ref-name>jdbc/dataorigin_db_editing</res-ref-name>
+		<res-ref-name>jdbc/dataorigin_test_editing</res-ref-name>
 		<res-type>javax.sql.DataSource</res-type>
 		<res-auth>Container</res-auth>
 	</resource-ref>

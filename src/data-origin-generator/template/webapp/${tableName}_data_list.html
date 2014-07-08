@@ -189,6 +189,7 @@
 	  				<thead class="my-thead">
 	  					<tr class="my-head-tr">
 	  						<th id="th-checkbox" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
+	  						<th id="th-row-num" class="my-th" style="width:36px;">No.</th>
   						<!--#for(DBColumn dbCol : dbTable.columns)-->
 	  						<th class="my-th-sort nosort" listHead="${dbCol.name}" onclick="setSortCol()"><span>${dbCol.comment}</span> <img src="myimg/empty.png"/> </th>
 	  					<!--#end-->
@@ -198,6 +199,7 @@
 	  				<tbody id="data-tbody" style="" listData="List">
 	  					<tr id="tr-data" class="my-tr" listData="${dataClassName}">
 	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
+	  						<td id="td-row-num" class="my-td"></td>
   						<!--#for(DBColumn dbCol : dbTable.columns)-->
 	  						<td class="my-td" listData="${dbCol.name}" isPrimaryKey="${dbCol.primaryKey}"></td>
 	  					<!--#end-->

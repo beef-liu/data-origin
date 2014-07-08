@@ -92,24 +92,29 @@ function resetPageSize(pageSize) {
 
 <!------------------ Functions for data ----------------------------->
 function prepareSearchCondition() {
-	//set _searchConditionXml, _orderByFields
+	//set _searchConditionXml
 }
+
+function setSortCol() {
+	
+}
+
 function searchData() {
 	$.ajax({
 		url: WEB_APP + "/cloudDataService.do",
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.web.service.DODataSearchService",
+			serviceType: "${basePackage}.service.${dataClassName}DataSearchService",
 			serviceMethod: "searchData",
-			tableName: ${tableName},
+			tableName: "${tableName}",
 			searchConditionXml: _searchConditionXml,
 			orderByFields: _orderByFields,
 			beginIndex: _curPageIndex * PAGE_SIZE,
 			pageSize: PAGE_SIZE
 		},
 		success: function(response) {
-			
+			reloadData(response);
 		},
 		error: function(p0, p1, p2) {
 			alert(DEFAULT_MSG_ERROR_AJAX);
@@ -118,5 +123,15 @@ function searchData() {
 } 
 
 function reloadData(dataListXml) {
-	
+    easyJsDomUtil.loadListDataXmlToDomNode({
+        dataListXml: dataListXml,
+        dataXmlNodeName: "${dataClassName}",
+        dataListDomNode: $('[listData="List"]'),
+        dataDomNodeCopy: _trClone,
+        domNodeAttrName: "listData",
+        dataNodeDidLoadFunc: function (dataDomNode, index, length) {
+        	//row num
+        	$(dataDomNode).find('[id="td-row-num"]').text(String(index + 1));
+        }
+    });
 }

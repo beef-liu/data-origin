@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DataOriginSetting>
-  <onEditingDBResourceName>jdbc/dataorigin_db_editing</onEditingDBResourceName>
-  <productionDBResourceName>jdbc/dataorigin_db</productionDBResourceName>
+  <onEditingDBResourceName>jdbc/dataorigin_test_editing</onEditingDBResourceName>
+  <productionDBResourceName>jdbc/dataorigin_test</productionDBResourceName>
 </DataOriginSetting>
