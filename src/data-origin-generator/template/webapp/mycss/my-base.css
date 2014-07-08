@@ -71,11 +71,11 @@
 	height: 18px;
 }
 .my-th-sort.asc img {
-	background: url(../myimg/arrow-up.png) 0 0 no-repeat;
+	background: url(../myimg/arrow-up-blue.png) 0 0 no-repeat;
 	background-size: 18px 18px;
 }
 .my-th-sort.desc img {
-	background: url(../myimg/arrow-down.png) 0 0 no-repeat;
+	background: url(../myimg/arrow-down-blue.png) 0 0 no-repeat;
 	background-size: 18px 18px;
 }
 .my-th-sort.nosort img {

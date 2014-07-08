@@ -2,6 +2,8 @@
 var _trClone;
 //from 0
 var _curPageIndex = 0;
+var _pageCount = 1;
+
 var _orderByFields = "";
 var _searchConditionXml = "";
 
@@ -9,7 +11,7 @@ var _searchConditionXml = "";
 $(document).ready(function() {
 	initUI();
 	
-	searchData();
+	doSearch();
 });
 
 <!------------------ Functions for UI ----------------------------->
@@ -29,10 +31,10 @@ function initUI() {
 	_trClone = $(tr[0]).clone();
 	
 	//set page size
-	resetPageSize(PAGE_SIZE);
+	//resetPageSize(PAGE_SIZE);
 	
 	//check box 
-	$('#table-check-all').change(function() {
+	$('#table-check-all').change(function(event) {
 		if($(this).attr('checked') != undefined && $(this).attr('checked') == 'checked') {
 			$('[id="table-check-row"]').attr('checked', 'checked');
 		} else {
@@ -51,10 +53,6 @@ function initUI() {
 		}
 	});
 	
-	//th checkbox
-	$('[id="th-checkbox"]').click(function() {
-		reverseCheckBoxStatus($(this).find('[id="table-check-all"]'));
-	});
 	//td checkbox
 	$('[id="td-checkbox"]').click(function() {
 		reverseCheckBoxStatus($(this).find('[id="table-check-row"]'));
@@ -93,9 +91,46 @@ function resetPageSize(pageSize) {
 <!------------------ Functions for data ----------------------------->
 function prepareSearchCondition() {
 	//set _searchConditionXml
+	_searchConditionXml = easyJsDomUtil.mappingDomNodeToDataXml(
+		$('[searchCondition="DOSearchCondition"]')[0], "searchCondition");
 }
 
 function setSortCol() {
+	
+}
+
+function doSearch() {
+	prepareSearchCondition();
+	
+	searchDataCount();
+}
+
+function searchDataCount() {
+	$.ajax({
+		url: WEB_APP + "/cloudDataService.do",
+		type: "post",
+		dataType: "text",
+		data: {
+			serviceType: "${basePackage}.service.${dataClassName}DataSearchService",
+			serviceMethod: "searchDataCount",
+			tableName: "${tableName}",
+			searchConditionXml: _searchConditionXml
+		},
+		success: function(response) {
+			var dataCount = Number(response);
+			_pageCount = Math.round(dataCount / PAGE_SIZE);
+			_curPageIndex = 0;
+			
+			
+			searchData();
+		},
+		error: function(p0, p1, p2) {
+			alert(DEFAULT_MSG_ERROR_AJAX);
+		}
+	});
+}
+
+function resetPageController() {
 	
 }
 
@@ -123,6 +158,7 @@ function searchData() {
 } 
 
 function reloadData(dataListXml) {
+	$('[id="tr-data"]').remove();
     easyJsDomUtil.loadListDataXmlToDomNode({
         dataListXml: dataListXml,
         dataXmlNodeName: "${dataClassName}",

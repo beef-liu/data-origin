@@ -5,6 +5,7 @@ import java.sql.Connection;
 import org.apache.log4j.Logger;
 
 import MetoXML.XmlDeserializer;
+import MetoXML.XmlSerializer;
 
 import com.beef.dataorigin.web.context.DataOriginWebContext;
 import com.beef.dataorigin.web.dao.DODataDao;
@@ -19,14 +20,42 @@ public class DODataSearchService {
 	private final static Logger logger = Logger.getLogger(DODataSearchService.class);
 	
 	public final static int MAX_PAGE_SIZE = 500;
-		
+	
+	public static String searchDataCount(
+		String tableName,
+		String searchConditionXml
+		) {
+		Connection conn = null;
+		try {
+			
+			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
+					searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());
+			
+			conn = DOServiceUtil.getOnEditingDBConnection();
+			
+			return Integer.toString(DODataDao.searchDataCountBySearchCondition(conn, tableName, searchCondition));
+		} catch(Throwable e) {
+			logger.error(null, e);
+			
+			try {
+				DODataServiceError error = new DODataServiceError(e);
+				return XmlSerializer.objectToString(error, DODataServiceError.class);
+			} catch (Throwable e1) {
+				throw new RuntimeException(e1);
+			}
+		} finally {
+			try {
+				conn.close();
+			} catch(Throwable e) {
+			}
+		}
+	}
+	
 	public static String searchData(
 			int beginIndex, int pageSize,
 			String tableName,
 			String searchConditionXml,
 			String orderByFields) {
-		AppContext appContext = AppServiceContext.getAppContext();
-		
 		Connection conn = null;
 		try {
 			
@@ -43,7 +72,7 @@ public class DODataSearchService {
 			
 			try {
 				DODataServiceError error = new DODataServiceError(e);
-				return appContext.objectToXml(error, DODataServiceError.class);
+				return XmlSerializer.objectToString(error, DODataServiceError.class);
 			} catch (Throwable e1) {
 				throw new RuntimeException(e1);
 			}

@@ -65,7 +65,7 @@ public class DOSqlParamUtil {
 				//OK
 			} else if(c >= '0' && c <= '9' ) {
 				//OK
-			} else if(c == '-' && c == '_') {
+			} else if(c == '-' || c == '_') {
 				//OK
 			} else {
 				throw new RuntimeException("Invalid param name.(SQL injection?):" + name);

@@ -49,11 +49,11 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			String[] orderByFields) throws ParseException, SQLException {
 		StringBuilder sql = new StringBuilder();
 		
-		sql.append("select * from ").append(DOSqlParamUtil.wrapNameInSql(DOSqlParamUtil.verifyName(tableName)));
-	
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
 		MMetaDataUISetting mMetaDataUISetting = DataOriginWebContext.getDataOriginContext().getMMetaDataUISetting(tableName);
 
+		sql.append("select * from ").append(DOSqlParamUtil.wrapNameInSql(mDBTable.getTableName()));
+		
 		//where conditions -------------------------------------------------------------
 		List<Object> colValueListForStmt = new ArrayList<Object>();
 		StringBuilder sqlWhereConditions = new StringBuilder();
@@ -94,6 +94,56 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			}
 			
 			return QueryDataDao.findDataXml(stmt, "List", mMetaDataUISetting.getDataClassName());
+		} finally {
+			stmt.close();
+		}
+	}
+
+	public static int searchDataCountBySearchCondition(
+			Connection conn,
+			String tableName, DOSearchCondition searchCondition) throws ParseException, SQLException {
+		StringBuilder sql = new StringBuilder();
+		
+		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
+		MMetaDataUISetting mMetaDataUISetting = DataOriginWebContext.getDataOriginContext().getMMetaDataUISetting(tableName);
+
+		sql.append("select count(1) from ").append(DOSqlParamUtil.wrapNameInSql(mDBTable.getTableName()));
+		
+		//where conditions -------------------------------------------------------------
+		List<Object> colValueListForStmt = new ArrayList<Object>();
+		StringBuilder sqlWhereConditions = new StringBuilder();
+		DOSearchConditionItem searchConditionItem;
+		for(int i = 0; i < searchCondition.getSearchConditionItemList().size(); i++) {
+			searchConditionItem = searchCondition.getSearchConditionItemList().get(i);
+			
+			addSearchConditionItem(mMetaDataUISetting, mDBTable, colValueListForStmt, sqlWhereConditions, searchConditionItem);
+		}
+		
+		if(sqlWhereConditions.length() > 0) {
+			sql.append(" where ");
+			sql.append(sqlWhereConditions);
+		}
+		
+		logger.debug("sql:" + sql.toString());
+		
+		//statement
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			stmt = conn.prepareStatement(sql.toString());
+			
+			int index = 1;
+			
+			for(int i = 0; i < colValueListForStmt.size(); i++) {
+				stmt.setObject(index++, colValueListForStmt.get(i));
+			}
+			
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				return rs.getInt(1);
+			} else {
+				return 0;
+			}
 		} finally {
 			stmt.close();
 		}
