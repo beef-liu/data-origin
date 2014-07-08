@@ -4,9 +4,9 @@
     <authTicketManagerBackupDirPath></authTicketManagerBackupDirPath>
 	<appConfigs>
 		<CloudDataAppConfig>
-			<appId>testWS</appId>
-			<basePackage>com.salama.test.ws</basePackage>
-			<exposedPackage>com.salama.test.ws.service</exposedPackage>
+			<appId>dotest</appId>
+			<basePackage>${basePackage}</basePackage>
+			<exposedPackage>com.beef.dataorigin.web.service,${basePackage}.service</exposedPackage>
 		</CloudDataAppConfig>
 	</appConfigs>
 </CloudDataServiceContext>

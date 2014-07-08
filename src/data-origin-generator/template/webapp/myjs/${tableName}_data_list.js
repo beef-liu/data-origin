@@ -1,4 +1,11 @@
-var trClone;
+<!----------- Variables ----------------->
+var _trClone;
+//from 0
+var _curPageIndex = 0;
+var _orderByFields = "";
+var _searchConditionXml = "";
+
+
 $(document).ready(function() {
 	initUI();
 	
@@ -19,10 +26,10 @@ function initUI() {
 
 	//clone tr of data row
 	var tr = $('#tr-data');
-	trClone = $(tr[0]).clone();
+	_trClone = $(tr[0]).clone();
 	
 	//set page size
-	resetPageSize(50);
+	resetPageSize(PAGE_SIZE);
 	
 	//check box 
 	$('#table-check-all').change(function() {
@@ -78,12 +85,38 @@ function resetPageSize(pageSize) {
 		}
 	} else {
 		for(i = 0; i < pageSizeIncrement; i++) {
-			$(tbody).append($(trClone).clone());
+			$(tbody).append($(_trClone).clone());
 		}
 	}
 }
 
 <!------------------ Functions for data ----------------------------->
+function prepareSearchCondition() {
+	//set _searchConditionXml, _orderByFields
+}
 function searchData() {
-	
+	$.ajax({
+		url: WEB_APP + "/cloudDataService.do",
+		type: "post",
+		dataType: "text",
+		data: {
+			serviceType: "com.beef.dataorigin.web.service.DODataSearchService",
+			serviceMethod: "searchData",
+			tableName: ${tableName},
+			searchConditionXml: _searchConditionXml,
+			orderByFields: _orderByFields,
+			beginIndex: _curPageIndex * PAGE_SIZE,
+			pageSize: PAGE_SIZE
+		},
+		success: function(response) {
+			
+		},
+		error: function(p0, p1, p2) {
+			alert(DEFAULT_MSG_ERROR_AJAX);
+		}
+	});
 } 
+
+function reloadData(dataListXml) {
+	
+}

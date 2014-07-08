@@ -18,6 +18,7 @@ import MetoXML.Base.XmlParseException;
 import com.beef.dataorigin.context.DataOriginContext;
 import com.beef.dataorigin.generator.DataOriginGenerator;
 import com.beef.dataorigin.generator.DataOriginGeneratorContext;
+import com.beef.dataorigin.generator.DataOriginGenerator.WebGenerateOverwriteFlag;
 import com.beef.dataorigin.generator.imp.settings.MetaDataFieldGenerator;
 import com.beef.dataorigin.generator.util.DataOriginGeneratorUtil;
 import com.beef.dataorigin.setting.meta.MetaDataUISetting;
@@ -30,7 +31,7 @@ import com.salama.util.io.DirectoryRecursiveVisitor;
 
 public class WebGenerator {
 
-	public static void generateAll(final DataOriginGeneratorContext generatorContext, final boolean isOverwrite) 
+	public static void generateAll(final DataOriginGeneratorContext generatorContext, final WebGenerateOverwriteFlag overwriteFlg) 
 			throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, XmlParseException, InstantiationException, NoSuchMethodException {
 		final DataOriginContext dataOriginContext = new DataOriginContext(generatorContext.getDataOriginDirManager().getBaseDir(), null);
 		
@@ -54,7 +55,7 @@ public class WebGenerator {
 			@Override
 			protected void dealFile(File currentFile) {
 				try {
-					TemplateGenerator.generateFile(dataOriginContext, generatorContext, currentFile, isOverwrite);
+					TemplateGenerator.generateFile(dataOriginContext, generatorContext, currentFile, overwriteFlg);
 				} catch(Throwable e) {
 					throw new RuntimeException(e);
 				}

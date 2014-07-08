@@ -36,9 +36,10 @@
     <script src="myjs/lib/md5.js"></script>
     <script src="myjs/lib/salama/easyJsDomUtil.js"></script>
     <script src="myjs/lib/easyUpload.js"></script>
+    <script src="myjs/lib/urlparams.js"></script>
     
     <script src="myjs/${empty}myCommon.js"></script>
-    <script src="myjs/$!{tableName}_data_list.js"></script>
+    <script src="myjs/${tableName}_data_list.js"></script>
   </head>
   <body>
   	<!-- Header #f3f3f3 #2f4154-->
@@ -87,14 +88,14 @@
 		  				<tbody id="search-tbody" style="" searchCondition="DOSearchCondition">
 		  					<tr class="">
 		  						<td class="my-td-search" searchCondition="searchConditionItemList">
-		  							<!--#for(MetaSearchConditionItem searchCondItem : dataUISetting.searchCondition.searchConditionItemList)-->
+		  						<!--#for(MetaSearchConditionItem searchCondItem : dataUISetting.searchCondition.searchConditionItemList)-->
 		  							<div searchCondition="DOSearchConditionItem">
-		  								<!--#set(DBColumn dbCol = mDBTable.columnMap.get(searchCondItem.fieldName))-->
+		  							<!--#set(DBColumn dbCol = mDBTable.columnMap.get(searchCondItem.fieldName))-->
 		  								<label>$!{dbCol.comment}:</label>
 		  								<input type="hidden" searchCondition="fieldName" value="$!{searchCondItem.fieldName}" />
 		  								<input type="text" searchCondition="fieldValue" />
 		  							</div>
-		  							<!--#end-->
+		  						<!--#end-->
 		  						</td>
 		  					</tr>
 		  				</tbody>
@@ -179,85 +180,7 @@
 		  				</tbody>
 		  			</table>
 		  		</div>
-		  	<!--
-		  		<div id="table-btn-region" class="" style="width:98%; line-height: 34px;">
-			  		<div class="col-xs-1" style="padding: 2px">
-			  			<div class="my-button-s my-button-bk-default">
-				  			<a href="#">
-				  				<img src="myimg/btn-add.png"/>
-				  			</a>
-			  			</div>
-			  			<div style="display: table-cell; width:4px;"></div>
-			  			<div class="my-button-s my-button-bk-danger">
-				  			<a href="#" style="">
-				  				<img src="myimg/btn-delete.png"/>
-				  			</a>
-			  			</div>
-			  		</div>
-
-		  			<div class="pagination my-pagination" style="float:right; margin: 0px; padding: 2px;">
-						<ul style="padding:0px;">
-			              <li class="previous" style="padding:0px;"><a href="#" class="fui-arrow-left" style="padding:8px;"></a></li>
-			              <li style="color: #000; padding:0px;">1</li>
-			              <li style="padding-left: 4px; padding:0px; color: #000;">/</li>
-			              <li style="color: #000; padding:0px;">10</li>
-			              <li class="next" style="padding:0px;"><a href="#" class="fui-arrow-right" style="padding:8px;"></a></li>
-			            </ul>			  				
-		  			</div>
-
-			  		<div class="row" style="float:right; padding: 2px; margin-right: 8px;">
-			  			<div class="" style="float:left; display: table-cell; width:64px; padding: 2px; ">
-				  			<div class="form-group" style="margin: 0px; ">
-				  				<input type="text" class="form-control" style="height:34px;"/>
-				  			</div>
-			  			</div>
-			  			<div style="float:left; display: table-cell; width:4px;"></div>
-			  			<div class="my-button-s my-button-bk-default" style="">
-				  			<a href="#">
-				  				<span>Go</span>
-				  			</a>
-			  			</div>
-			  		</div>
-
-					<div id="pagesize_chooser" class="row" style="float:right; padding: 2px; margin-right: 22px; height: 38px;">
-						<div class="" style="float:left; margin-right: 4px;">
-							<label style="">Page row count:</label>
-						</div>			  		
-
-					  <select name="pagesize_list" class="select-block" style="display: none;">
-					    <option value="20">20</option>
-					    <option value="50" selected="selected">50</option>
-					    <option value="100">100</option>
-					    <option value="200">200</option>
-					  </select>
-					  <div class="btn-group select select-block" style="float:left; padding: 0px; width: 60px; margin-right: 8px;">
-					  	<button class="btn dropdown-toggle clearfix btn-info" data-toggle="dropdown" style="padding:2px; width: 70px; height: 34px; ">
-					  		<span id="page_size_selected" class="filter-option pull-left" style="top:8px;">50</span>&nbsp;
-					  		<span class="caret" ></span>
-					    </button>
-					    <span class="dropdown-arrow dropdown-arrow-info"></span>
-					    <ul id="pagesize_dropdown" class="dropdown-menu dropdown-info" role="menu" style="max-height: 180px; overflow-y: auto; min-height: 108px;min-width:60px;">
-					    	<li rel="0" ><a tabindex="-1" href="#" class="" ><span class="pull-left">20</span></a></li>
-					    	<li rel="1" class="selected"><a tabindex="-1" href="#" class="" ><span class="pull-left">50</span></a></li>
-					    	<li rel="2" ><a tabindex="-1" href="#" class="" ><span class="pull-left">100</span></a></li>
-					    	<li rel="3" ><a tabindex="-1" href="#" class="" ><span class="pull-left">200</span></a></li>
-					    </ul>
-					  </div>
-					  
-					</div>
-					
-					
-			  		<div class="col-xs-1" style="float: right; padding: 2px; margin-right: 80px;">
-			  			<div class="my-button-s my-button-bk-info">
-				  			<a href="#" style="padding-left: 60px; padding-right: 60px;">
-				  				<img src="myimg/btn-search.png" style="width: 20px; height: 20px;"/>
-				  			</a>
-			  			</div>
-			  		</div>
-			  		
-		  		</div>
-		  	-->
-							  			
+		  		
 	  		</div>
 	  		
 	  		<!-- Content Table -->
@@ -266,15 +189,19 @@
 	  				<thead class="my-thead">
 	  					<tr class="my-head-tr">
 	  						<th id="th-checkbox" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
-	  						<th class="my-th-sort asc"><span>col0</span> <img src="myimg/empty.png"/> </th>
+  						<!--#for(DBColumn dbCol : dbTable.columns)-->
+	  						<th class="my-th-sort nosort" listHead="${dbCol.name}" onclick="setSortCol()"><span>${dbCol.comment}</span> <img src="myimg/empty.png"/> </th>
+	  					<!--#end-->
 	  						<th class="my-th" style="width:36px;"></th>
 	  					</tr>
 	  				</thead>
-	  				<tbody id="data-tbody" style="">
-	  					<tr id="tr-data" class="my-tr">
+	  				<tbody id="data-tbody" style="" listData="List">
+	  					<tr id="tr-data" class="my-tr" listData="${dataClassName}">
 	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
-	  						<td class="my-td">val0</td>
-	  						<td class="my-td"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/> </td>
+  						<!--#for(DBColumn dbCol : dbTable.columns)-->
+	  						<td class="my-td" listData="${dbCol.name}" isPrimaryKey="${dbCol.primaryKey}"></td>
+	  					<!--#end-->
+	  						<td class="my-td"><a href="#" onclick="gotoDetail()"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
 	  					</tr>
 	  				</tbody>
 	  			</table>

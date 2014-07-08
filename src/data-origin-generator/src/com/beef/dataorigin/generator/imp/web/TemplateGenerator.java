@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import com.beef.dataorigin.context.DataOriginContext;
 import com.beef.dataorigin.generator.DataOriginGeneratorContext;
+import com.beef.dataorigin.generator.DataOriginGenerator.WebGenerateOverwriteFlag;
 import com.beef.dataorigin.generator.util.DataOriginGeneratorUtil;
 import com.salama.modeldriven.util.db.DBTable;
 
@@ -49,12 +50,12 @@ public class TemplateGenerator {
 			DataOriginContext dataOriginContext,
 			DataOriginGeneratorContext generatorContext,
 			File file,
-			boolean isOverwrite) throws IOException, ParseException {
+			WebGenerateOverwriteFlag overwriteFlg) throws IOException, ParseException {
 		boolean isJavaFile = file.getName().toLowerCase().contains(DataOriginGeneratorUtil.FILE_EXT_JAVA);
 		boolean needGenerateFile = file.getName().contains(TEMPLATE_FILE_NAME_PATTERN);
 		
 		if(!needGenerateFile) {
-			generateTemplateFile(dataOriginContext, generatorContext, file, isOverwrite, isJavaFile, needGenerateFile, null);
+			generateTemplateFile(dataOriginContext, generatorContext, file, overwriteFlg, isJavaFile, needGenerateFile, null);
 		} else {
 			if(needGenerateFile && file.getName().contains(TEMPLATE_FILE_NAME_PATTERN_TABLE_NAME)) {
 				//need enumerate table list
@@ -62,10 +63,10 @@ public class TemplateGenerator {
 				for(int i = 0; i < generatorContext.getDbTableList().size(); i++) {
 					dbTable = generatorContext.getDbTableList().get(i);
 
-					generateTemplateFile(dataOriginContext, generatorContext, file, isOverwrite, isJavaFile, needGenerateFile, dbTable);
+					generateTemplateFile(dataOriginContext, generatorContext, file, overwriteFlg, isJavaFile, needGenerateFile, dbTable);
 				}
 			} else {
-				generateTemplateFile(dataOriginContext, generatorContext, file, isOverwrite, isJavaFile, needGenerateFile, null);
+				generateTemplateFile(dataOriginContext, generatorContext, file, overwriteFlg, isJavaFile, needGenerateFile, null);
 			}
 		}
 		
@@ -75,7 +76,7 @@ public class TemplateGenerator {
 			DataOriginContext dataOriginContext,
 			DataOriginGeneratorContext generatorContext,
 			File file, 
-			boolean isOverwrite,
+			WebGenerateOverwriteFlag overwriteFlg,
 			boolean isJavaFile, boolean needGenerateFile,
 			DBTable dbTable
 			) throws IOException, ParseException {
@@ -89,8 +90,15 @@ public class TemplateGenerator {
 			destFile = getFileForNotJavaTemplateFile(dataOriginContext, generatorContext, dbTable, file, needGenerateFile);
 		}
 		
-		if(!isOverwrite && destFile.exists()) {
-			return;
+		if(destFile.exists()) {
+			if(overwriteFlg == WebGenerateOverwriteFlag.NoOverwrite) {
+				return;
+			} else if(overwriteFlg == WebGenerateOverwriteFlag.OverwriteAll) {
+			} else if (overwriteFlg == WebGenerateOverwriteFlag.OverwriteGeneratedFileOnly) {
+				if(!needGenerateFile) {
+					return;
+				}
+			}
 		}
 		
 		if(!destFile.getParentFile().exists()) {

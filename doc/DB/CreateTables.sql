@@ -15,10 +15,10 @@
 -- Table structure for table `BOAdmin`
 --
 
-DROP TABLE IF EXISTS `BOAdmin`;
+DROP TABLE IF EXISTS `Admin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `BOAdmin` (
+CREATE TABLE `Admin` (
   `admin_id` char(32) NOT NULL COMMENT '管理员ID',
   `priviledge_roles` varchar(4000) DEFAULT NULL COMMENT '权限分配(dataA:rw|dataB:rw|...|dataN:rw)',
   `name` varchar(45) DEFAULT NULL COMMENT '姓名',
@@ -28,13 +28,13 @@ CREATE TABLE `BOAdmin` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `BOBrand`
+-- Table structure for table `Brand`
 --
 
-DROP TABLE IF EXISTS `BOBrand`;
+DROP TABLE IF EXISTS `Brand`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `BOBrand` (
+CREATE TABLE `Brand` (
   `brand_id` char(32) NOT NULL COMMENT '品牌ID',
   `name` varchar(100) DEFAULT NULL COMMENT '品牌名',
   `name_en` varchar(100) DEFAULT NULL COMMENT '英文名',
@@ -48,13 +48,13 @@ CREATE TABLE `BOBrand` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `BOShop`
+-- Table structure for table `Shop`
 --
 
-DROP TABLE IF EXISTS `BOShop`;
+DROP TABLE IF EXISTS `Shop`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `BOShop` (
+CREATE TABLE `Shop` (
   `shop_id` char(32) NOT NULL COMMENT '门店ID',
   `brand_id` char(32) DEFAULT NULL COMMENT '品牌ID',
   `province_name` varchar(32) DEFAULT NULL COMMENT '省名',

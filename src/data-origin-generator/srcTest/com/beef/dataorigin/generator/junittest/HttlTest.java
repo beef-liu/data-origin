@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -37,6 +39,13 @@ public class HttlTest {
 	
 	@Test
 	public void testHttl1() {
+		try {
+			String s = URLEncoder.encode(" +", "utf-8");
+			System.out.println("s:" + s);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		testHttl("httl_test1.html");
 	}
 

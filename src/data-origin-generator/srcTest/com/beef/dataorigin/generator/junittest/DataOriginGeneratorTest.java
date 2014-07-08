@@ -12,13 +12,13 @@ public class DataOriginGeneratorTest {
 		DataOriginGenerator.main(null);
 	}
 
-	@Test
 	public void testMain2() {
 		DataOriginGenerator.main(new String[]{"web"});
 	}
 
+	@Test
 	public void testMain3() {
-		DataOriginGenerator.main(new String[]{"web", "overwrite"});
+		DataOriginGenerator.main(new String[]{"web", DataOriginGenerator.WebGenerateOverwriteFlagStringOverwriteGeneratedFileOnly});
 	}
 	
 }

@@ -32,6 +32,11 @@ import com.salama.util.ResourceUtil;
 
 public class DataOriginGenerator {
 	private final static Logger logger = Logger.getLogger(DataOriginGenerator.class);
+
+	public static enum WebGenerateOverwriteFlag {NoOverwrite, OverwriteAll, OverwriteGeneratedFileOnly};
+	public static String WebGenerateOverwriteFlagStringOverwriteAll = "wa";
+	public static String WebGenerateOverwriteFlagStringOverwriteGeneratedFileOnly = "wg";
+	
 	
 	public final static Charset DefaultCharset = Charset.forName("utf-8");
 
@@ -54,12 +59,19 @@ public class DataOriginGenerator {
 				String taskType = args[0];
 				if(taskType.equals("web")) {
 					
-					boolean isOverwrite = false;
-					if(args.length >= 2 && args[1].equals("overwrite")) {
-						isOverwrite = true;
+					WebGenerateOverwriteFlag overwriteFlg = WebGenerateOverwriteFlag.NoOverwrite;
+					
+					if(args.length >= 2) {
+						String overwriteFlgStr = args[1];
+						
+						if(overwriteFlgStr.equals(WebGenerateOverwriteFlagStringOverwriteAll)) {
+							overwriteFlg = WebGenerateOverwriteFlag.OverwriteAll;
+						} else if(overwriteFlgStr.equals(WebGenerateOverwriteFlagStringOverwriteGeneratedFileOnly)) {
+							overwriteFlg = WebGenerateOverwriteFlag.OverwriteGeneratedFileOnly;
+						}
 					}
 					
-					generator.generateWeb(isOverwrite);
+					generator.generateWeb(overwriteFlg);
 				}
 			}
 		} catch(Throwable e) {
@@ -81,8 +93,8 @@ public class DataOriginGenerator {
 		
 	}
 	
-	protected void generateWeb(boolean isOverwrite) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, XmlParseException, InstantiationException, NoSuchMethodException {
-		WebGenerator.generateAll(_generatorContext, isOverwrite);
+	protected void generateWeb(WebGenerateOverwriteFlag overwriteFlg) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, XmlParseException, InstantiationException, NoSuchMethodException {
+		WebGenerator.generateAll(_generatorContext, overwriteFlg);
 	}
 	
 	

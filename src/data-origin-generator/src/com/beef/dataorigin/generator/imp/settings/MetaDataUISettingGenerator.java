@@ -19,7 +19,7 @@ import com.salama.modeldriven.util.db.DBColumn;
 import com.salama.modeldriven.util.db.DBTable;
 
 public class MetaDataUISettingGenerator {
-	private final static int DEFAULT_SEARCH_CONDITION_COUNT = 5;
+	private final static int DEFAULT_SEARCH_CONDITION_COUNT = 4;
 	
 	public static void generateAll(DataOriginGeneratorContext generatorContext) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException {
 		
