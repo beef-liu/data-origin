@@ -68,6 +68,8 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			sql.append(" where ");
 			sql.append(sqlWhereConditions);
 		}
+		
+		//order by -------------------------------------------------------------
 		if(orderByFields != null && orderByFields.length > 0) {
 			sql.append(" order by ");
 			for(int i = 0; i < orderByFields.length; i++) {
@@ -77,11 +79,13 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 				sql.append(DOSqlParamUtil.wrapNameInSql(orderByFields[i]));
 			}
 		}
+
+		//limit -------------------------------------------------------------
 		sql.append(" limit ").append(beginIndex).append(",").append(pageSize);
 		
 		logger.debug("sql:" + sql.toString());
 		
-		//statement
+		//execute statement -------------------------------------------------------------
 		PreparedStatement stmt = null;
 		
 		try {
@@ -126,7 +130,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		
 		logger.debug("sql:" + sql.toString());
 		
-		//statement
+		//execute statement -------------------------------------------------------------
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
