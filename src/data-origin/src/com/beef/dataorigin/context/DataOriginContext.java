@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,16 +12,19 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import MetoXML.XmlDeserializer;
+import MetoXML.XmlSerializer;
 import MetoXML.Base.XmlParseException;
 import MetoXML.Util.ClassFinder;
 
 import com.beef.dataorigin.context.data.MDBTable;
+import com.beef.dataorigin.context.data.MMetaDataImportSetting;
 import com.beef.dataorigin.context.data.MMetaDataUISetting;
 import com.beef.dataorigin.setting.DataOriginSetting;
 import com.beef.dataorigin.setting.meta.MetaDataImportSetting;
 import com.beef.dataorigin.setting.meta.MetaDataUISetting;
 import com.beef.dataorigin.setting.meta.data.MetaDataField;
-import com.beef.dataorigin.web.data.DODataServiceError;
+import com.beef.dataorigin.setting.msg.DOServiceMsg;
+import com.beef.dataorigin.web.data.DOSearchCondition;
 import com.salama.modeldriven.util.db.DBColumn;
 import com.salama.modeldriven.util.db.DBTable;
 import com.salama.reflect.PreScanClassFinder;
@@ -40,6 +44,12 @@ public class DataOriginContext implements ClassFinder {
 	 */
 	private DataOriginSetting _dataOriginSetting;
 	
+	private List<String> _tableNameList;
+	
+	public List<String> getTableNameList() {
+		return _tableNameList;
+	}
+
 	/**
 	 * data-origin/dbtables/*.xml
 	 * key: table name (lowercase) value:DBTable
@@ -58,6 +68,8 @@ public class DataOriginContext implements ClassFinder {
 	 */
 	private Map<String, MetaDataImportSetting> _MetaDataImportSettingMap;
 	
+	private Map<String, MMetaDataImportSetting> _mMetaDataImportSettingMap;
+	
 	/**
 	 * data-origin/meta/data-ui-setting/*.xml
 	 * key:table name (lowercase) value:MMetaDataUISetting
@@ -69,6 +81,11 @@ public class DataOriginContext implements ClassFinder {
 	 * key:table name (lowercase) value:MMetaDataUISetting
 	 */
 	private Map<String, MMetaDataUISetting> _mMetaDataUISettingMap;
+	
+	/**
+	 * key:msgCode value: xml of DOServiceMsg
+	 */
+	private Map<String, String> _serviceMsgMap;
 	
 	public DataOriginSetting getDataOriginSetting() {
 		return _dataOriginSetting;
@@ -86,12 +103,20 @@ public class DataOriginContext implements ClassFinder {
 		return _MetaDataImportSettingMap.get(tableName.toLowerCase());
 	}
 	
+	public MMetaDataImportSetting getMMetaDataImportSetting(String tableName) {
+		return _mMetaDataImportSettingMap.get(tableName.toLowerCase());
+	}
+	
 	public MetaDataUISetting getMetaDataUISetting(String tableName) {
 		return _MetaDataUISettingMap.get(tableName.toLowerCase());
 	}
 	
 	public MMetaDataUISetting getMMetaDataUISetting(String tableName) {
 		return _mMetaDataUISettingMap.get(tableName.toLowerCase());
+	}
+	
+	public String getServiceMsgXml(String msgCode) {
+		return _serviceMsgMap.get(msgCode);
 	}
 
 	public DataOriginContext(File baseDir, ClassFinder dataClassFinder) throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
@@ -117,7 +142,7 @@ public class DataOriginContext implements ClassFinder {
 		_dataOriginDataClassFinder = new PreScanClassFinder();
 		_dataOriginDataClassFinder.loadClassOfPackage(DBColumn.class.getPackage().getName());
 		_dataOriginDataClassFinder.loadClassOfPackage(DataOriginSetting.class.getPackage().getName());
-		_dataOriginDataClassFinder.loadClassOfPackage(DODataServiceError.class.getPackage().getName());
+		_dataOriginDataClassFinder.loadClassOfPackage(DOSearchCondition.class.getPackage().getName());
 		
 		_webDataClassFinder = dataClassFinder;
 	}
@@ -127,9 +152,34 @@ public class DataOriginContext implements ClassFinder {
 		File file = new File(_dataOriginDirManager.getBaseDir(), DataOriginSetting.class.getSimpleName() + ".xml");
 		_dataOriginSetting = (DataOriginSetting) xmlDes.Deserialize(file.getAbsolutePath(), DataOriginSetting.class, 
 				XmlDeserializer.DefaultCharset, this);
+		
+		logger.info("Load " + DataOriginSetting.class.getSimpleName() + ".xml");
+		
+		//load into msg map
+		List<DOServiceMsg> msgList = _dataOriginSetting.getServiceMsgList();
+		if(msgList != null) {
+			DOServiceMsg msg;
+			String msgStr;
+			logger.debug("Load ServiceMsg settings -----------------------");
+			for(int i = 0; i < msgList.size(); i++) {
+				msg = msgList.get(i);
+				
+				try {
+					msgStr = XmlSerializer.objectToString(msg, DOServiceMsg.class);
+
+					_serviceMsgMap.put(msg.getMsgCode(), msgStr);
+
+					logger.debug("Load ServiceMsg:" + msgStr);
+				} catch (Throwable e1) {
+					throw new RuntimeException(e1);
+				}
+			}
+		}
+		
 	}
 	
 	private void loadDBTableSettings() throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+		_tableNameList = new ArrayList<String>();
 		_DBTableMap = new HashMap<String, DBTable>();
 		_mDBTableMap = new HashMap<String, MDBTable>();
 		File[] files = _dataOriginDirManager.getDbTablesDir().listFiles(_xmlFileFilter);
@@ -142,6 +192,8 @@ public class DataOriginContext implements ClassFinder {
 				dbTable = (DBTable) xmlDes.Deserialize(
 						files[i].getAbsolutePath(), DBTable.class, 
 						XmlDeserializer.DefaultCharset, this);
+				
+				_tableNameList.add(dbTable.getTableName().toLowerCase());
 				_DBTableMap.put(dbTable.getTableName().toLowerCase(), dbTable);
 				_mDBTableMap.put(dbTable.getTableName().toLowerCase(), convertDBTable(dbTable));
 			}
@@ -150,17 +202,19 @@ public class DataOriginContext implements ClassFinder {
 	
 	private void loadDataImportSetting() throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
 		_MetaDataImportSettingMap = new HashMap<String, MetaDataImportSetting>();
+		_mMetaDataImportSettingMap = new HashMap<String, MMetaDataImportSetting>();
 		File[] files = _dataOriginDirManager.getMetaDataImportSettingDir().listFiles(_xmlFileFilter);
 		
 		if(files != null) {
-			MetaDataImportSetting dataImpSetting;
+			MetaDataImportSetting dataSetting;
 			XmlDeserializer xmlDes = new XmlDeserializer();
 			
 			for(int i = 0; i < files.length; i++) {
-				dataImpSetting = (MetaDataImportSetting) xmlDes.Deserialize(
+				dataSetting = (MetaDataImportSetting) xmlDes.Deserialize(
 						files[i].getAbsolutePath(), MetaDataImportSetting.class, 
 						XmlDeserializer.DefaultCharset, this);
-				_MetaDataImportSettingMap.put(dataImpSetting.getDataTableName().toLowerCase(), dataImpSetting);
+				_MetaDataImportSettingMap.put(dataSetting.getDataTableName().toLowerCase(), dataSetting);
+				_mMetaDataImportSettingMap.put(dataSetting.getDataTableName().toLowerCase(), convertMetaDataImportSetting(dataSetting));
 			}
 		}
 	}
@@ -230,6 +284,22 @@ public class DataOriginContext implements ClassFinder {
 		
 		return mDataSetting;
 	}
+	
+	private static MMetaDataImportSetting convertMetaDataImportSetting(MetaDataImportSetting dataSetting) {
+		MMetaDataImportSetting mDataSetting = new MMetaDataImportSetting();
+		
+		mDataSetting.setDataClassName(dataSetting.getDataClassName());
+		mDataSetting.setDataTableName(dataSetting.getDataTableName());
+		
+		MetaDataField dataField;
+		for(int i = 0; i < dataSetting.getFieldList().size(); i++) {
+			dataField = dataSetting.getFieldList().get(i);
+			mDataSetting.getFieldMap().put(dataField.getFieldName(), dataField);
+		}
+		
+		return mDataSetting;
+	}
+	
 
 	@Override
 	public Class<?> findClass(String className) throws ClassNotFoundException {

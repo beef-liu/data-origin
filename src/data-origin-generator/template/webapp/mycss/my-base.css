@@ -2,7 +2,7 @@
 	height: 44px; 
 	width: 100%; 
 	/*background: url('../img/header_bg.jpg') repeat 0 0 #204077;*/
-	position: fixed; 
+	/*position: fixed;*/ 
 	top: 0; 
 	left: 0;
 	line-height: 44px;
@@ -32,6 +32,7 @@
 	position: relative;
 	width: 200px;
 	height: 100%;
+	padding-right:4px;
 	/*border-right: 1px solid #e5e5e5;*/
 }
 
@@ -214,6 +215,9 @@
   text-decoration: none;
   -webkit-transition: 0.25s;
   transition: 0.25s;
+}
+.my-menu-item.selected {
+  background-color: #8dc1ff;
 }
 .my-menu-item:hover {
   color: black;

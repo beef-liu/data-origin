@@ -13,6 +13,8 @@ public class MetaDataField {
 	private String _fieldDispFormat = "";
 	
 	private String _fieldValidateRegex = "";
+	
+	private String _fieldValidateComment = "";
 
 	/**
 	 * Option list for select or checkbox
@@ -67,5 +69,12 @@ public class MetaDataField {
 		_fieldValidateRegex = fieldValidateRegex;
 	}
 
+	public String getFieldValidateComment() {
+		return _fieldValidateComment;
+	}
+
+	public void setFieldValidateComment(String fieldValidateComment) {
+		_fieldValidateComment = fieldValidateComment;
+	}
 	
 }

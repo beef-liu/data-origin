@@ -1,0 +1,79 @@
+package com.beef.dataorigin.web.data;
+
+public class DODataImportResult {
+	private String _originalFileName;
+	private String _tableName;
+	private String _tableComment;
+	
+	private int _totalCount;
+	private int _insertedCount = 0;
+	private int _updatedCount = 0;
+	private int _errorCount = 0;
+	
+	private String _importResultFileDownloadUrl;
+
+	public String getOriginalFileName() {
+		return _originalFileName;
+	}
+
+	public void setOriginalFileName(String originalFileName) {
+		_originalFileName = originalFileName;
+	}
+
+	public String getTableName() {
+		return _tableName;
+	}
+
+	public void setTableName(String tableName) {
+		_tableName = tableName;
+	}
+
+	public String getTableComment() {
+		return _tableComment;
+	}
+
+	public void setTableComment(String tableComment) {
+		_tableComment = tableComment;
+	}
+
+	public int getTotalCount() {
+		return _totalCount;
+	}
+
+	public void setTotalCount(int totalCount) {
+		_totalCount = totalCount;
+	}
+
+	public int getInsertedCount() {
+		return _insertedCount;
+	}
+
+	public void setInsertedCount(int insertedCount) {
+		_insertedCount = insertedCount;
+	}
+
+	public int getUpdatedCount() {
+		return _updatedCount;
+	}
+
+	public void setUpdatedCount(int updatedCount) {
+		_updatedCount = updatedCount;
+	}
+
+	public int getErrorCount() {
+		return _errorCount;
+	}
+
+	public void setErrorCount(int errorCount) {
+		_errorCount = errorCount;
+	}
+
+	public String getImportResultFileDownloadUrl() {
+		return _importResultFileDownloadUrl;
+	}
+
+	public void setImportResultFileDownloadUrl(String importResultFileDownloadUrl) {
+		_importResultFileDownloadUrl = importResultFileDownloadUrl;
+	}
+	
+}

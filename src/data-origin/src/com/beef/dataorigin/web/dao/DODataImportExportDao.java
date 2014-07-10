@@ -1,5 +1,6 @@
 package com.beef.dataorigin.web.dao;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -10,11 +11,21 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.oro.text.regex.Pattern;
+import org.apache.oro.text.regex.PatternCompiler;
+import org.apache.oro.text.regex.Perl5Compiler;
+import org.apache.poi.hssf.record.chart.BeginRecord;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import com.beef.dataorigin.setting.meta.MetaDataImportSetting;
 import com.beef.dataorigin.setting.meta.data.MetaDataField;
 import com.beef.dataorigin.util.ExcelUtil;
+import com.beef.dataorigin.web.data.DODataImportResult;
+import com.beef.dataorigin.web.util.DODataDaoUtil;
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import com.salama.modeldriven.util.db.DBColumn;
 import com.salama.modeldriven.util.db.DBTable;
 
@@ -23,9 +34,14 @@ public class DODataImportExportDao {
 	
 	private final static int DEFAULT_MAX_COL = 512;
 	
-	public static void importDataExcel(
+	public static Color BG_COLOR_ROW_INSERTED = Color.yellow; 
+	public static Color BG_COLOR_ROW_UPDATED = Color.green; 
+	
+	public static DODataImportResult importDataExcel(
 			Connection conn,
-			InputStream inputExcel, boolean isXLSX, int sheetIndex,
+			InputStream inputExcel,
+			String originalFileName,
+			boolean isXLSX, int sheetIndex,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
@@ -33,15 +49,19 @@ public class DODataImportExportDao {
 		int beginCol = 0;
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
+
+		Workbook workbook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
+		Sheet sheet = workbook.getSheetAt(sheetIndex);
 		
-		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(inputExcel, isXLSX, sheetIndex, beginCol, maxCol, beginRow);
+		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(sheet, beginCol, maxCol, beginRow);
 	
-		importDataExcel(conn, allRowList, dataImportSetting, dbTable, colValueAssignList);
+		return importDataExcel(conn, originalFileName, sheet, allRowList, dataImportSetting, dbTable, colValueAssignList);
 	}
 	
-	public static void importDataExcel(
+	public static DODataImportResult importDataExcel(
 			Connection conn,
 			Sheet sheet,
+			String originalFileName,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
@@ -52,26 +72,118 @@ public class DODataImportExportDao {
 		
 		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(sheet, beginCol, maxCol, beginRow);
 	
-		importDataExcel(conn, allRowList, dataImportSetting, dbTable, colValueAssignList);
+		return importDataExcel(conn, originalFileName, sheet, allRowList, dataImportSetting, dbTable, colValueAssignList);
 	}
 	
-	protected static void importDataExcel(
+	protected static DODataImportResult importDataExcel(
 			Connection conn,
+			String originalFileName,
+			Sheet sheet, int beginCol,
 			List<List<Object>> allRowList,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
 			) {
-		List<DataImportColMeta> colMataList = findoutDataImportColMetaListOfExcelTitleRow(dataImportSetting, dbTable, allRowList.get(0));
+		DODataImportResult dataImportResult = new DODataImportResult();
+		dataImportResult.setOriginalFileName(originalFileName);
+		dataImportResult.setTableName(dbTable.getTableName());
+		dataImportResult.setTableComment(dbTable.getComment());
+		dataImportResult.setTotalCount(0);
+		dataImportResult.setInsertedCount(0);
+		dataImportResult.setUpdatedCount(0);
+		dataImportResult.setErrorCount(0);
+
+		List<DataImportColMeta> colMataList = findoutDataImportColMetaListOfExcelTitleRow(
+				dataImportSetting, dbTable, allRowList.get(0));
+		PatternCompiler compiler = new Perl5Compiler();
+		List<Pattern> verifyPatternList = new ArrayList<Pattern>();
+		int col = 0;
+		DataImportColMeta colMeta = null;
+		for(int i = 0; i < colMataList.size(); i++) {
+			col = beginCol + i;
+			
+			colMeta = colMataList.get(i);
+			if(colMeta.dbCol != null && colMeta.metaDataField != null
+					&& colMeta.metaDataField.getFieldValidateRegex() != null
+					&& colMeta.metaDataField.getFieldValidateRegex().length() > 0) {
+				verifyPatternList.add(compiler.compile(colMeta.metaDataField.getFieldValidateRegex()));
+			} else {
+				verifyPatternList.add(null);
+			}
+		}
 		
+		boolean isDuplicatedKey = false;
 		for(int i = 1; i < allRowList.size(); i++) {
+			isDuplicatedKey = false;
 			try {
 				insertOneRow(conn, dbTable, colMataList, allRowList.get(i), colValueAssignList);
+			} catch(com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException e) {
+				if("23000".equals(e.getSQLState())) {
+					//duplicated key
+					isDuplicatedKey = true;
+				} else {
+					logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
+				}
+			} catch(MySQLIntegrityConstraintViolationException e) {
+				if("23000".equals(e.getSQLState())) {
+					//duplicated key
+					isDuplicatedKey = true;
+				} else {
+					logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
+				}
 			} catch(Throwable e) {
 				logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
 			}
+			if(isDuplicatedKey) {
+				//duplicated key, then update
+			}
 		}
+		
+		return dataImportResult;
 	}
+	
+	protected static boolean verifyDataRowFormat(
+			Sheet sheet, CellStyle cellStyleOfError,
+			List<DataImportColMeta> colMataList, List<Pattern> verifyPatternList,  
+			List<Object> excelRow, 
+			int rowIndex, int beginCol) {
+		int i;
+		int colIndex = 0;
+		DataImportColMeta colMeta = null;
+		Object dbVal;
+		String dbValStr;
+		String verifyRegexStr;
+		boolean isValidCol = false;
+		Row curRow = sheet.getRow(rowIndex);
+		for(i = 0; i < colMataList.size(); i++) {
+			colIndex = beginCol + i;
+			colMeta = colMataList.get(i);
+			
+			if(colMeta.dbCol == null) {
+				continue;
+			}
+			verifyRegexStr = colMeta.metaDataField.getFieldValidateRegex();
+			if(verifyRegexStr == null || verifyRegexStr.length() == 0) {
+				continue;
+			}
+			
+			dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.dbCol);
+			if(dbVal.getClass() == String.class) {
+				dbValStr = (String) dbVal; 
+			} else {
+				dbValStr = String.valueOf(dbVal);
+			}
+			
+			//verify
+			isValidCol = DODataDaoUtil.isFormatOfPattern(verifyPatternList.get(i), dbValStr);
+			if(!isValidCol) {
+				curRow.getCell(colIndex).setCellStyle(cellStyleOfError);
+			}
+		}
+		
+		return true;
+	}
+	
 	
 	protected static int insertOneRow(
 			Connection conn,
@@ -203,6 +315,8 @@ public class DODataImportExportDao {
 					return Integer.valueOf(((Double)excelCellVal).intValue());
 				} else if(colType.startsWith("bigint")) {
 					return Long.valueOf(((Double)excelCellVal).longValue());
+				} else if(colType.indexOf("char") >= 0) {
+					return String.valueOf(excelCellVal);
 				} else {
 					return excelCellVal;
 				}
@@ -210,10 +324,14 @@ public class DODataImportExportDao {
 				//TODO
 				return String.valueOf(excelCellVal); 
 			} else if(excelCellVal.getClass() == Boolean.class) {
-				if(((Boolean)excelCellVal).booleanValue()) {
-					return 1;
+				if(colType.indexOf("int") >= 0) {
+					if(((Boolean)excelCellVal).booleanValue()) {
+						return 1;
+					} else {
+						return 0;
+					}
 				} else {
-					return 0;
+					return String.valueOf(excelCellVal);
 				}
 			} else {
 				return String.valueOf(excelCellVal);
@@ -292,4 +410,5 @@ public class DODataImportExportDao {
 	public static class DataImportColValue extends DataImportColMeta {
 		public Object dbVal = null;
 	}
+	
 }

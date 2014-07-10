@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="max-age=1" />
     
     <title>$!{tableName}</title>
-
+    
     <!-- Loading Bootstrap -->
     <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 
@@ -42,9 +42,12 @@
     <script src="myjs/lib/urlparams.js"></script>
     
     <script src="myjs/${empty}myCommon.js"></script>
-    <script src="myjs/${tableName}_data_list.js"></script>
+    
+    <script src="myjs/data/${tableName}_data_list.js"></script>
   </head>
   <body>
+  <div class="container" style="width: 100%;padding:0;">
+  		
   	<!-- Header #f3f3f3 #2f4154-->
 	<header class="my-navibar" style="background:#f3f3f3;">
 		<div style="float:left;">
@@ -61,13 +64,13 @@
 	</header>
 	
 	<!-- Content -->
-    <div class="container my-container">
+    <div class="my-container">
 	  	<div class="my-left-menu" style="background: white;">
 	  		<ul style="padding-left: 4px;">
 	  			<li>
 	  				<div class="my-menu-group">Menu Group Title0</div>
 	  				<ul>
-	  					<li class="my-menu-item"><a href="#">menu0</a></li>
+	  					<li class="my-menu-item selected"><a href="#">menu0</a></li>
 	  					<li class="my-menu-item"><a href="#">menu1</a></li>
 	  					<li class="my-menu-item"><a href="#">menu2</a></li>
 	  				</ul>
@@ -123,13 +126,13 @@
 						  			</div>
 						  			
 						  			<div class="my-button-s my-button-bk-default">
-							  			<a href="#">
-							  				<img src="myimg/btn-add.png"/>
+							  			<a href="#" style="padding: 10px 20px;">
+							  				<img src="myimg/xls-up.png" style="width:24px;height:24px;"/>
 							  			</a>
 						  			</div>
 						  			<div class="my-button-s my-button-bk-default">
-							  			<a href="#">
-							  				<img src="myimg/btn-add.png"/>
+							  			<a href="#" style="padding: 10px 20px;">
+							  				<img src="myimg/xls-down.png" style="width:24px;height:24px;"/>
 							  			</a>
 						  			</div>
 						  			
@@ -225,7 +228,6 @@
 	        
 	  	</div>
     </div>
-    <!-- /.container -->
 
 	<!-- Footer -->
 	<footer class="my-footbar" style="background:#ffffff; font-size: small; font-weight: normal;">
@@ -233,6 +235,10 @@
 			<a href="" style="padding:4px;"><span>Copyright @ 2014 Salama Soft, Inc</span></a>
 		</div>
 	</footer>
+
+  </div>
+  
+  <div></div>
 
   </body>
 </html>

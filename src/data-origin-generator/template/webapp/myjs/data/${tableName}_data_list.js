@@ -193,7 +193,7 @@ function doSearch() {
 }
 
 function searchDataCount() {
-	$.ajax({
+	myAjax({
 		url: WEB_APP + "/cloudDataService.do",
 		type: "post",
 		dataType: "text",
@@ -224,7 +224,7 @@ function resetPageController() {
 }
 
 function searchData() {
-	$.ajax({
+	myAjax({
 		url: WEB_APP + "/cloudDataService.do",
 		type: "post",
 		dataType: "text",

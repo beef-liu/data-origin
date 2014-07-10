@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--#set(MetaDataUISetting dataUISetting, DBTable dbTable, MDBTable mDBTable)-->
+<html lang="en">
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="max-age=1" />
+    
+    <title>$!{tableName}</title>
+
+    <!-- Loading Bootstrap -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Loading Flat UI -->
+    <link href="css/flat-ui.css" rel="stylesheet">
+    <link href="mycss/my-base.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="images/favicon.ico">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="js/jquery.ui.touch-punch.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-select.js"></script>
+    <script src="js/bootstrap-switch.js"></script>
+    <script src="js/flatui-checkbox.js"></script>
+    <script src="js/flatui-radio.js"></script>
+    <script src="js/jquery.tagsinput.js"></script>
+    <script src="js/jquery.placeholder.js"></script>
+
+    
+    <script src="myjs/lib/md5.js"></script>
+    <script src="myjs/lib/salama/easyJsDomUtil.js"></script>
+    <script src="myjs/lib/easyUpload.js"></script>
+    <script src="myjs/lib/urlparams.js"></script>
+    
+    <script src="myjs/${empty}myCommon.js"></script>
+    
+    <script>
+    	function loadContentHtml() {
+    		var showingHtmlName = $('#main-content').attr('htmlName');
+    		var htmlName = $(this).attr('htmlName').text();
+    		if(showingHtmlName == htmlName) {
+    			return;
+    		}
+    		
+    		//remove some js
+    		var scriptNodes = $(document.head).find('script');
+    		var i, jsSrc;
+    		for(i = 0; i < scriptNodes.length; i++) {
+    			jsSrc = scriptNodes[i].src; 
+    			if(jsSrc.indexOf('myjs/data/') == 0) {
+    				$(scriptNodes[i]).remove();
+    			}
+    		}
+    		
+    		//load html
+    		$('#main-content').html(htmlName);
+    	}
+    </script>
+  </head>
+  <body>
+  <div class="container" style="width: 100%;padding:0;">
+  		
+  	<!-- Header #f3f3f3 #2f4154-->
+	<header class="my-navibar" style="background:#f3f3f3;">
+		<div style="float:left;">
+			<a href="" style="padding:4px;"><img src="myimg/company-logo.png" /></a>
+		</div>
+		<div style="float:right;">
+			<a href="#" style="padding-right: 8px;"><img src="myimg/sign_out.png" style="width:22px; height:22px;" /> </a>
+		</div>
+		<div style="float:right;">
+			<div style="padding-right: 14px; padding-right: 14px;">
+				<a href="#" style="padding-right: 8px;"><span>user001xxxxx</span> </a>
+			</div>
+		</div>
+	</header>
+	
+	<!-- Content -->
+    <div class="my-container">
+	  	<div class="my-left-menu" style="background: white;">
+	  		<ul style="padding-left: 4px;">
+	  			<li>
+	  				<div class="my-menu-group">Super Admin</div>
+	  				<ul>
+	  					<li class="my-menu-item"><a href="#">menu0</a></li>
+	  					<li class="my-menu-item"><a href="#">menu1</a></li>
+	  					<li class="my-menu-item"><a href="#">menu2</a></li>
+	  				</ul>
+	  			</li>
+	  			<li>
+	  				<div class="my-menu-group">Data Management</div>
+	  				<ul>
+					<!--#for(MetaSearchConditionItem searchCondItem : dataUISetting.searchCondition.searchConditionItemList)-->
+	  					<li class="my-menu-item" htmlName="brand_data_list.html"><a href="#">menu0</a></li>
+	  					<li class="my-menu-item"><a href="#">menu1</a></li>
+	  					<li class="my-menu-item"><a href="#">menu2</a></li>
+	  				<!--#end-->
+	  				</ul>
+	  			</li>
+	  		</ul>
+	  	</div>
+	  	<div id="main-content" class="my-main-content" style="">
+	        
+	  	</div>
+    </div>
+
+	<!-- Footer -->
+	<footer class="my-footbar" style="background:#ffffff; font-size: small; font-weight: normal;">
+		<div style="float:left;">
+			<a href="" style="padding:4px;"><span>Copyright @ 2014 Salama Soft, Inc</span></a>
+		</div>
+	</footer>
+
+  </div>
+  
+  <div></div>
+
+  </body>
+</html>

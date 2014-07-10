@@ -5,20 +5,17 @@ import java.sql.Connection;
 import org.apache.log4j.Logger;
 
 import MetoXML.XmlDeserializer;
-import MetoXML.XmlSerializer;
 
 import com.beef.dataorigin.web.context.DataOriginWebContext;
 import com.beef.dataorigin.web.dao.DODataDao;
-import com.beef.dataorigin.web.data.DODataServiceError;
 import com.beef.dataorigin.web.data.DOSearchCondition;
 import com.beef.dataorigin.web.util.DODataDaoUtil;
+import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 import com.beef.dataorigin.web.util.DOServiceUtil;
-import com.salama.service.clouddata.core.AppContext;
-import com.salama.service.clouddata.core.AppServiceContext;
 
 public class DODataSearchService {
 	private final static Logger logger = Logger.getLogger(DODataSearchService.class);
-	
+
 	public final static int MAX_PAGE_SIZE = 500;
 	
 	public static String searchDataCount(
@@ -36,13 +33,7 @@ public class DODataSearchService {
 			return Integer.toString(DODataDao.searchDataCountBySearchCondition(conn, tableName, searchCondition));
 		} catch(Throwable e) {
 			logger.error(null, e);
-			
-			try {
-				DODataServiceError error = new DODataServiceError(e);
-				return XmlSerializer.objectToString(error, DODataServiceError.class);
-			} catch (Throwable e1) {
-				throw new RuntimeException(e1);
-			}
+			return DOServiceMsgUtil.makeMsgXml(e);
 		} finally {
 			try {
 				conn.close();
@@ -58,6 +49,9 @@ public class DODataSearchService {
 			String orderByFields) {
 		Connection conn = null;
 		try {
+			if(pageSize > MAX_PAGE_SIZE) {
+				return DOServiceMsgUtil.getDefinedMsg(DOServiceMsgUtil.ErrorSearchPageSizeExceedMax);
+			}
 			
 			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
 					searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());
@@ -70,12 +64,7 @@ public class DODataSearchService {
 		} catch(Throwable e) {
 			logger.error(null, e);
 			
-			try {
-				DODataServiceError error = new DODataServiceError(e);
-				return XmlSerializer.objectToString(error, DODataServiceError.class);
-			} catch (Throwable e1) {
-				throw new RuntimeException(e1);
-			}
+			return DOServiceMsgUtil.makeMsgXml(e);
 		} finally {
 			try {
 				conn.close();

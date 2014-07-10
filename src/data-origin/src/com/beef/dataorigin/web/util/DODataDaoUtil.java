@@ -41,6 +41,11 @@ public class DODataDaoUtil {
 			throw new RuntimeException(e);
 		}
 	}
+		
+	public static boolean isFormatOfPattern(Pattern regexPattern, String val) {
+		PatternMatcher matcher = new Perl5Matcher();
+		return matcher.matches(val, regexPattern);
+	}
 	
 	public static boolean isFormatOfDateYmd(String val) {
 		PatternMatcher matcher = new Perl5Matcher();
