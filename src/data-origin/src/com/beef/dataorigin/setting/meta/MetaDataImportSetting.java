@@ -10,6 +10,10 @@ public class MetaDataImportSetting {
 	
 	private String _dataClassName = "";
 	
+	private String _bgColorError = "red";
+	private String _bgColorDataRowInserted = "yellow";
+	private String _bgColorDataRowUpdated = "green";
+	
 	private List<MetaDataField> _fieldList = new ArrayList<MetaDataField>();
 
 	public final static String defaultFileNameOfTable(String tableName) {
@@ -39,5 +43,30 @@ public class MetaDataImportSetting {
 	public void setFieldList(List<MetaDataField> fieldList) {
 		_fieldList = fieldList;
 	}
+
+	public String getBgColorError() {
+		return _bgColorError;
+	}
+
+	public void setBgColorError(String bgColorError) {
+		_bgColorError = bgColorError;
+	}
+
+	public String getBgColorDataRowInserted() {
+		return _bgColorDataRowInserted;
+	}
+
+	public void setBgColorDataRowInserted(String bgColorDataRowInserted) {
+		_bgColorDataRowInserted = bgColorDataRowInserted;
+	}
+
+	public String getBgColorDataRowUpdated() {
+		return _bgColorDataRowUpdated;
+	}
+
+	public void setBgColorDataRowUpdated(String bgColorDataRowUpdated) {
+		_bgColorDataRowUpdated = bgColorDataRowUpdated;
+	}
+
 	
 }
