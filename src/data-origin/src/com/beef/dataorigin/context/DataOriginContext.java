@@ -85,7 +85,8 @@ public class DataOriginContext implements ClassFinder {
 	/**
 	 * key:msgCode value: xml of DOServiceMsg
 	 */
-	private Map<String, String> _serviceMsgMap;
+	private Map<String, String> _serviceMsgXmlMap;
+	private Map<String, DOServiceMsg> _serviceMsgMap;
 	
 	public DataOriginSetting getDataOriginSetting() {
 		return _dataOriginSetting;
@@ -116,6 +117,10 @@ public class DataOriginContext implements ClassFinder {
 	}
 	
 	public String getServiceMsgXml(String msgCode) {
+		return _serviceMsgXmlMap.get(msgCode);
+	}
+	
+	public DOServiceMsg getServiceMsg(String msgCode) {
 		return _serviceMsgMap.get(msgCode);
 	}
 
@@ -156,6 +161,8 @@ public class DataOriginContext implements ClassFinder {
 		logger.info("Load " + DataOriginSetting.class.getSimpleName() + ".xml");
 		
 		//load into msg map
+		_serviceMsgXmlMap = new HashMap<String, String>();
+		_serviceMsgMap = new HashMap<String, DOServiceMsg>();
 		List<DOServiceMsg> msgList = _dataOriginSetting.getServiceMsgList();
 		if(msgList != null) {
 			DOServiceMsg msg;
@@ -167,7 +174,8 @@ public class DataOriginContext implements ClassFinder {
 				try {
 					msgStr = XmlSerializer.objectToString(msg, DOServiceMsg.class);
 
-					_serviceMsgMap.put(msg.getMsgCode(), msgStr);
+					_serviceMsgMap.put(msg.getMsgCode(), msg);
+					_serviceMsgXmlMap.put(msg.getMsgCode(), msgStr);
 
 					logger.debug("Load ServiceMsg:" + msgStr);
 				} catch (Throwable e1) {

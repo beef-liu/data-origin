@@ -100,6 +100,31 @@ public class ExcelUtil {
 		return readRows(sheet, beginCol, endCol, beginRow, endRow);
 	}
 	
+	public static List<Object> readRowAutoDetectEndCol(Sheet sheet,
+			int beginCol, int maxCol, int rowIndex) {
+		//int endCol = maxCol;
+
+		FormulaEvaluator evaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+		
+		Row row = sheet.getRow(rowIndex);
+		Cell cell = null;
+		Object cellVal = null;
+		List<Object> cellValList = new ArrayList<Object>();
+		for (int j = 0; j < maxCol; j++) {
+			cell = row.getCell(j);
+			cellVal = getCellValue(evaluator, cell);
+			
+			if(cellVal == null || (cellVal.getClass() == String.class && ((String)cellVal).length() == 0)) {
+				//endCol = j - 1;
+				break;
+			}
+			
+			cellValList.add(cellVal);
+		}
+		
+		return cellValList;
+	}
+	
 	public static Workbook createWorkbook(InputStream inputExcel, boolean isXLSX) throws IOException {
 		if (isXLSX) {
 			return new XSSFWorkbook(inputExcel);
@@ -124,13 +149,11 @@ public class ExcelUtil {
 		List<List<Object>> allRows = new ArrayList<List<Object>>();
 		
 		Row row = null;
-		Cell cell = null;
-		Object cellVal = null;
 
 		FormulaEvaluator evaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
 		
 		int i, j;
-		ArrayList<Object> cellValList = null;
+		List<Object> cellValList = null;
 		for(i = beginRow; i <= endRow; i++) {
 			row = sheet.getRow(i);
 			
@@ -139,21 +162,32 @@ public class ExcelUtil {
 			}
 
 			//1 row
-			cellValList = new ArrayList<Object>();
-			for(j = beginCol; j <= endCol; j++) {
-				cell = row.getCell(j);
-				if(cell == null) {
-					cellValList.add(null);
-				} else {
-					cellVal = getCellValue(evaluator, cell);
-					cellValList.add(cellVal);
-				}
-			}
+			cellValList = readRow(evaluator, row, beginCol, endCol);
 			
 			allRows.add(cellValList);
 		}
 
 		return allRows;
+	}
+	
+	public static List<Object> readRow(
+			FormulaEvaluator evaluator,
+			Row row,
+			int beginCol, int endCol) {
+		List<Object> cellValList = new ArrayList<Object>();
+		Cell cell = null;
+		Object cellVal = null;
+		for(int j = beginCol; j <= endCol; j++) {
+			cell = row.getCell(j);
+			if(cell == null) {
+				cellValList.add(null);
+			} else {
+				cellVal = getCellValue(evaluator, cell);
+				cellValList.add(cellVal);
+			}
+		}
+		
+		return cellValList;
 	}
 
 	/**

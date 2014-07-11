@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import com.beef.dataorigin.setting.meta.MetaDataImportSetting;
 import com.beef.dataorigin.setting.meta.data.MetaDataField;
 import com.beef.dataorigin.util.ExcelUtil;
+import com.beef.dataorigin.web.data.DODataImportColMetaInfo;
 import com.beef.dataorigin.web.data.DODataImportResult;
 import com.beef.dataorigin.web.util.DODataDaoUtil;
 import com.beef.dataorigin.web.util.DOServiceMsgUtil;
@@ -36,7 +37,7 @@ import com.salama.modeldriven.util.db.DBTable;
 public class DODataImportExportDao {
 	private final static Logger logger = Logger.getLogger(DODataImportExportDao.class);
 	
-	private final static int DEFAULT_MAX_COL = 512;
+	public final static int DEFAULT_MAX_COL = 512;
 	
 	private static final short DEFAULT_BG_COLOR_ERROR = IndexedColors.RED.index;
 	private static final short DEFAULT_BG_COLOR_DATA_ROW_INSERTED = IndexedColors.YELLOW.index;
@@ -166,17 +167,17 @@ public class DODataImportExportDao {
 		int updatedRowCount = 0;
 		int errorRowCount = 0;
 		
-		List<DataImportColMeta> colMataList = findoutDataImportColMetaListOfExcelTitleRow(
+		List<DODataImportColMetaInfo> colMataList = findoutDataImportColMetaListOfExcelTitleRow(
 				dataImportSetting, dbTable, allRowList.get(0));
 		PatternCompiler compiler = new Perl5Compiler();
 		List<Pattern> verifyPatternList = new ArrayList<Pattern>();
-		DataImportColMeta colMeta = null;
+		DODataImportColMetaInfo colMeta = null;
 		for(int i = 0; i < colMataList.size(); i++) {
 			colMeta = colMataList.get(i);
-			if(colMeta.dbCol != null && colMeta.metaDataField != null
-					&& colMeta.metaDataField.getFieldValidateRegex() != null
-					&& colMeta.metaDataField.getFieldValidateRegex().length() > 0) {
-				verifyPatternList.add(compiler.compile(colMeta.metaDataField.getFieldValidateRegex()));
+			if(colMeta.getDbCol() != null && colMeta.getMetaDataField() != null
+					&& colMeta.getMetaDataField().getFieldValidateRegex() != null
+					&& colMeta.getMetaDataField().getFieldValidateRegex().length() > 0) {
+				verifyPatternList.add(compiler.compile(colMeta.getMetaDataField().getFieldValidateRegex()));
 			} else {
 				verifyPatternList.add(null);
 			}
@@ -242,7 +243,7 @@ public class DODataImportExportDao {
 					updateCnt = updateOneRow(conn, dbTable, colMataList, allRowList.get(i), colValueAssignList);
 					
 					if(updateCnt == 0) {
-						errorMsg = DOServiceMsgUtil.getDefinedMsg(DOServiceMsgUtil.ErrorDataImportUpdateFailDataNotExist);
+						errorMsg = DOServiceMsgUtil.getDefinedMsg(DOServiceMsgUtil.ErrorDataImportUpdateFailDataNotExist).getMsg();
 					}
 				} catch(Throwable e) {
 					errorMsg = DOServiceMsgUtil.getStackTrace(e);
@@ -289,14 +290,14 @@ public class DODataImportExportDao {
 	
 	protected static boolean verifyDataRowFormat(
 			Sheet sheet, CellStyle cellStyleOfError,
-			List<DataImportColMeta> colMataList, List<Pattern> verifyPatternList,  
+			List<DODataImportColMetaInfo> colMataList, List<Pattern> verifyPatternList,  
 			List<Object> excelRow, 
 			int rowIndex, int beginCol) {
 		int i;
 		int colIndex = 0;
 		int colForErrorMsg = beginCol + colMataList.size() + 1;
 		StringBuilder errorMsg = new StringBuilder();
-		DataImportColMeta colMeta = null;
+		DODataImportColMetaInfo colMeta = null;
 		Object dbVal;
 		String dbValStr;
 		String verifyRegexStr;
@@ -306,15 +307,15 @@ public class DODataImportExportDao {
 			colIndex = beginCol + i;
 			colMeta = colMataList.get(i);
 			
-			if(colMeta.dbCol == null) {
+			if(colMeta.getDbCol() == null) {
 				continue;
 			}
-			verifyRegexStr = colMeta.metaDataField.getFieldValidateRegex();
+			verifyRegexStr = colMeta.getMetaDataField().getFieldValidateRegex();
 			if(verifyRegexStr == null || verifyRegexStr.length() == 0) {
 				continue;
 			}
 			
-			dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.dbCol);
+			dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.getDbCol());
 			if(dbVal.getClass() == String.class) {
 				dbValStr = (String) dbVal; 
 			} else {
@@ -327,7 +328,7 @@ public class DODataImportExportDao {
 				//is invalid cell, make color, and output error msg
 				curRow.getCell(colIndex).setCellStyle(cellStyleOfError);
 				
-				errorMsg.append(colMeta.dbCol.getName() + "(" + colMeta.dbCol.getComment() + ")" + ":" + colMeta.metaDataField.getFieldValidateComment())
+				errorMsg.append(colMeta.getDbCol().getName() + "(" + colMeta.getDbCol().getComment() + ")" + ":" + colMeta.getMetaDataField().getFieldValidateComment())
 					.append("\n");
 			}
 		}
@@ -345,7 +346,7 @@ public class DODataImportExportDao {
 	protected static int insertOneRow(
 			Connection conn,
 			DBTable dbTable,
-			List<DataImportColMeta> colMataList, List<Object> excelRow,
+			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
 			List<DataImportColValue> colValueAssignList) throws SQLException {
 		PreparedStatement pstmt = null;
 
@@ -357,19 +358,19 @@ public class DODataImportExportDao {
 			StringBuilder sql = new StringBuilder();
 			sql.append("insert into ").append(tableName).append(" (");
 
-			DataImportColMeta colMeta = null;
+			DODataImportColMetaInfo colMeta = null;
 			index = 0;
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 				
-				if(colMeta.dbCol == null) {
+				if(colMeta.getDbCol() == null) {
 					continue;
 				}
 				
 				if(index == 0) {
-					sql.append(colMeta.dbCol.getName());
+					sql.append(colMeta.getDbCol().getName());
 				} else {
-					sql.append(",").append(colMeta.dbCol.getName());
+					sql.append(",").append(colMeta.getDbCol().getName());
 				}
 				
 				index++;
@@ -380,9 +381,9 @@ public class DODataImportExportDao {
 					importColVal = colValueAssignList.get(i);
 					
 					if(index == 0) {
-						sql.append(importColVal.dbCol.getName());
+						sql.append(importColVal.getDbCol().getName());
 					} else {
-						sql.append(",").append(importColVal.dbCol.getName());
+						sql.append(",").append(importColVal.getDbCol().getName());
 					}
 					
 					index++;
@@ -395,7 +396,7 @@ public class DODataImportExportDao {
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 
-				if(colMeta.dbCol == null) {
+				if(colMeta.getDbCol() == null) {
 					continue;
 				}
 
@@ -430,11 +431,11 @@ public class DODataImportExportDao {
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 
-				if(colMeta.dbCol == null) {
+				if(colMeta.getDbCol() == null) {
 					continue;
 				}
 
-				dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.dbCol);
+				dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.getDbCol());
 				pstmt.setObject(index++, dbVal);
 			}
 			if(colValueAssignList != null) {
@@ -458,7 +459,7 @@ public class DODataImportExportDao {
 	protected static int updateOneRow(
 			Connection conn,
 			DBTable dbTable,
-			List<DataImportColMeta> colMataList, List<Object> excelRow,
+			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
 			List<DataImportColValue> colValueAssignList) throws SQLException {
 		PreparedStatement pstmt = null;
 
@@ -470,22 +471,22 @@ public class DODataImportExportDao {
 			StringBuilder sql = new StringBuilder();
 			sql.append("update ").append(tableName).append(" set ");
 
-			DataImportColMeta colMeta = null;
+			DODataImportColMetaInfo colMeta = null;
 			index = 0;
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 				
-				if(colMeta.dbCol == null) {
+				if(colMeta.getDbCol() == null) {
 					continue;
 				}
-				if(colMeta.dbCol.isPrimaryKey()) {
+				if(colMeta.getDbCol().isPrimaryKey()) {
 					continue;
 				}
 				
 				if(index > 0) {
 					sql.append(",");
 				}
-				sql.append(colMeta.dbCol.getName()).append(" = ? ");
+				sql.append(colMeta.getDbCol().getName()).append(" = ? ");
 				
 				index++;
 			}
@@ -494,14 +495,14 @@ public class DODataImportExportDao {
 				for(i = 0; i < colValueAssignList.size(); i++) {
 					importColVal = colValueAssignList.get(i);
 					
-					if(importColVal.dbCol.isPrimaryKey()) {
+					if(importColVal.getDbCol().isPrimaryKey()) {
 						continue;
 					}
 					
 					if(index > 0) {
 						sql.append(",");
 					}
-					sql.append(importColVal.dbCol.getName()).append(" = ? ");
+					sql.append(importColVal.getDbCol().getName()).append(" = ? ");
 					
 					index++;
 				}
@@ -513,17 +514,17 @@ public class DODataImportExportDao {
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 
-				if(colMeta.dbCol == null) {
+				if(colMeta.getDbCol() == null) {
 					continue;
 				}
-				if(!colMeta.dbCol.isPrimaryKey()) {
+				if(!colMeta.getDbCol().isPrimaryKey()) {
 					continue;
 				}
 
 				if(index > 0) {
 					sql.append(" and ");
 				}
-				sql.append(colMeta.dbCol.getName()).append(" = ?");
+				sql.append(colMeta.getDbCol().getName()).append(" = ?");
 				
 				index++;
 			}
@@ -532,14 +533,14 @@ public class DODataImportExportDao {
 				for(i = 0; i < colValueAssignList.size(); i++) {
 					importColVal = colValueAssignList.get(i);
 					
-					if(!importColVal.dbCol.isPrimaryKey()) {
+					if(!importColVal.getDbCol().isPrimaryKey()) {
 						continue;
 					}
 					
 					if(index > 0) {
 						sql.append(" and ");
 					}
-					sql.append(importColVal.dbCol.getName()).append(" = ? ");
+					sql.append(importColVal.getDbCol().getName()).append(" = ? ");
 					
 					index++;
 				}
@@ -554,14 +555,14 @@ public class DODataImportExportDao {
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 
-				if(colMeta.dbCol == null) {
+				if(colMeta.getDbCol() == null) {
 					continue;
 				}
-				if(colMeta.dbCol.isPrimaryKey()) {
+				if(colMeta.getDbCol().isPrimaryKey()) {
 					continue;
 				}
 
-				dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.dbCol);
+				dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.getDbCol());
 				pstmt.setObject(index++, dbVal);
 			}
 			if(colValueAssignList != null) {
@@ -569,7 +570,7 @@ public class DODataImportExportDao {
 				for(i = 0; i < colValueAssignList.size(); i++) {
 					importColVal = colValueAssignList.get(i);
 
-					if(importColVal.dbCol.isPrimaryKey()) {
+					if(importColVal.getDbCol().isPrimaryKey()) {
 						continue;
 					}
 					
@@ -580,14 +581,14 @@ public class DODataImportExportDao {
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 
-				if(colMeta.dbCol == null) {
+				if(colMeta.getDbCol() == null) {
 					continue;
 				}
-				if(!colMeta.dbCol.isPrimaryKey()) {
+				if(!colMeta.getDbCol().isPrimaryKey()) {
 					continue;
 				}
 
-				dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.dbCol);
+				dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.getDbCol());
 				pstmt.setObject(index++, dbVal);
 			}
 			if(colValueAssignList != null) {
@@ -595,7 +596,7 @@ public class DODataImportExportDao {
 				for(i = 0; i < colValueAssignList.size(); i++) {
 					importColVal = colValueAssignList.get(i);
 
-					if(!importColVal.dbCol.isPrimaryKey()) {
+					if(!importColVal.getDbCol().isPrimaryKey()) {
 						continue;
 					}
 					
@@ -649,29 +650,29 @@ public class DODataImportExportDao {
 		}
 	}
 	
-	protected static List<DataImportColMeta> findoutDataImportColMetaListOfExcelTitleRow(
+	public static List<DODataImportColMetaInfo> findoutDataImportColMetaListOfExcelTitleRow(
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<Object> titleRow) {
-		List<DataImportColMeta> colMetaList = new ArrayList<DODataImportExportDao.DataImportColMeta>();
+		List<DODataImportColMetaInfo> colMetaList = new ArrayList<DODataImportColMetaInfo>();
 		
 		MetaDataField dataField = null;
 		DBColumn dbCol = null;
-		DataImportColMeta importColMeta = null;
+		DODataImportColMetaInfo importColMeta = null;
 		
 		Object title = null;
 		for(int j = 0; j < titleRow.size(); j++) {
 			title = titleRow.get(j);
 			
-			importColMeta = new DataImportColMeta();
+			importColMeta = new DODataImportColMetaInfo();
 			
 			dataField = findoutMetaDataFieldByExcelTitle(dataImportSetting, title);
 			if(dataField != null) {
-				importColMeta.metaDataField = dataField;
+				importColMeta.setMetaDataField(dataField);
 
 				dbCol = findoutDBColumnByColName(dbTable, dataField.getFieldName());
 				if(dbCol != null) {
-					importColMeta.dbCol = dbCol;
+					importColMeta.setDbCol(dbCol);
 				}
 			}
 			
@@ -681,7 +682,7 @@ public class DODataImportExportDao {
 		return colMetaList;
 	}
 	
-	protected static MetaDataField findoutMetaDataFieldByExcelTitle(MetaDataImportSetting dataImportSetting, Object title) {
+	public static MetaDataField findoutMetaDataFieldByExcelTitle(MetaDataImportSetting dataImportSetting, Object title) {
 		if(title == null) {
 			return null;
 		}
@@ -711,14 +712,17 @@ public class DODataImportExportDao {
 		
 		return null;
 	}
-
-	protected static class DataImportColMeta {
-		public DBColumn dbCol = null;
-		public MetaDataField metaDataField = null;
-	}
 	
-	public static class DataImportColValue extends DataImportColMeta {
-		public Object dbVal = null;
+	public static class DataImportColValue extends DODataImportColMetaInfo {
+		private Object dbVal = null;
+
+		public Object getDbVal() {
+			return dbVal;
+		}
+
+		public void setDbVal(Object dbVal) {
+			this.dbVal = dbVal;
+		}
 	}
 	
 }

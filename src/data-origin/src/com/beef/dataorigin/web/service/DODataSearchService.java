@@ -50,7 +50,7 @@ public class DODataSearchService {
 		Connection conn = null;
 		try {
 			if(pageSize > MAX_PAGE_SIZE) {
-				return DOServiceMsgUtil.getDefinedMsg(DOServiceMsgUtil.ErrorSearchPageSizeExceedMax);
+				return DOServiceMsgUtil.getDefinedMsgXml(DOServiceMsgUtil.ErrorSearchPageSizeExceedMax);
 			}
 			
 			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
