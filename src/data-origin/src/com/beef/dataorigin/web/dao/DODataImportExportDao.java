@@ -111,7 +111,7 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws IOException {
+			) throws IOException, MalformedPatternException {
 		int beginCol = 0;
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
@@ -121,7 +121,9 @@ public class DODataImportExportDao {
 		
 		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(sheet, beginCol, maxCol, beginRow);
 	
-		return importDataExcel(conn, originalFileName, sheet, allRowList, dataImportSetting, dbTable, colValueAssignList);
+		return importDataExcel(conn, originalFileName, 
+				sheet, beginCol, 
+				allRowList, dataImportSetting, dbTable, colValueAssignList);
 	}
 	
 	public static DODataImportResult importDataExcel(
@@ -131,14 +133,16 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws IOException {
+			) throws IOException, MalformedPatternException {
 		int beginCol = 0;
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
 		
 		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(sheet, beginCol, maxCol, beginRow);
 	
-		return importDataExcel(conn, originalFileName, sheet, allRowList, dataImportSetting, dbTable, colValueAssignList);
+		return importDataExcel(conn, originalFileName, 
+				sheet, beginCol, 
+				allRowList, dataImportSetting, dbTable, colValueAssignList);
 	}
 	
 	protected static DODataImportResult importDataExcel(
@@ -150,15 +154,18 @@ public class DODataImportExportDao {
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
 			) throws MalformedPatternException {
+		
 		DODataImportResult dataImportResult = new DODataImportResult();
 		dataImportResult.setOriginalFileName(originalFileName);
 		dataImportResult.setTableName(dbTable.getTableName());
 		dataImportResult.setTableComment(dbTable.getComment());
-		dataImportResult.setTotalCount(0);
-		dataImportResult.setInsertedCount(0);
-		dataImportResult.setUpdatedCount(0);
-		dataImportResult.setErrorCount(0);
+		
+		dataImportResult.setTotalCount(allRowList.size() - 1);
 
+		int insertedRowCount = 0;
+		int updatedRowCount = 0;
+		int errorRowCount = 0;
+		
 		List<DataImportColMeta> colMataList = findoutDataImportColMetaListOfExcelTitleRow(
 				dataImportSetting, dbTable, allRowList.get(0));
 		PatternCompiler compiler = new Perl5Compiler();
@@ -248,15 +255,25 @@ public class DODataImportExportDao {
 				setCellStyleToRow(sheet.getRow(i), cellStyleOfError, beginCol, endCol);
 				sheet.getRow(i).getCell(endCol + 1).setCellValue(errorMsg);
 				sheet.getRow(i).getCell(endCol + 1).setCellStyle(cellStyleOfError);
+				
+				errorRowCount++;
 			} else {
 				//success
 				if(isUpdate) {
 					setCellStyleToRow(sheet.getRow(i), cellStyleOfUpdated, beginCol, endCol);
+					
+					updatedRowCount++;
 				} else {
 					setCellStyleToRow(sheet.getRow(i), cellStyleOfInserted, beginCol, endCol);
+					
+					insertedRowCount++;
 				}
 			}
 		}
+
+		dataImportResult.setInsertedCount(insertedRowCount);
+		dataImportResult.setUpdatedCount(updatedRowCount);
+		dataImportResult.setErrorCount(errorRowCount);
 		
 		return dataImportResult;
 	}
