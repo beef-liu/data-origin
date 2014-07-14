@@ -50,6 +50,7 @@ public class DataOriginContext implements ClassFinder {
 		return _tableNameList;
 	}
 
+	private List<DBTable> _DBTableList;
 	/**
 	 * data-origin/dbtables/*.xml
 	 * key: table name (lowercase) value:DBTable
@@ -90,6 +91,10 @@ public class DataOriginContext implements ClassFinder {
 	
 	public DataOriginSetting getDataOriginSetting() {
 		return _dataOriginSetting;
+	}
+	
+	public List<DBTable> getDBTableList() {
+		return _DBTableList;
 	}
 	
 	public DBTable getDBTable(String tableName) {
@@ -188,6 +193,7 @@ public class DataOriginContext implements ClassFinder {
 	
 	private void loadDBTableSettings() throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
 		_tableNameList = new ArrayList<String>();
+		_DBTableList = new ArrayList<DBTable>();
 		_DBTableMap = new HashMap<String, DBTable>();
 		_mDBTableMap = new HashMap<String, MDBTable>();
 		File[] files = _dataOriginDirManager.getDbTablesDir().listFiles(_xmlFileFilter);
@@ -201,6 +207,7 @@ public class DataOriginContext implements ClassFinder {
 						files[i].getAbsolutePath(), DBTable.class, 
 						XmlDeserializer.DefaultCharset, this);
 				
+				_DBTableList.add(dbTable);
 				_tableNameList.add(dbTable.getTableName().toLowerCase());
 				_DBTableMap.put(dbTable.getTableName().toLowerCase(), dbTable);
 				_mDBTableMap.put(dbTable.getTableName().toLowerCase(), convertDBTable(dbTable));

@@ -15,7 +15,7 @@ function myAjax(args) {
 	
 	$.ajax({
 		url: args.url,
-		type: args.url,
+		type: args.type,
 		dataType: dataType,
 		data: args.data,
 		success: function(response) {
@@ -26,7 +26,7 @@ function myAjax(args) {
 				args.success(response);
 			}
 		},
-		error: args.error != undefined? args.error: myAjaxError();
+		error: args.error != undefined? args.error: myAjaxError(),
 	});
 }
 

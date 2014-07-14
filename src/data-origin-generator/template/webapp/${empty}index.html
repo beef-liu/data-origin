@@ -44,9 +44,13 @@
     <script src="myjs/${empty}myCommon.js"></script>
     
     <script>
-    	function loadContentHtml() {
+	    $(document).ready(function() {
+	    	loadContentHtml($('#data-menu-item')[0]);
+	    });
+    
+    	function loadContentHtml(thisNode) {
     		var showingHtmlName = $('#main-content').attr('htmlName');
-    		var htmlName = $(this).attr('htmlName').text();
+    		var htmlName = $(thisNode).attr('htmlName');
     		if(showingHtmlName == htmlName) {
     			return;
     		}
@@ -62,7 +66,16 @@
     		}
     		
     		//load html
-    		$('#main-content').html(htmlName);
+			$.ajax({
+				url: htmlName,
+				type: "GET",
+				dataType: "text",
+				success: function(response) {
+					$('#main-content').html(response);
+					$('#main-content').attr('htmlName', htmlName);
+				}
+			});
+    		
     	}
     </script>
   </head>
@@ -99,8 +112,8 @@
 	  			<li>
 	  				<div class="my-menu-group">Data Management</div>
 	  				<ul>
-					<!--#for(String tableNm : tableNames)-->
-	  					<li class="my-menu-item" htmlName="${tableNm}_data_list.html"><a href="#">menu0</a></li>
+					<!--#for(DBTable table : tables)-->
+	  					<li id="data-menu-item" class="my-menu-item" htmlName="${table.tableName.toLowerCase()}_data_list.html" onclick="loadContentHtml(this)"><a href="#">${table.comment}</a></li>
 	  				<!--#end-->
 	  				</ul>
 	  			</li>

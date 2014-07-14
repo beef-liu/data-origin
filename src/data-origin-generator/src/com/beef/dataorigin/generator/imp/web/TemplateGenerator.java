@@ -32,6 +32,7 @@ public class TemplateGenerator {
 
 	public static enum TemplateCommentType {HtmlComment, JavaComment};
 
+	public final static String TEMPLATE_PARAM_NAME_TABLE_LIST = "tables";
 	public final static String TEMPLATE_PARAM_NAME_TABLE_NAME_LIST = "tableNames";
 	public final static String TEMPLATE_PARAM_NAME_EMPTY = "empty";
 	public final static String TEMPLATE_PARAM_NAME_NULL = "null";
@@ -282,6 +283,7 @@ public class TemplateGenerator {
 		httlParams.put(TEMPLATE_PARAM_NAME_EMPTY, "");
 		httlParams.put(TEMPLATE_PARAM_NAME_NULL, "");
 		httlParams.put(TEMPLATE_PARAM_NAME_TABLE_NAME_LIST, dataOriginContext.getTableNameList());
+		httlParams.put(TEMPLATE_PARAM_NAME_TABLE_LIST, dataOriginContext.getDBTableList());
 		
 		httlParams.put(TEMPLATE_PARAM_NAME_BASE_PACKAGE, generatorContext.getOutputWebProjectJavaPackage());
 		httlParams.put(TEMPLATE_PARAM_NAME_WEB_CONTEXT_NAME, generatorContext.getOutputWebContextName());
