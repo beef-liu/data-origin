@@ -18,7 +18,7 @@ public class DODataSearchService {
 
 	public final static int MAX_PAGE_SIZE = 500;
 	
-	public static String searchDataCount(
+	protected String searchDataCount(
 		String tableName,
 		String searchConditionXml
 		) {
@@ -42,7 +42,7 @@ public class DODataSearchService {
 		}
 	}
 	
-	public static String searchData(
+	protected String searchData(
 			int beginIndex, int pageSize,
 			String tableName,
 			String searchConditionXml,

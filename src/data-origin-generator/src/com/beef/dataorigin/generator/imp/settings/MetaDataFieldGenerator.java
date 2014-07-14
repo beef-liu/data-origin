@@ -47,11 +47,32 @@ public class MetaDataFieldGenerator {
 		dataField.setFieldDispFormat(dispFormat);
 		
 		//FieldValidateRegex -------------------------------------------------
-		String fieldValidateRegex = "";
+		StringBuilder validateRegex = new StringBuilder();
+		StringBuilder validateComment = new StringBuilder();
+		validateComment.append("Only");
+		if(colType.startsWith("char")) {
+			validateRegex.append("[a-zA-Z0-9 \\\\_\\-\\!\\~`\\@\\#\\$%\\^&\\*\\(\\)\\{\\}\\+\\=\\|\\[\\]'\":;\\,\\.\\/\\<\\>\\?]");
+			validateComment.append(" letters, numbers, punctuations,");
+		} else {
+			validateRegex.append(".");
+		}
+		validateComment.append(" length");
+		validateRegex.append("{");
+		if(dbCol.isNullable()) {
+			validateRegex.append("0");
+		} else {
+			validateRegex.append("1");
+			validateComment.append(" > 0 and");
+		}
+		validateRegex.append(",").append(String.valueOf(colMaxLen));
+		validateComment.append(" < " + colMaxLen);
+		validateRegex.append("}");
+
+		validateComment.append(" are allowed");
 		
-		dataField.setFieldValidateRegex(fieldValidateRegex);
-		
-		
+		dataField.setFieldValidateRegex(validateRegex.toString());
+		dataField.setFieldValidateComment(validateComment.toString());
+
 		return dataField; 
 	}
 }

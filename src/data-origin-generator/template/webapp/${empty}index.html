@@ -99,10 +99,8 @@
 	  			<li>
 	  				<div class="my-menu-group">Data Management</div>
 	  				<ul>
-					<!--#for(MetaSearchConditionItem searchCondItem : dataUISetting.searchCondition.searchConditionItemList)-->
-	  					<li class="my-menu-item" htmlName="brand_data_list.html"><a href="#">menu0</a></li>
-	  					<li class="my-menu-item"><a href="#">menu1</a></li>
-	  					<li class="my-menu-item"><a href="#">menu2</a></li>
+					<!--#for(String tableNm : tableNames)-->
+	  					<li class="my-menu-item" htmlName="${tableNm}_data_list.html"><a href="#">menu0</a></li>
 	  				<!--#end-->
 	  				</ul>
 	  			</li>

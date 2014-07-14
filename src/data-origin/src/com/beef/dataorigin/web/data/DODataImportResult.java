@@ -10,7 +10,7 @@ public class DODataImportResult {
 	private int _updatedCount = 0;
 	private int _errorCount = 0;
 	
-	private String _importResultFileDownloadUrl;
+	private String _importResultFile;
 
 	public String getOriginalFileName() {
 		return _originalFileName;
@@ -68,12 +68,13 @@ public class DODataImportResult {
 		_errorCount = errorCount;
 	}
 
-	public String getImportResultFileDownloadUrl() {
-		return _importResultFileDownloadUrl;
+	public String getImportResultFile() {
+		return _importResultFile;
 	}
 
-	public void setImportResultFileDownloadUrl(String importResultFileDownloadUrl) {
-		_importResultFileDownloadUrl = importResultFileDownloadUrl;
+	public void setImportResultFile(String importResultFile) {
+		_importResultFile = importResultFile;
 	}
+
 	
 }

@@ -1,4 +1,7 @@
 <!----------- Variables ----------------->
+//DEBUG
+var _tableName = "${tableName}";
+
 var _trClone;
 
 var _curPageSize = 50;
@@ -200,7 +203,7 @@ function searchDataCount() {
 		data: {
 			serviceType: "${basePackage}.service.${dataClassName}DataSearchService",
 			serviceMethod: "searchDataCount",
-			tableName: "${tableName}",
+			//tableName: "${tableName}",
 			searchConditionXml: _searchConditionXml
 		},
 		success: function(response) {
@@ -231,7 +234,7 @@ function searchData() {
 		data: {
 			serviceType: "${basePackage}.service.${dataClassName}DataSearchService",
 			serviceMethod: "searchData",
-			tableName: "${tableName}",
+			//tableName: "${tableName}",
 			searchConditionXml: _searchConditionXml,
 			orderByFields: _orderByFields,
 			beginIndex: _curPageIndex * _curPageSize,

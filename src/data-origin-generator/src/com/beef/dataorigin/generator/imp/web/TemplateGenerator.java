@@ -281,7 +281,7 @@ public class TemplateGenerator {
 		Map<String, Object> httlParams = new HashMap<String, Object>();
 		httlParams.put(TEMPLATE_PARAM_NAME_EMPTY, "");
 		httlParams.put(TEMPLATE_PARAM_NAME_NULL, "");
-		httlParams.put(TEMPLATE_PARAM_NAME_TABLE_NAME_LIST, );
+		httlParams.put(TEMPLATE_PARAM_NAME_TABLE_NAME_LIST, dataOriginContext.getTableNameList());
 		
 		httlParams.put(TEMPLATE_PARAM_NAME_BASE_PACKAGE, generatorContext.getOutputWebProjectJavaPackage());
 		httlParams.put(TEMPLATE_PARAM_NAME_WEB_CONTEXT_NAME, generatorContext.getOutputWebContextName());

@@ -2,4 +2,26 @@
 <DataOriginSetting>
   <onEditingDBResourceName>jdbc/dataorigin_db_editing</onEditingDBResourceName>
   <productionDBResourceName>jdbc/dataorigin_db</productionDBResourceName>
+  <serviceMsgList>
+    <DOServiceMsg>
+      <msg>PageSize can not bigger than 500</msg>
+      <msgCode>Error.Search.PageSizeOutOfRange</msgCode>
+      <msgLevel>error</msgLevel>
+    </DOServiceMsg>
+    <DOServiceMsg>
+      <msg>Must upload excel file for data importing</msg>
+      <msgCode>Error.DataImport.MustUploadExcel</msgCode>
+      <msgLevel>error</msgLevel>
+    </DOServiceMsg>
+    <DOServiceMsg>
+      <msg>Data updating failed: Not exist</msg>
+      <msgCode>Error.DataImport.updateFail.DataNotExist</msgCode>
+      <msgLevel>error</msgLevel>
+    </DOServiceMsg>
+    <DOServiceMsg>
+      <msg>Please input sheet index</msg>
+      <msgCode>Error.DataImport.SheetMoreThanOne</msgCode>
+      <msgLevel>error</msgLevel>
+    </DOServiceMsg>
+  </serviceMsgList>
 </DataOriginSetting>

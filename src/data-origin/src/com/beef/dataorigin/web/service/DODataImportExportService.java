@@ -1,6 +1,11 @@
 package com.beef.dataorigin.web.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -37,7 +42,7 @@ import com.salama.service.core.net.http.MultipartRequestWrapper;
 
 public class DODataImportExportService {
 	private final static Logger logger = Logger.getLogger(DODataImportExportService.class);
-
+	
 	/**
 	 * 
 	 * @param request
@@ -46,7 +51,7 @@ public class DODataImportExportService {
 	 * @param sheetIndex
 	 * @return "ok" if there is only 1 sheet.
 	 */
-	public static String checkDataExcelSheetCount(
+	protected String checkDataExcelSheetCount(
 			RequestWrapper request, ResponseWrapper response) {
 		//get file and check file name
 		ExcelMultiFile excelMultiFile = new ExcelMultiFile((MultipartRequestWrapper)request);
@@ -82,7 +87,7 @@ public class DODataImportExportService {
 		
 	}
 	
-	public static String checkDataExcelTitleRow(
+	protected String checkDataExcelTitleRow(
 			RequestWrapper request, ResponseWrapper response, 
 			String tableName,
 			int sheetIndex) {
@@ -166,7 +171,7 @@ public class DODataImportExportService {
 		}
 	}
 	
-	public static String importDataExcel(
+	protected String importDataExcel(
 			RequestWrapper request, ResponseWrapper response, 
 			String tableName,
 			int sheetIndex, 
@@ -224,6 +229,22 @@ public class DODataImportExportService {
 					originFileName, dataImportSetting, 
 					dbTable, importColValueList);
 			
+			//save file which error indicated
+			String resultFileName = newErrorResultExcelFileName();
+			OutputStream output = null;
+			
+			try {
+				output = getErrorResultExcelOutputStream(request, resultFileName);
+				workBook.write(output);
+				
+				dataImportResult.setImportResultFile(resultFileName);
+			} catch(Throwable e) {
+				logger.error(null, e);
+			} finally {
+				output.close();
+			}
+			
+			
 			return XmlSerializer.objectToString(dataImportResult, DODataImportResult.class);
 		} catch(Throwable e) {
 			logger.error(null, e);
@@ -240,7 +261,31 @@ public class DODataImportExportService {
 		}
 	}
 
-	private static class ExcelMultiFile {
+	protected String newErrorResultExcelFileName() {
+		return DOServiceUtil.newDataId() + ".xlsx";
+	}
+	
+	protected InputStream getErrorResultExcelInputStream(RequestWrapper request, String fileName) throws FileNotFoundException {
+		return new FileInputStream(getErrorResultExcelFile(request, fileName));
+	}
+	
+	protected OutputStream getErrorResultExcelOutputStream(RequestWrapper request, String fileName) throws FileNotFoundException {
+		return new FileOutputStream(getErrorResultExcelFile(request, fileName));
+	}
+	
+	protected File getErrorResultExcelFile(RequestWrapper request, String fileName) {
+		String dirPath = request.getServletContext().getRealPath("/WEB-INF/tempxls");
+		File dir = new File(dirPath);
+		if(!dir.exists()) {
+			dir.mkdirs();
+		}
+		
+		File file = new File(dir, fileName);
+		
+		return file;
+	} 
+
+	protected static class ExcelMultiFile {
 		public MultipartFile multiFile = null;
 		public boolean isXLSorXLSX = false;
 		public boolean isXLSX = false;
