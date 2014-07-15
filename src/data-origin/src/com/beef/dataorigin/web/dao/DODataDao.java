@@ -10,8 +10,10 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.hslf.blip.Metafile;
 
 import CollectionCommon.ITreeNode;
 import MetoXML.AbstractReflectInfoCachedSerializer;
@@ -61,7 +63,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		for(int i = 0; i < searchCondition.getSearchConditionItemList().size(); i++) {
 			searchConditionItem = searchCondition.getSearchConditionItemList().get(i);
 			
-			addSearchConditionItem(mMetaDataUISetting, mDBTable, colValueListForStmt, sqlWhereConditions, searchConditionItem);
+			addSearchConditionItem(mMetaDataUISetting.getFieldMap(), mDBTable, colValueListForStmt, sqlWhereConditions, searchConditionItem);
 		}
 		
 		if(sqlWhereConditions.length() > 0) {
@@ -120,7 +122,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		for(int i = 0; i < searchCondition.getSearchConditionItemList().size(); i++) {
 			searchConditionItem = searchCondition.getSearchConditionItemList().get(i);
 			
-			addSearchConditionItem(mMetaDataUISetting, mDBTable, colValueListForStmt, sqlWhereConditions, searchConditionItem);
+			addSearchConditionItem(mMetaDataUISetting.getFieldMap(), mDBTable, colValueListForStmt, sqlWhereConditions, searchConditionItem);
 		}
 		
 		if(sqlWhereConditions.length() > 0) {
@@ -153,8 +155,8 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		}
 	}
 	
-	protected static boolean addSearchConditionItem(
-			MMetaDataUISetting mMetaDataUISetting,
+	public static boolean addSearchConditionItem(
+			Map<String, MetaDataField> metaDataFieldMap,
 			MDBTable mDBTable,
 			List<Object> colValueListForStmt,
 			StringBuilder sqlWhereConditions, 
@@ -170,7 +172,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		}
 		
 
-		dataField = mMetaDataUISetting.getFieldMap().get(
+		dataField = metaDataFieldMap.get(
 				DOSqlParamUtil.verifyName(searchConditionItem.getFieldName())); 
 		dbColumn = mDBTable.getColumnMap().get(searchConditionItem.getFieldName());
 		colType = dbColumn.getColumnType().trim().toLowerCase();

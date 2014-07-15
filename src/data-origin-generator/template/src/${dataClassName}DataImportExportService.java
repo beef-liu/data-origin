@@ -6,6 +6,18 @@ import com.salama.service.core.net.ResponseWrapper;
 
 public class ${dataClassName}DataImportExportService extends DODataImportExportService {
 
+	public String exportDataExcel(RequestWrapper request,ResponseWrapper response,
+			String searchConditionXml) {
+		String tableName = "${tableName}";
+		return super.exportDataExcel(request, response, tableName, searchConditionXml);
+	}
+
+	public void downloadTempExcel(RequestWrapper request,
+			ResponseWrapper response, String fileName) {
+		String tableName = "${tableName}";
+		super.downloadTempExcel(request, response, tableName, fileName);
+	}
+	
 	public String checkDataExcelSheetCount(RequestWrapper request,
 			ResponseWrapper response) {
 		return super.checkDataExcelSheetCount(request, response);

@@ -128,6 +128,10 @@ public class DataOriginContext implements ClassFinder {
 	public DOServiceMsg getServiceMsg(String msgCode) {
 		return _serviceMsgMap.get(msgCode);
 	}
+	
+	public DataOriginDirManager getDataOriginDirManager() {
+		return _dataOriginDirManager;
+	}
 
 	public DataOriginContext(File baseDir, ClassFinder dataClassFinder) throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
 		_dataOriginDirManager = new DataOriginDirManager(baseDir);

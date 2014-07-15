@@ -3,9 +3,13 @@ package com.beef.dataorigin.web.dao;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,17 +21,24 @@ import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternCompiler;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.poi.hssf.record.chart.BeginRecord;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import com.beef.dataorigin.context.data.MDBTable;
+import com.beef.dataorigin.context.data.MMetaDataImportSetting;
 import com.beef.dataorigin.setting.meta.MetaDataImportSetting;
 import com.beef.dataorigin.setting.meta.data.MetaDataField;
 import com.beef.dataorigin.util.ExcelUtil;
+import com.beef.dataorigin.web.context.DataOriginWebContext;
+import com.beef.dataorigin.web.data.DODataExportResult;
 import com.beef.dataorigin.web.data.DODataImportColMetaInfo;
 import com.beef.dataorigin.web.data.DODataImportResult;
+import com.beef.dataorigin.web.data.DOSearchCondition;
+import com.beef.dataorigin.web.data.DOSearchConditionItem;
 import com.beef.dataorigin.web.util.DODataDaoUtil;
 import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
@@ -104,6 +115,126 @@ public class DODataImportExportDao {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param conn
+	 * @param inputExcel template excel
+	 * @param originalFileName
+	 * @param isXLSX
+	 * @param sheetIndex
+	 * @param dataImportSetting
+	 * @param dbTable
+	 * @param colValueAssignList
+	 * @throws IOException 
+	 * @throws SQLException 
+	 * @throws ParseException 
+	 */
+	public static DODataExportResult exportDataExcel(
+			Connection conn,
+			InputStream inputExcel,
+			OutputStream outputExcel,
+			boolean isXLSX,
+			MetaDataImportSetting dataImportSetting,
+			DBTable dbTable,
+			DOSearchCondition searchCondition
+			) throws IOException, SQLException, ParseException {
+		Workbook workbook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
+		Sheet sheet = workbook.getSheetAt(0);
+		
+		int beginCol = 0;
+		int maxCol = DEFAULT_MAX_COL;
+		//Cell cell = null;
+		//MetaDataField dataField = null;
+		MMetaDataImportSetting mMetaDataImportSetting = DataOriginWebContext.getDataOriginContext().getMMetaDataImportSetting(
+				dbTable.getTableName());
+		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(
+				dbTable.getTableName());
+
+		//read title ----------------------------------
+		List<Object> titleRowValList = ExcelUtil.readRowAutoDetectEndCol(sheet, beginCol, maxCol, 0);
+		List<DODataImportColMetaInfo> colMataList = findoutDataImportColMetaListOfExcelTitleRow(
+				dataImportSetting, dbTable, titleRowValList);
+		
+		DODataExportResult exportResult = new DODataExportResult();
+		exportResult.setTableName(dbTable.getTableName());
+		exportResult.setTableComment(dbTable.getComment());
+
+		//content -------------------------------------
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("select * from " + dbTable.getTableName());
+			
+			//where conditions -------------------------------------------------------------
+			List<Object> colValueListForStmt = new ArrayList<Object>();
+			StringBuilder sqlWhereConditions = new StringBuilder();
+			DOSearchConditionItem searchConditionItem;
+			for(int i = 0; i < searchCondition.getSearchConditionItemList().size(); i++) {
+				searchConditionItem = searchCondition.getSearchConditionItemList().get(i);
+				
+				DODataDao.addSearchConditionItem(
+						mMetaDataImportSetting.getFieldMap(), mDBTable, colValueListForStmt, 
+						sqlWhereConditions, searchConditionItem);
+			}
+			
+			if(sqlWhereConditions.length() > 0) {
+				sql.append(" where ");
+				sql.append(sqlWhereConditions);
+			}
+			
+			logger.debug("sql:" + sql.toString());
+			
+			
+			stmt = conn.prepareStatement(sql.toString());
+			
+			rs = stmt.executeQuery();
+
+			int rowIndex = 1;
+			Row row = null;
+			Cell cell = null;
+			int col;
+			String cellVal;
+			String fieldName;
+			while(rs.next()) {
+				row = sheet.getRow(rowIndex);
+				if(row == null) {
+					row = sheet.createRow(rowIndex);
+				}
+				
+				DODataImportColMetaInfo colMetaInfo = null;
+				for(col = beginCol; col < colMataList.size(); col++) {
+					colMetaInfo = colMataList.get(col);
+					if(colMetaInfo.getDbCol() == null) {
+						continue;
+					}
+					
+					cell = row.getCell(col);
+					if(cell == null) {
+						cell = row.createCell(col);
+					}
+					
+					fieldName = colMetaInfo.getMetaDataField().getFieldName();
+					cellVal = formatDBValueToExcelValue(
+							rs.getString(fieldName), 
+							mDBTable.getColumnMap().get(fieldName), 
+							mMetaDataImportSetting.getFieldMap().get(fieldName));
+					cell.setCellValue(cellVal);
+				}
+				
+				rowIndex ++;
+			}
+
+			exportResult.setTotalCount(rowIndex - 1);
+		} finally {
+			stmt.close();
+		}
+
+		workbook.write(outputExcel);
+		return exportResult;
+	} 
+	
 	public static DODataImportResult importDataExcel(
 			Connection conn,
 			InputStream inputExcel,
@@ -112,7 +243,7 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws IOException, MalformedPatternException {
+			) throws IOException, MalformedPatternException, ParseException {
 		int beginCol = 0;
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
@@ -134,7 +265,7 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws IOException, MalformedPatternException {
+			) throws IOException, MalformedPatternException, ParseException {
 		int beginCol = 0;
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
@@ -154,7 +285,7 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws MalformedPatternException {
+			) throws MalformedPatternException, ParseException {
 		
 		DODataImportResult dataImportResult = new DODataImportResult();
 		dataImportResult.setOriginalFileName(originalFileName);
@@ -254,8 +385,12 @@ public class DODataImportExportDao {
 			if(updateCnt == 0) {
 				//fail
 				setCellStyleToRow(sheet.getRow(i), cellStyleOfError, beginCol, endCol);
-				sheet.getRow(i).getCell(endCol + 1).setCellValue(errorMsg);
-				sheet.getRow(i).getCell(endCol + 1).setCellStyle(cellStyleOfError);
+				Cell cell = sheet.getRow(i).getCell(endCol + 1);
+				if(cell == null) {
+					cell = sheet.getRow(i).createCell(endCol + 1);
+				}
+				cell.setCellValue(errorMsg);
+				cell.setCellStyle(cellStyleOfError);
 				
 				errorRowCount++;
 			} else {
@@ -283,8 +418,13 @@ public class DODataImportExportDao {
 			Row row,
 			CellStyle cellStyle,
 			int beginCol, int endCol) {
+		Cell cell;
 		for(int i = beginCol; i <= endCol; i++) {
-			row.getCell(i).setCellStyle(cellStyle);
+			cell = row.getCell(i);
+			if(cell == null) {
+				cell = row.createCell(i);
+			}
+			cell.setCellStyle(cellStyle);
 		}
 	}
 	
@@ -292,7 +432,7 @@ public class DODataImportExportDao {
 			Sheet sheet, CellStyle cellStyleOfError,
 			List<DODataImportColMetaInfo> colMataList, List<Pattern> verifyPatternList,  
 			List<Object> excelRow, 
-			int rowIndex, int beginCol) {
+			int rowIndex, int beginCol) throws ParseException {
 		int i;
 		int colIndex = 0;
 		int colForErrorMsg = beginCol + colMataList.size() + 1;
@@ -335,7 +475,11 @@ public class DODataImportExportDao {
 		
 		//set error msg
 		if(errorMsg.length() > 0) {
-			curRow.getCell(colForErrorMsg).setCellValue(errorMsg.toString());
+			Cell cell = curRow.getCell(colForErrorMsg);
+			if(cell == null) {
+				cell = curRow.createCell(colForErrorMsg);
+			}
+			cell.setCellValue(errorMsg.toString());
 			return false;
 		} else {
 			return true;
@@ -347,7 +491,7 @@ public class DODataImportExportDao {
 			Connection conn,
 			DBTable dbTable,
 			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
-			List<DataImportColValue> colValueAssignList) throws SQLException {
+			List<DataImportColValue> colValueAssignList) throws SQLException, ParseException {
 		PreparedStatement pstmt = null;
 
 		try {
@@ -460,7 +604,7 @@ public class DODataImportExportDao {
 			Connection conn,
 			DBTable dbTable,
 			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
-			List<DataImportColValue> colValueAssignList) throws SQLException {
+			List<DataImportColValue> colValueAssignList) throws SQLException, ParseException {
 		PreparedStatement pstmt = null;
 
 		try {
@@ -613,14 +757,35 @@ public class DODataImportExportDao {
 		}
 	}
 	
-	protected static Object getDBValueFromExcelValue(Object excelCellVal, DBColumn dbCol) {
+	protected static String formatDBValueToExcelValue(String dbVal, DBColumn dbCol, MetaDataField metaDataField) {
+		String colType = dbCol.getColumnType().toLowerCase();
+		
+		if(dbVal == null) {
+			return "";
+		} else {
+			if(colType.startsWith("bigint") 
+					&& (DODataDaoUtil.isFormatOfDateYmdHms(metaDataField.getFieldDispFormat())
+							|| DODataDaoUtil.isFormatOfDateYmd(metaDataField.getFieldDispFormat())) 
+				) {
+				return DODataDaoUtil.formatUTCToDate(metaDataField.getFieldDispFormat(), Long.parseLong(dbVal));
+			} else {
+				return dbVal;
+			}
+		}
+	}
+	
+	protected static Object getDBValueFromExcelValue(Object excelCellVal, DBColumn dbCol) throws ParseException {
 		String colType = dbCol.getColumnType().toLowerCase();
 		
 		if(excelCellVal == null) {
 			return null;
 		} else {
 			if(excelCellVal.getClass() == String.class) {
-				return excelCellVal;
+				if(colType.startsWith("bigint")) {
+					return DODataDaoUtil.parseDateOrNumberToNumber((String)excelCellVal);
+				} else {
+					return excelCellVal;
+				}
 			} else if(excelCellVal.getClass() == Double.class) {
 				if(colType.startsWith("int")) {
 					return Integer.valueOf(((Double)excelCellVal).intValue());
@@ -632,8 +797,11 @@ public class DODataImportExportDao {
 					return excelCellVal;
 				}
 			} else if(excelCellVal.getClass() == Date.class) {
-				//TODO
-				return String.valueOf(excelCellVal); 
+				if(colType.startsWith("bigint")) {
+					return Long.valueOf(((Date)excelCellVal).getTime());
+				} else {
+					return String.valueOf(excelCellVal); 
+				}
 			} else if(excelCellVal.getClass() == Boolean.class) {
 				if(colType.indexOf("int") >= 0) {
 					if(((Boolean)excelCellVal).booleanValue()) {
@@ -687,7 +855,7 @@ public class DODataImportExportDao {
 			return null;
 		}
 		
-		String titleStr = String.valueOf(title);
+		String titleStr = String.valueOf(title).toLowerCase();
 		MetaDataField dataField = null;
 		for(int i = 0; i < dataImportSetting.getFieldList().size(); i++) {
 			dataField = dataImportSetting.getFieldList().get(i);
@@ -726,3 +894,4 @@ public class DODataImportExportDao {
 	}
 	
 }
+ 

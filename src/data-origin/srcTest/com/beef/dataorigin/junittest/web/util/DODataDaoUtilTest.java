@@ -2,6 +2,9 @@ package com.beef.dataorigin.junittest.web.util;
 
 import static org.junit.Assert.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternCompiler;
@@ -20,6 +23,9 @@ public class DODataDaoUtilTest {
 	@Test
 	public void test() {
 		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			Date dt = dateFormat.parse("2014-3-1");
+			
 			DataOriginSetting setting = new DataOriginSetting();
 			setting.setServiceMsgList(DOServiceMsgUtil.createDefaultMsgList());
 			

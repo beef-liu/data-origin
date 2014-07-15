@@ -189,6 +189,34 @@ function setSortCol() {
 	
 }
 
+function doExportData() {
+	prepareSearchCondition();
+	
+	myAjax({
+		url: WEB_APP + "/cloudDataService.do",
+		type: "post",
+		dataType: "text",
+		data: {
+			serviceType: "${basePackage}.service.${dataClassName}DataImportExportService",
+			serviceMethod: "exportDataExcel",
+			searchConditionXml: _searchConditionXml
+		},
+		success: function(response) {
+			var totalCount = Number($(response).find('totalCount').text());
+			var exportResultFile = $(response).find('exportResultFile').text();
+			
+			myShowConfirmMsg(
+				"Total count of data:" + totalCount + "\nPlease click 'OK' button to download excel file",
+				function(){
+					window.location = WEB_APP + "/cloudDataService.do?" 
+						+ "serviceType=" + "${basePackage}.service.${dataClassName}DataImportExportService"
+						+ "&serviceMethod=downloadTempExcel" 
+						+ "&fileName=" + exportResultFile; 
+				});			
+		},
+	});
+}
+
 function doSearch() {
 	prepareSearchCondition();
 	
@@ -216,9 +244,6 @@ function searchDataCount() {
 			
 			searchData();
 		},
-		error: function(p0, p1, p2) {
-			alert(DEFAULT_MSG_ERROR_AJAX);
-		}
 	});
 }
 
@@ -243,9 +268,6 @@ function searchData() {
 		success: function(response) {
 			reloadData(response);
 		},
-		error: function(p0, p1, p2) {
-			alert(DEFAULT_MSG_ERROR_AJAX);
-		}
 	});
 } 
 

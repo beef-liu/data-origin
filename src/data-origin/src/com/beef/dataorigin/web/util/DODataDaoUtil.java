@@ -89,6 +89,22 @@ public class DODataDaoUtil {
 		
 		return dt.getTime();
 	}
+
+	public static String formatUTCToDate(String dateFormat, long utc) {
+		if(dateFormat.startsWith(FORMAT_DATE_YMD_MINUS)) {
+			if(dateFormat.length() == FORMAT_DATE_YMD_MINUS.length()) {
+				return formatUTCToYmdMinus(utc);
+			} else {
+				return formatUTCToYmdHmsMinus(utc);
+			}
+		} else {
+			if(dateFormat.length() == FORMAT_DATE_YMD_SLASH.length()) {
+				return formatUTCToYmdSlash(utc);
+			} else {
+				return formatUTCToYmdHmsSlash(utc);
+			}
+		}
+	}
 	
 	public static String formatUTCToYmdMinus(long utc) {
 		Date dt = new Date(utc);

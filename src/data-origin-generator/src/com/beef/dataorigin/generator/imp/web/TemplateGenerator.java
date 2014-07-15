@@ -7,9 +7,12 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -17,11 +20,18 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import com.beef.dataorigin.context.DataOriginContext;
 import com.beef.dataorigin.generator.DataOriginGeneratorContext;
 import com.beef.dataorigin.generator.DataOriginGenerator.WebGenerateOverwriteFlag;
 import com.beef.dataorigin.generator.util.DataOriginGeneratorUtil;
+import com.beef.dataorigin.setting.meta.MetaDataImportSetting;
+import com.beef.dataorigin.setting.meta.data.MetaDataField;
+import com.beef.dataorigin.util.ExcelUtil;
 import com.salama.modeldriven.util.db.DBTable;
 
 public class TemplateGenerator {
@@ -112,22 +122,80 @@ public class TemplateGenerator {
 		}
 
 		if(needGenerateFile) {
-			template = createTemplate(generatorContext, dbTable, file);
-			
-			FileOutputStream fos = null;
-			try {
-				fos = new FileOutputStream(destFile);
-				template.render(templateParamMap, fos);
+			String fileNameLowercase = file.getName();
+			if(fileNameLowercase.endsWith(".xls") || fileNameLowercase.endsWith(".xlsx")) {
+				//template excel
+				createTemplateXls(dataOriginContext, dbTable, file, destFile);
+			} else {
+				template = createTemplate(generatorContext, dbTable, file);
 				
-				logger.debug("Generated template file:" + file.getAbsolutePath());
-			} finally {
-				fos.close();
+				FileOutputStream fos = null;
+				try {
+					fos = new FileOutputStream(destFile);
+					template.render(templateParamMap, fos);
+					
+					logger.debug("Generated template file:" + file.getAbsolutePath());
+				} finally {
+					fos.close();
+				}
 			}
 		} else {
 			//just copy
 			DataOriginGeneratorUtil.copyFile(file, destFile);
 			logger.debug("copy file:" + file.getAbsolutePath() + " -> " + destFile.getAbsolutePath());
 		}
+	}
+	
+	private static void createTemplateXls(
+			DataOriginContext dataOriginContext,
+			DBTable dbTable,
+			File file,
+			File destFile) throws IOException {
+		String fileNameLowercase = file.getName();
+		boolean isXLSX = fileNameLowercase.endsWith(".xlsx");
+		
+		InputStream inputExcel = null;
+		OutputStream outputExcel = null;
+		try {
+			inputExcel = new FileInputStream(file);
+			Workbook workbook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
+			Sheet sheet = workbook.getSheetAt(0);
+			
+			//title --------------------------------------
+			int beginCol = 0;
+			int col;
+			Row row = sheet.getRow(0);
+			if(row == null) {
+				row = sheet.createRow(0);
+			}
+			Cell cell;
+			MetaDataField dataField;
+			MetaDataImportSetting dataImportSetting = dataOriginContext.getMetaDataImportSetting(
+					dbTable.getTableName());
+			for(col = beginCol; col < dataImportSetting.getFieldList().size(); col++) {
+				dataField = dataImportSetting.getFieldList().get(col);
+				
+				cell = row.getCell(col);
+				if(cell == null) {
+					cell = row.createCell(col);
+				}
+				cell.setCellValue(dataField.getFieldDispName());
+			}
+			
+			//output
+			outputExcel = new FileOutputStream(destFile);
+			workbook.write(outputExcel);
+		} finally {
+			try {
+				inputExcel.close();
+			} catch(Throwable e) {
+			}
+			try {
+				outputExcel.close();
+			} catch(Throwable e) {
+			}
+		}
+		
 	}
 	
 	private static File getFileForJavaTemplateFile(

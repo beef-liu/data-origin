@@ -7,7 +7,9 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -23,10 +25,10 @@ import com.beef.dataorigin.context.data.MMetaDataImportSetting;
 import com.beef.dataorigin.setting.meta.MetaDataImportSetting;
 import com.beef.dataorigin.util.ExcelUtil;
 import com.beef.dataorigin.web.context.DataOriginWebContext;
-import com.beef.dataorigin.web.dao.DODataDao;
 import com.beef.dataorigin.web.dao.DODataImportExportDao;
 import com.beef.dataorigin.web.dao.DODataImportExportDao.DataImportColValue;
 import com.beef.dataorigin.web.data.DOColValue;
+import com.beef.dataorigin.web.data.DODataExportResult;
 import com.beef.dataorigin.web.data.DODataImportCheckFileResult;
 import com.beef.dataorigin.web.data.DODataImportColMetaInfo;
 import com.beef.dataorigin.web.data.DODataImportResult;
@@ -37,11 +39,84 @@ import com.salama.modeldriven.util.db.DBColumn;
 import com.salama.modeldriven.util.db.DBTable;
 import com.salama.service.core.net.RequestWrapper;
 import com.salama.service.core.net.ResponseWrapper;
+import com.salama.service.core.net.http.ContentTypeHelper;
 import com.salama.service.core.net.http.MultipartFile;
 import com.salama.service.core.net.http.MultipartRequestWrapper;
 
 public class DODataImportExportService {
 	private final static Logger logger = Logger.getLogger(DODataImportExportService.class);
+	private final static SimpleDateFormat DateFormatYmdHMS = new SimpleDateFormat("yyyyMMddHHmmss");
+	
+	protected String exportDataExcel(
+			RequestWrapper request, ResponseWrapper response, 
+			String tableName,
+			String searchConditionXml) {
+		String outputTempFileName = DOServiceUtil.newDataId() + ".xlsx";
+		File outputTempFile = getTempExcelFile(request, outputTempFileName);
+
+		DBTable dbTable = DataOriginWebContext.getDataOriginContext().getDBTable(tableName);
+		MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
+		
+		Connection conn = null;
+		InputStream inputExcel = null;
+		OutputStream outputExcel = null;
+		try {
+			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
+					searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());			
+			
+			boolean isXLSX = true;
+			File templateFile = new File(
+					DataOriginWebContext.getDataOriginContext().getDataOriginDirManager().getTemplateXlsDir(),
+					tableName.toLowerCase() + "_data_list.xlsx"
+					);
+			
+			inputExcel = new FileInputStream(templateFile);
+			outputExcel = new FileOutputStream(outputTempFile);
+
+			conn = DOServiceUtil.getOnEditingDBConnection();
+			
+			DODataExportResult exportResult = DODataImportExportDao.exportDataExcel(
+					conn, inputExcel, outputExcel, isXLSX, dataImportSetting, dbTable, 
+					searchCondition);
+			exportResult.setExportResultFile(outputTempFileName);
+			
+			return XmlSerializer.objectToString(exportResult, DODataExportResult.class);
+		} catch(Throwable e) {
+			logger.error(null, e);
+			return DOServiceMsgUtil.makeMsgXml(e);
+		} finally {
+			try {
+				conn.close();
+			} catch(Throwable e) {
+			}
+			try {
+				inputExcel.close();
+			} catch(Throwable e) {
+			}
+			try {
+				outputExcel.close();
+			} catch(Throwable e) {
+			}
+		}
+	}
+	
+	protected void downloadTempExcel(
+			RequestWrapper request, ResponseWrapper response,
+			String tableName,
+			String fileName) {
+		try {
+			File downloadTargetFile = getTempExcelFile(request, fileName);
+			
+			response.setContentLength((int)downloadTargetFile.length());
+			response.setContentType(ContentTypeHelper.ApplicationMsExcel);
+			String saveAsFileName = tableName + DateFormatYmdHMS.format(new Date()) + ".xlsx";
+			response.setDownloadFileName(request, response, saveAsFileName);
+			
+			response.writeFile(downloadTargetFile);
+		} catch(Throwable e) {
+			logger.error(null, e);
+		}
+	}
 	
 	/**
 	 * 
@@ -266,14 +341,14 @@ public class DODataImportExportService {
 	}
 	
 	protected InputStream getErrorResultExcelInputStream(RequestWrapper request, String fileName) throws FileNotFoundException {
-		return new FileInputStream(getErrorResultExcelFile(request, fileName));
+		return new FileInputStream(getTempExcelFile(request, fileName));
 	}
 	
 	protected OutputStream getErrorResultExcelOutputStream(RequestWrapper request, String fileName) throws FileNotFoundException {
-		return new FileOutputStream(getErrorResultExcelFile(request, fileName));
+		return new FileOutputStream(getTempExcelFile(request, fileName));
 	}
 	
-	protected File getErrorResultExcelFile(RequestWrapper request, String fileName) {
+	protected File getTempExcelFile(RequestWrapper request, String fileName) {
 		String dirPath = request.getServletContext().getRealPath("/WEB-INF/tempxls");
 		File dir = new File(dirPath);
 		if(!dir.exists()) {

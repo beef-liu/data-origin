@@ -9,6 +9,7 @@ public class DataOriginDirManager {
 	
 	//public final static String SUB_DIR_DB_DATA_GENERATE = "dbdata-generate";
 	public final static String SUB_DIR_DB_TABLES = "dbtables";
+	public final static String SUB_DIR_TEMPLATE_XLS = "template_xls";
 
 	public final static String SUB_DIR_META = "meta";
 	public final static String SUB_DIR_META_DATA_IMPORT_SETTING = "data-import-setting";
@@ -17,6 +18,7 @@ public class DataOriginDirManager {
 	private File _baseDir;
 	//private File _dbDataClassDir;
 	private File _dbTablesDir;
+	private File _templateXlsDir;
 	private File _metaDir;
 	private File _metaDataImportSettingDir;
 	private File _metaDataUISettingDir;
@@ -33,6 +35,10 @@ public class DataOriginDirManager {
 
 	public File getDbTablesDir() {
 		return _dbTablesDir;
+	}
+	
+	public File getTemplateXlsDir() {
+		return _templateXlsDir;
 	}
 
 	public File getMetaDir() {
@@ -62,6 +68,9 @@ public class DataOriginDirManager {
 		
 		_dbTablesDir = new File(_baseDir, SUB_DIR_DB_TABLES);
 		checkDirExists(_dbTablesDir);
+		
+		_templateXlsDir = new File(_baseDir, SUB_DIR_TEMPLATE_XLS);
+		checkDirExists(_templateXlsDir);
 		
 		_metaDir = new File(_baseDir, SUB_DIR_META);
 		checkDirExists(_metaDir);

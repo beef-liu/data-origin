@@ -79,7 +79,7 @@
     	}
     </script>
   </head>
-  <body>
+  <body style="height:100%;">
   <div class="container" style="width: 100%;padding:0;">
   		
   	<!-- Header #f3f3f3 #2f4154-->
@@ -98,7 +98,7 @@
 	</header>
 	
 	<!-- Content -->
-    <div class="my-container">
+    <div id="my-container" class="my-container">
 	  	<div class="my-left-menu" style="background: white;">
 	  		<ul style="padding-left: 4px;">
 	  			<li>
@@ -131,9 +131,32 @@
 		</div>
 	</footer>
 
-  </div>
-  
-  <div></div>
+  </div> <!-- end of container -->
+
+	<div id="anim-loading-container" style="position:absolute; width: 100%; height: 100%;">
+		<div id="anim-loading" style="position:absolute; width: 48px; height: 48px; background: center; background-color: #353535; border-radius: 4px; filter:alpha(Opacity=128);-moz-opacity:0.5;opacity: 0.5;">
+			<img class="icon-rotating" style="background-image: url(myimg/loading_gray.png); background-size:48px 48px; position:absolute; width: 48px; height:48px;" src="myimg/empty.png" />  
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div id="modal-alert" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+		      </div>
+		      <div class="modal-body">
+		      	<pre id="modal-msg" style="border: none;"></pre>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" style="display: none;float:right;">OK</button>
+		        <button type="button" class="btn btn-default" data-dismiss="modal" style="float:right; margin-right:8px;">Cancel</button>
+		      </div>
+		    </div>
+		  </div>
+	</div>    
 
   </body>
 </html>
