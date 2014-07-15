@@ -96,3 +96,75 @@ function myShowConfirmMsgDlg(title, msg, okClickCallback) {
 	
 	$('#modal-alert').modal();	
 }
+
+function myFormatDataColValue(dispFormat, dataColVal) {
+	var iYY, iMM, iDD;
+	iYY = dispFormat.indexOf("yy");
+	iMM = dispFormat.indexOf("MM");
+	iDD = dispFormat.indexOf("dd");
+	if(iYY >= 0 && iMM > 0 && iDD > 0
+		&& iDD > iMM  && iMM > iYY) {
+		//format to Date
+		var utcMS = Number(dataColVal);
+		if(utcMS == 0) {
+			return "";
+		} else {
+			var dt = myParseDateFromLong(utcMS);
+			return dt.formatToStr(dispFormat);
+		}
+	} else {
+		//do nothing
+		return dataColVal;
+	}
+}
+
+function myParseDateFromLong(utcMS) {
+	var dt = new Date();
+    dt.setTime(utcMS);
+    
+    return dt;
+}
+
+Date.prototype.formatToStr = function(dateFormat) {
+	if(this.getFullYear() == 1899) {
+		return "";
+	}
+	
+	var returnText = dateFormat; 
+
+	if (returnText.indexOf("yyyy") >= 0) { 
+		returnText = returnText.replace("yyyy", this.getFullYear()); 
+	} 
+
+	if (returnText.indexOf("MM") >= 0) { 
+		returnText = returnText.replace("MM", myStrPadLeft(String(this.getMonth() + 1), '0', 2)); 
+	} 
+
+	if (returnText.indexOf("dd") >= 0) { 
+		returnText = returnText.replace("dd", myStrPadLeft(String(this.getDate()), '0', 2)); 
+	} 
+
+	if (returnText.indexOf("HH") >= 0) { 
+		returnText = returnText.replace("HH", myStrPadLeft(String(this.getHours()), '0', 2)); 
+	} 
+
+	if (returnText.indexOf("mm") >= 0) { 
+		returnText = returnText.replace("mm", myStrPadLeft(String(this.getMinutes()), '0', 2)); 
+	} 
+
+	if (returnText.indexOf("ss") >= 0) { 
+		returnText = returnText.replace("ss", myStrPadLeft(String(this.getSeconds()), '0', 2)); 
+	}
+
+	return returnText; 
+}
+
+function myStrPadLeft(strIn, padChar, expectingLen) {
+	var strResult = strIn;  
+    var len = strIn.length;  
+    while(len < expectingLen) {  
+        strResult = padChar + strResult;  
+        len++;  
+    }  
+    return strResult;  
+}  

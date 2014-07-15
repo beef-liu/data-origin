@@ -52,7 +52,8 @@ public class TemplateGenerator {
 	public final static String TEMPLATE_PARAM_NAME_BASE_PACKAGE = "basePackage";
 	public final static String TEMPLATE_PARAM_NAME_WEB_CONTEXT_NAME = "webContextName";
 	public final static String TEMPLATE_PARAM_NAME_META_DATA_UI_SETTING = "dataUISetting";
-	public final static String TEMPLATE_PARAM_NAME_META_MDBTABLE = "mDBTable";
+	public final static String TEMPLATE_PARAM_NAME_MDBTABLE = "mDBTable";
+	public final static String TEMPLATE_PARAM_NAME_MMETA_DATA_UI_SETTING = "mDataUISetting";
 	
 	
 	public final static String TEMPLATE_FILE_NAME_PATTERN_TABLE_NAME = "${" + TEMPLATE_PARAM_NAME_TABLE_NAME + "}";
@@ -362,7 +363,8 @@ public class TemplateGenerator {
 			
 			httlParams.put(TEMPLATE_PARAM_NAME_DBTABLE, dbTable);
 			httlParams.put(TEMPLATE_PARAM_NAME_META_DATA_UI_SETTING, dataOriginContext.getMetaDataUISetting(dbTable.getTableName()));
-			httlParams.put(TEMPLATE_PARAM_NAME_META_MDBTABLE, dataOriginContext.getMDBTable(dbTable.getTableName()));
+			httlParams.put(TEMPLATE_PARAM_NAME_MMETA_DATA_UI_SETTING, dataOriginContext.getMMetaDataUISetting(dbTable.getTableName()));
+			httlParams.put(TEMPLATE_PARAM_NAME_MDBTABLE, dataOriginContext.getMDBTable(dbTable.getTableName()));
 		}
 		
 		return httlParams;

@@ -764,8 +764,10 @@ public class DODataImportExportDao {
 			return "";
 		} else {
 			if(colType.startsWith("bigint") 
-					&& (DODataDaoUtil.isFormatOfDateYmdHms(metaDataField.getFieldDispFormat())
-							|| DODataDaoUtil.isFormatOfDateYmd(metaDataField.getFieldDispFormat())) 
+					&& metaDataField.getFieldDispFormat() != null
+					&& (metaDataField.getFieldDispFormat().startsWith(DODataDaoUtil.FORMAT_DATE_YMD_MINUS)
+							|| metaDataField.getFieldDispFormat().startsWith(DODataDaoUtil.FORMAT_DATE_YMD_SLASH)
+						) 
 				) {
 				return DODataDaoUtil.formatUTCToDate(metaDataField.getFieldDispFormat(), Long.parseLong(dbVal));
 			} else {

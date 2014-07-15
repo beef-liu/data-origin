@@ -283,6 +283,21 @@ function reloadData(dataListXml) {
         	//row num
         	var rowNum = _curPageIndex * _curPageSize + index + 1;
         	$(dataDomNode).find('[id="td-row-num"]').text(rowNum);
+        	
+        	//format
+        	var dataColNodes = $(dataDomNode).find('[id="td-data-col"]');
+        	var i, dataColNode, dispFormat, dataColVal;
+        	for(i = 0; i < dataColNodes.length; i++) {
+        		dataColNode = dataColNodes[i];
+        		dispFormat = $(dataColNode).attr('fieldDispFormat');
+        		dataColVal = $(dataColNode).text();
+        		if(dispFormat != undefined && dispFormat.length > 0
+        			&& dataColVal.length > 0) {
+        			$(dataColNode).text(
+        				myFormatDataColValue(dispFormat, dataColVal)
+        				);
+        		}
+        	}
         }
     });
 }

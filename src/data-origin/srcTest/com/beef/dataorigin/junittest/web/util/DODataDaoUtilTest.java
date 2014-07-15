@@ -23,9 +23,6 @@ public class DODataDaoUtilTest {
 	@Test
 	public void test() {
 		try {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			Date dt = dateFormat.parse("2014-3-1");
-			
 			DataOriginSetting setting = new DataOriginSetting();
 			setting.setServiceMsgList(DOServiceMsgUtil.createDefaultMsgList());
 			
@@ -34,6 +31,17 @@ public class DODataDaoUtilTest {
 		} catch(Throwable e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	public void testDateFormat() {
+		String dateFmt = "yyyy-MM-dd HH:mm:ss";
+		SimpleDateFormat dateFormat = new SimpleDateFormat(dateFmt);
+		
+		long t = System.currentTimeMillis();
+		
+		String dt = dateFormat.format(new Date(t));
+		System.out.println("date:" + dt);
 	}
 	
 	@Test

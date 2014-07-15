@@ -1,4 +1,4 @@
-<!--#set(MetaDataUISetting dataUISetting, DBTable dbTable, MDBTable mDBTable)-->
+<!--#set(MetaDataUISetting dataUISetting, MMetaDataUISetting mDataUISetting, DBTable dbTable, MDBTable mDBTable)-->
 	    <script src="myjs/data/${tableName}_data_list.js"></script>
 	  		<!-- Content Header -->
 	  		<div id="content-header">
@@ -10,8 +10,8 @@
 		  						<td class="my-td-search" searchCondition="searchConditionItemList">
 		  						<!--#for(MetaSearchConditionItem searchCondItem : dataUISetting.searchCondition.searchConditionItemList)-->
 		  							<div searchCondition="DOSearchConditionItem">
-		  							<!--#set(DBColumn dbCol = mDBTable.columnMap.get(searchCondItem.fieldName))-->
-		  								<label>$!{dbCol.comment}:</label>
+		  							<!--#set(MetaDataField metaDataField = mDataUISetting.fieldMap.get(searchCondItem.fieldName))-->
+		  								<label>$!{metaDataField.fieldDispName}:</label>
 		  								<input type="hidden" searchCondition="fieldName" value="$!{searchCondItem.fieldName}" />
 		  								<input type="text" searchCondition="fieldValue" />
 		  							</div>
@@ -122,8 +122,8 @@
 	  					<tr class="my-head-tr">
 	  						<th id="th-checkbox" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
 	  						<th id="th-row-num" class="my-th" style="width:36px;">No.</th>
-  						<!--#for(DBColumn dbCol : dbTable.columns)-->
-	  						<th class="my-th-sort nosort" listHead="${dbCol.name}" onclick="setSortCol()"><span>${dbCol.comment}</span> <img src="myimg/empty.png"/> </th>
+  						<!--#for(MetaDataField metaDataField : dataUISetting.fieldList)-->
+	  						<th class="my-th-sort nosort" listHead="${metaDataField.fieldName}" onclick="setSortCol()"><span>$!{metaDataField.fieldDispName}</span> <img src="myimg/empty.png"/> </th>
 	  					<!--#end-->
 	  						<th class="my-th" style="width:36px;"></th>
 	  					</tr>
@@ -132,8 +132,9 @@
 	  					<tr id="tr-data" class="my-tr" listData="${dataClassName}">
 	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
 	  						<td id="td-row-num" class="my-td"></td>
-  						<!--#for(DBColumn dbCol : dbTable.columns)-->
-	  						<td class="my-td" listData="${dbCol.name}" isPrimaryKey="${dbCol.primaryKey}"></td>
+  						<!--#for(MetaDataField metaDataField : dataUISetting.fieldList)-->
+  							<!--#set(DBColumn dbCol = mDBTable.columnMap.get(metaDataField.fieldName))-->
+	  						<td id="td-data-col" class="my-td" listData="${metaDataField.fieldName}" fieldDispFormat="${metaDataField.fieldDispFormat}" isPrimaryKey="${dbCol.primaryKey}"></td>
 	  					<!--#end-->
 	  						<td class="my-td"><a href="#" onclick="gotoDetail()"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
 	  					</tr>

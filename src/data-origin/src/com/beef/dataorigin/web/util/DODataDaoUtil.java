@@ -15,7 +15,7 @@ public class DODataDaoUtil {
 	public final static String SEARCH_CONDITION_SCOPE_DELIM = "~";
 
 	public final static String REGEX_DATE_YMD = "[0-9]{1,4}\\-[0-9]{1,2}\\-[0-9]{1,2}|[0-9]{1,4}\\/[0-9]{1,2}\\/[0-9]{1,2}";
-	public final static String REGEX_DATE_YMDHMS = "[0-9]{1,4}\\-[0-9]{1,2}\\-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}|[0-9]{1,4}\\/[0-9]{1,2}\\/[0-9]{1,2}  [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}";
+	public final static String REGEX_DATE_YMDHMS = "[0-9]{1,4}\\-[0-9]{1,2}\\-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}|[0-9]{1,4}\\/[0-9]{1,2}\\/[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}";
 	
 	public final static String FORMAT_DATE_YMD_MINUS = "yyyy-MM-dd";
 	public final static String FORMAT_DATE_YMD_SLASH = "yyyy/MM/dd";
