@@ -23,6 +23,7 @@ import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.poi.hssf.record.chart.BeginRecord;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -41,6 +42,7 @@ import com.beef.dataorigin.web.data.DOSearchCondition;
 import com.beef.dataorigin.web.data.DOSearchConditionItem;
 import com.beef.dataorigin.web.util.DODataDaoUtil;
 import com.beef.dataorigin.web.util.DOServiceMsgUtil;
+import com.beef.dataorigin.web.util.DOSqlParamUtil;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import com.salama.modeldriven.util.db.DBColumn;
 import com.salama.modeldriven.util.db.DBTable;
@@ -326,6 +328,7 @@ public class DODataImportExportDao {
 
 		CellStyle cellStyleOfError = sheet.getWorkbook().createCellStyle();
 		cellStyleOfError.setFillBackgroundColor(getExcelBGColor(dataImportSetting.getBgColorError(), DEFAULT_BG_COLOR_ERROR));
+		cellStyleOfError.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
 		CellStyle cellStyleOfInserted = sheet.getWorkbook().createCellStyle();
 		cellStyleOfInserted.setFillBackgroundColor(getExcelBGColor(dataImportSetting.getBgColorDataRowInserted(), DEFAULT_BG_COLOR_DATA_ROW_INSERTED));
@@ -339,6 +342,7 @@ public class DODataImportExportDao {
 					sheet, cellStyleOfError, colMataList, 
 					verifyPatternList, allRowList.get(i), i, beginCol);
 			if(!isValidRow) {
+				errorRowCount ++;
 				continue;
 			}
 			
@@ -349,25 +353,14 @@ public class DODataImportExportDao {
 			errorMsg = null;
 			try {
 				updateCnt = insertOneRow(conn, dbTable, colMataList, allRowList.get(i), colValueAssignList);
-			} catch(com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException e) {
-				if("23000".equals(e.getSQLState())) {
-					//duplicated key
-					isDuplicatedKey = true;
-				} else {
-					errorMsg = DOServiceMsgUtil.getStackTrace(e);
-					logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
-				}
-			} catch(MySQLIntegrityConstraintViolationException e) {
-				if("23000".equals(e.getSQLState())) {
-					//duplicated key
-					isDuplicatedKey = true;
-				} else {
-					errorMsg = DOServiceMsgUtil.getStackTrace(e);
-					logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
-				}
 			} catch(Throwable e) {
-				errorMsg = DOServiceMsgUtil.getStackTrace(e);
-				logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
+				if(e.getClass().getSimpleName().equalsIgnoreCase("MySQLIntegrityConstraintViolationException")) {
+					//duplicated key
+					isDuplicatedKey = true;
+				} else {
+					errorMsg = DOServiceMsgUtil.getStackTrace(e);
+					logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
+				}
 			}
 			
 			if(isDuplicatedKey) {
@@ -459,10 +452,14 @@ public class DODataImportExportDao {
 			}
 			
 			dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.getDbCol());
-			if(dbVal.getClass() == String.class) {
-				dbValStr = (String) dbVal; 
+			if(dbVal == null) {
+				return true;
 			} else {
-				dbValStr = String.valueOf(dbVal);
+				if(dbVal.getClass() == String.class) {
+					dbValStr = (String) dbVal; 
+				} else {
+					dbValStr = String.valueOf(dbVal);
+				}
 			}
 			
 			//verify
@@ -503,7 +500,7 @@ public class DODataImportExportDao {
 			int index;
 			int i;
 			StringBuilder sql = new StringBuilder();
-			sql.append("insert into ").append(tableName).append(" (");
+			sql.append("insert into ").append(DOSqlParamUtil.wrapNameInSql(tableName)).append(" (");
 
 			DODataImportColMetaInfo colMeta = null;
 			index = 0;
@@ -515,9 +512,9 @@ public class DODataImportExportDao {
 				}
 				
 				if(index == 0) {
-					sql.append(colMeta.getDbCol().getName());
+					sql.append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName()));
 				} else {
-					sql.append(",").append(colMeta.getDbCol().getName());
+					sql.append(",").append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName()));
 				}
 				
 				index++;
@@ -528,9 +525,9 @@ public class DODataImportExportDao {
 					importColVal = colValueAssignList.get(i);
 					
 					if(index == 0) {
-						sql.append(importColVal.getDbCol().getName());
+						sql.append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName()));
 					} else {
-						sql.append(",").append(importColVal.getDbCol().getName());
+						sql.append(",").append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName()));
 					}
 					
 					index++;
@@ -633,7 +630,7 @@ public class DODataImportExportDao {
 				if(index > 0) {
 					sql.append(",");
 				}
-				sql.append(colMeta.getDbCol().getName()).append(" = ? ");
+				sql.append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName())).append(" = ? ");
 				
 				index++;
 			}
@@ -649,7 +646,7 @@ public class DODataImportExportDao {
 					if(index > 0) {
 						sql.append(",");
 					}
-					sql.append(importColVal.getDbCol().getName()).append(" = ? ");
+					sql.append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName())).append(" = ? ");
 					
 					index++;
 				}
@@ -671,7 +668,7 @@ public class DODataImportExportDao {
 				if(index > 0) {
 					sql.append(" and ");
 				}
-				sql.append(colMeta.getDbCol().getName()).append(" = ?");
+				sql.append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName())).append(" = ?");
 				
 				index++;
 			}
@@ -687,7 +684,7 @@ public class DODataImportExportDao {
 					if(index > 0) {
 						sql.append(" and ");
 					}
-					sql.append(importColVal.getDbCol().getName()).append(" = ? ");
+					sql.append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName())).append(" = ? ");
 					
 					index++;
 				}
@@ -787,7 +784,11 @@ public class DODataImportExportDao {
 		} else {
 			if(excelCellVal.getClass() == String.class) {
 				if(colType.startsWith("bigint")) {
-					return DODataDaoUtil.parseDateOrNumberToNumber((String)excelCellVal);
+					if(((String)excelCellVal).length() == 0) {
+						return null;
+					} else {
+						return DODataDaoUtil.parseDateOrNumberToNumber((String)excelCellVal);
+					}
 				} else {
 					return excelCellVal;
 				}

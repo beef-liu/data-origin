@@ -215,6 +215,7 @@ function importFileChanged() {
 			serviceMethod: "checkDataExcelSheetCount",
 		},
 		success: function(response) {
+			resetDataImportInputFile();
 			if(response.trim().indexOf("<DOServiceMsg>") == 0) {
 				//Service Msg
 				myShowErrorMsg($(response).find('msg').text());
@@ -228,9 +229,14 @@ function importFileChanged() {
 			}
 		},
 		error: function() {
+			resetDataImportInputFile();
 			myShowErrorMsg(DEFAULT_MSG_ERROR_AJAX);
 		}
 	});
+}
+
+function resetDataImportInputFile() {
+	$('#file-data-import').val('');
 }
 
 function showSheetChooser(checkSheetResultXml) {
