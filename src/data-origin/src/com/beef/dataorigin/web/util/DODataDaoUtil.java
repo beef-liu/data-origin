@@ -1,5 +1,8 @@
 package com.beef.dataorigin.web.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -174,5 +177,29 @@ public class DODataDaoUtil {
 			}
 		}
 	}
+	
+	public static long copy(InputStream input, OutputStream output) throws IOException {
+		long totalRead = 0;
+		int readCnt = 0;
+		
+		byte[] tempBuff = new byte[10240];
+		
+		while(true) {
+			readCnt = input.read(tempBuff, 0, tempBuff.length);
+			
+			if(readCnt < 0) {
+				break;
+			}
+			
+			if(readCnt > 0) {
+				output.write(tempBuff, 0, readCnt);
+				output.flush();
+				
+				totalRead += readCnt;
+			}
+		}
+		
+		return totalRead;
+	} 
 	
 }

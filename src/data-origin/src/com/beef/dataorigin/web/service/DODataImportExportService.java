@@ -29,10 +29,12 @@ import com.beef.dataorigin.web.dao.DODataImportExportDao;
 import com.beef.dataorigin.web.dao.DODataImportExportDao.DataImportColValue;
 import com.beef.dataorigin.web.data.DOColValue;
 import com.beef.dataorigin.web.data.DODataExportResult;
-import com.beef.dataorigin.web.data.DODataImportCheckFileResult;
+import com.beef.dataorigin.web.data.DODataImportCheckSheetResult;
+import com.beef.dataorigin.web.data.DODataImportCheckTitleRowResult;
 import com.beef.dataorigin.web.data.DODataImportColMetaInfo;
 import com.beef.dataorigin.web.data.DODataImportResult;
 import com.beef.dataorigin.web.data.DOSearchCondition;
+import com.beef.dataorigin.web.util.DODataDaoUtil;
 import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 import com.beef.dataorigin.web.util.DOServiceUtil;
 import com.salama.modeldriven.util.db.DBColumn;
@@ -119,7 +121,7 @@ public class DODataImportExportService {
 	}
 	
 	/**
-	 * 
+	 * Upload file to check sheet count
 	 * @param request
 	 * @param response
 	 * @param tableName
@@ -139,17 +141,46 @@ public class DODataImportExportService {
 
 		//check columns --------------------------------------
 		InputStream inputExcel = null;
+		OutputStream outputExcel = null;
+		String saveToFileName = newTempExcelFileName();
+		File saveToFile = getTempExcelFile(request, saveToFileName);
 		try {
 			inputExcel = excelMultiFile.multiFile.getInputStream();
+			outputExcel = new FileOutputStream(saveToFile);
 
+			//copy file
+			DODataDaoUtil.copy(inputExcel, outputExcel);
+		} catch(Throwable e) {
+			logger.error(null, e);
+			return DOServiceMsgUtil.makeMsgXml(e);
+		} finally {
+			try {
+				inputExcel.close();
+			} catch(Throwable e) {
+			}
+			try {
+				outputExcel.close();
+			} catch(Throwable e) {
+			}
+		}
+		
+		try {
+			inputExcel = new FileInputStream(saveToFile);
+			
 			Workbook workBook = ExcelUtil.createWorkbook(inputExcel, excelMultiFile.isXLSX);
 			
 			int sheetCount = workBook.getNumberOfSheets();
-			if(sheetCount == 1) {
-				return "ok";
-			} else {
-				return DOServiceMsgUtil.getDefinedMsgXml(DOServiceMsgUtil.ErrorDataImportSheetMoreThanOne);
+
+			DODataImportCheckSheetResult checkSheetResult = new DODataImportCheckSheetResult();
+			checkSheetResult.setSheetCount(sheetCount);
+			checkSheetResult.setImportFile(saveToFileName);
+			
+			checkSheetResult.setSheetNameList(new ArrayList<String>());
+			for(int i = 0; i < sheetCount; i++) {
+				checkSheetResult.getSheetNameList().add(workBook.getSheetName(i));
 			}
+			
+			return XmlSerializer.objectToString(checkSheetResult, DODataImportCheckSheetResult.class) ;
 		} catch(Throwable e) {
 			logger.error(null, e);
 			return DOServiceMsgUtil.makeMsgXml(e);
@@ -159,13 +190,13 @@ public class DODataImportExportService {
 			} catch(Throwable e) {
 			}
 		}
-		
 	}
 	
 	protected String checkDataExcelTitleRow(
 			RequestWrapper request, ResponseWrapper response, 
-			String tableName,
+			String tableName, String fileName,
 			int sheetIndex) {
+		/*
 		//get file and check file name
 		ExcelMultiFile excelMultiFile = new ExcelMultiFile((MultipartRequestWrapper)request);
 		if(excelMultiFile.multiFile == null) {
@@ -175,14 +206,19 @@ public class DODataImportExportService {
 			return DOServiceMsgUtil.getDefinedMsgXml(DOServiceMsgUtil.ErrorDataImportMustExcel);
 		}
 
-		String originFileName =  excelMultiFile.multiFile.getOriginalFilename();
+		//String originFileName =  excelMultiFile.multiFile.getOriginalFilename();
+		*/
 
+
+		File excelImportFile = getTempExcelFile(request, fileName);
+		boolean isXLSX = fileName.endsWith(".xlsx");
+		
 		//check columns --------------------------------------
 		InputStream inputExcel = null;
 		try {
-			inputExcel = excelMultiFile.multiFile.getInputStream();
+			inputExcel = new FileInputStream(excelImportFile);
 
-			Workbook workBook = ExcelUtil.createWorkbook(inputExcel, excelMultiFile.isXLSX);
+			Workbook workBook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
 			Sheet sheet = workBook.getSheetAt(sheetIndex);
 			
 			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
@@ -196,7 +232,7 @@ public class DODataImportExportService {
 					dataImportSetting, dbTable, titleList);
 			
 			//make check result
-			DODataImportCheckFileResult checkResult = new DODataImportCheckFileResult();
+			DODataImportCheckTitleRowResult checkResult = new DODataImportCheckTitleRowResult();
 			checkResult.setColMetaList(colMetaList);
 			
 			List<String> titleStrList = new ArrayList<String>();
@@ -234,7 +270,7 @@ public class DODataImportExportService {
 			}
 			checkResult.setLackingColMetaList(lackingColMetaList);
 			
-			return XmlSerializer.objectToString(checkResult, DODataImportCheckFileResult.class);
+			return XmlSerializer.objectToString(checkResult, DODataImportCheckTitleRowResult.class);
 		} catch(Throwable e) {
 			logger.error(null, e);
 			return DOServiceMsgUtil.makeMsgXml(e);
@@ -248,9 +284,10 @@ public class DODataImportExportService {
 	
 	protected String importDataExcel(
 			RequestWrapper request, ResponseWrapper response, 
-			String tableName,
+			String tableName, String fileName,
 			int sheetIndex, 
 			String colValueListXml) {
+		/*
 		//get file and check file name
 		ExcelMultiFile excelMultiFile = new ExcelMultiFile((MultipartRequestWrapper)request);
 		if(excelMultiFile.multiFile == null) {
@@ -259,15 +296,18 @@ public class DODataImportExportService {
 		if(!excelMultiFile.isXLSorXLSX) {
 			return DOServiceMsgUtil.getDefinedMsgXml(DOServiceMsgUtil.ErrorDataImportMustExcel);
 		}
-		
-		String originFileName =  excelMultiFile.multiFile.getOriginalFilename();
+		//String originFileName =  excelMultiFile.multiFile.getOriginalFilename();
+		*/
 
+		File excelImportFile = getTempExcelFile(request, fileName);
+		boolean isXLSX = fileName.endsWith(".xlsx");
 		
 		//assigned col values
 		Connection conn = null;
 		InputStream inputExcel = null;
 		try {
-			inputExcel = excelMultiFile.multiFile.getInputStream();
+			inputExcel = new FileInputStream(excelImportFile);
+			
 			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
 			MMetaDataImportSetting mDataImportSetting = DataOriginWebContext.getDataOriginContext().getMMetaDataImportSetting(tableName);
 			DBTable dbTable = DataOriginWebContext.getDataOriginContext().getDBTable(tableName);
@@ -283,6 +323,9 @@ public class DODataImportExportService {
 				DataImportColValue impColVal;
 				for(int i = 0; i < colValList.size(); i++) {
 					colVal = colValList.get(i);
+					if(colVal.getColValue() == null || colVal.getColValue().length() == 0) {
+						continue;
+					}
 					
 					impColVal = new DataImportColValue();
 					impColVal.setDbCol(mDbTable.getColumnMap().get(colVal.getColName()));
@@ -296,16 +339,17 @@ public class DODataImportExportService {
 			//update DB
 			conn = DOServiceUtil.getOnEditingDBConnection();
 			
-			Workbook workBook = ExcelUtil.createWorkbook(inputExcel, excelMultiFile.isXLSX);
+			Workbook workBook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
 			Sheet sheet = workBook.getSheetAt(sheetIndex);
 			
 			DODataImportResult dataImportResult = DODataImportExportDao.importDataExcel(
 					conn, sheet, 
-					originFileName, dataImportSetting, 
+					//originFileName, 
+					dataImportSetting, 
 					dbTable, importColValueList);
 			
 			//save file which error indicated
-			String resultFileName = newErrorResultExcelFileName();
+			String resultFileName = getResultExcelFileName(fileName); 
 			OutputStream output = null;
 			
 			try {
@@ -336,8 +380,18 @@ public class DODataImportExportService {
 		}
 	}
 
-	protected String newErrorResultExcelFileName() {
+	protected String newTempExcelFileName() {
 		return DOServiceUtil.newDataId() + ".xlsx";
+	}
+	
+	protected String getResultExcelFileName(String importFileName) {
+		int index = importFileName.lastIndexOf('.');
+		
+		if(index > 0) {
+			return importFileName.substring(0, index) + "_result" + importFileName.substring(index);
+		} else {
+			return importFileName + "_result";
+		}
 	}
 	
 	protected InputStream getErrorResultExcelInputStream(RequestWrapper request, String fileName) throws FileNotFoundException {

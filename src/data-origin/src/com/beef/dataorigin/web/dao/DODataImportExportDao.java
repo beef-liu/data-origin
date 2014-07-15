@@ -220,6 +220,7 @@ public class DODataImportExportDao {
 							rs.getString(fieldName), 
 							mDBTable.getColumnMap().get(fieldName), 
 							mMetaDataImportSetting.getFieldMap().get(fieldName));
+					cell.setCellType(Cell.CELL_TYPE_STRING);
 					cell.setCellValue(cellVal);
 				}
 				
@@ -238,7 +239,7 @@ public class DODataImportExportDao {
 	public static DODataImportResult importDataExcel(
 			Connection conn,
 			InputStream inputExcel,
-			String originalFileName,
+			//String originalFileName,
 			boolean isXLSX, int sheetIndex,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
@@ -253,7 +254,8 @@ public class DODataImportExportDao {
 		
 		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(sheet, beginCol, maxCol, beginRow);
 	
-		return importDataExcel(conn, originalFileName, 
+		return importDataExcel(conn, 
+				//originalFileName, 
 				sheet, beginCol, 
 				allRowList, dataImportSetting, dbTable, colValueAssignList);
 	}
@@ -261,7 +263,7 @@ public class DODataImportExportDao {
 	public static DODataImportResult importDataExcel(
 			Connection conn,
 			Sheet sheet,
-			String originalFileName,
+			//String originalFileName,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
@@ -272,14 +274,15 @@ public class DODataImportExportDao {
 		
 		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(sheet, beginCol, maxCol, beginRow);
 	
-		return importDataExcel(conn, originalFileName, 
+		return importDataExcel(conn, 
+				//originalFileName, 
 				sheet, beginCol, 
 				allRowList, dataImportSetting, dbTable, colValueAssignList);
 	}
 	
 	protected static DODataImportResult importDataExcel(
 			Connection conn,
-			String originalFileName,
+			//String originalFileName,
 			Sheet sheet, int beginCol,
 			List<List<Object>> allRowList,
 			MetaDataImportSetting dataImportSetting,
@@ -288,7 +291,7 @@ public class DODataImportExportDao {
 			) throws MalformedPatternException, ParseException {
 		
 		DODataImportResult dataImportResult = new DODataImportResult();
-		dataImportResult.setOriginalFileName(originalFileName);
+		//dataImportResult.setOriginalFileName(originalFileName);
 		dataImportResult.setTableName(dbTable.getTableName());
 		dataImportResult.setTableComment(dbTable.getComment());
 		

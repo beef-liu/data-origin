@@ -296,3 +296,22 @@
 	from { -webkit-transform:rotate(0deg) translateZ(0); }
 	to { -webkit-transform:rotate(360deg) translateZ(0); }
 }
+
+.dataimp-input-required-td {
+	padding: 0px 4px;
+	border: 1px solid #e5e5e5;
+	text-align: center;
+	/*background-color: #e1e1e1;*/
+}
+
+.dataimp-input-required-td.matched-db-col {
+	background-color: #41aa30;
+}
+
+.dataimp-input-required-label {
+	padding: 0px 4px;
+}
+.dataimp-input-required-label.primarykey {
+	padding: 0px 4px;
+	background-color:red;
+}

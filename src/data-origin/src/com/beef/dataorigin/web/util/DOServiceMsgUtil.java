@@ -17,13 +17,11 @@ public class DOServiceMsgUtil {
 	public final static String ErrorDataImportUpdateFailDataNotExist = "Error.DataImport.updateFail.DataNotExist";
 	
 	public static String getDefinedMsgXml(String msgCode) {
-		return DataOriginWebContext.getDataOriginContext().getServiceMsgXml(
-				DOServiceMsgUtil.ErrorSearchPageSizeExceedMax);
+		return DataOriginWebContext.getDataOriginContext().getServiceMsgXml(msgCode);
 	}
 
 	public static DOServiceMsg getDefinedMsg(String msgCode) {
-		return DataOriginWebContext.getDataOriginContext().getServiceMsg(
-				DOServiceMsgUtil.ErrorSearchPageSizeExceedMax);
+		return DataOriginWebContext.getDataOriginContext().getServiceMsg(msgCode);
 	}
 	
 	public static String makeMsgXml(Throwable error) {

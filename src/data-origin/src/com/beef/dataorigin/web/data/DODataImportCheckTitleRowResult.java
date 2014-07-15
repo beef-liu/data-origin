@@ -2,11 +2,11 @@ package com.beef.dataorigin.web.data;
 
 import java.util.List;
 
-public class DODataImportCheckFileResult {
-	public final static String RESULT_SUCCESS = "success";
-	public final static String RESULT_FAIL = "fail";
-	
-	private String _result;
+public class DODataImportCheckTitleRowResult {
+//	public final static String RESULT_SUCCESS = "success";
+//	public final static String RESULT_FAIL = "fail";
+//	
+//	private String _result;
 	
 	/* if not success, then has some cases:
 	 * 1. Some title is unknown column, need to be confirmed
@@ -23,13 +23,13 @@ public class DODataImportCheckFileResult {
 	
 	private List<DODataImportColMetaInfo> _lackingColMetaList;
 
-	public String getResult() {
-		return _result;
-	}
-
-	public void setResult(String result) {
-		_result = result;
-	}
+//	public String getResult() {
+//		return _result;
+//	}
+//
+//	public void setResult(String result) {
+//		_result = result;
+//	}
 
 	public List<DODataImportColMetaInfo> getColMetaList() {
 		return _colMetaList;

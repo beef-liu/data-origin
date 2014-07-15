@@ -1,24 +1,15 @@
 package com.beef.dataorigin.web.data;
 
 public class DODataImportResult {
-	private String _originalFileName;
 	private String _tableName;
 	private String _tableComment;
 	
-	private int _totalCount;
+	private int _totalCount = 0;
 	private int _insertedCount = 0;
 	private int _updatedCount = 0;
 	private int _errorCount = 0;
 	
 	private String _importResultFile;
-
-	public String getOriginalFileName() {
-		return _originalFileName;
-	}
-
-	public void setOriginalFileName(String originalFileName) {
-		_originalFileName = originalFileName;
-	}
 
 	public String getTableName() {
 		return _tableName;

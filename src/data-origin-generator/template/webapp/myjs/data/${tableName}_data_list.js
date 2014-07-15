@@ -11,6 +11,10 @@ var _curPageCount = 1;
 var _orderByFields = "";
 var _searchConditionXml = "";
 
+var _dataimpColNameNodeCopy;
+var _dataimpInputColNodeCopy;
+var _dataimpImportFileName = "";
+var _dataimpImportSheetIndex = 0;
 
 $(document).ready(function() {
 	initUI();
@@ -121,6 +125,19 @@ function initUI() {
 	$('#btn-page-go').click(function() {
 		gotoPage();
 	});
+	
+	//data import button
+	$('#btn-data-import').bind('click', function(event) {
+		$('#file-data-import').click();
+	});
+	
+	$('#file-data-import').bind('change', function(event) {
+		importFileChanged();
+	});
+	
+	//dataimp dialog --------------------
+	_dataimpColNameNodeCopy = $($('#dataimpColDispName')[0]).clone();
+	_dataimpInputColNodeCopy = $($('[dataimpColValue="DOColValue"]')[0]).clone();
 }
 
 function pageIndexChanged() {
@@ -187,6 +204,207 @@ function prepareSearchCondition() {
 
 function setSortCol() {
 	
+}
+
+function importFileChanged() {
+	easyUpload.upload({
+		form: $('#form-import-data'),
+		url: WEB_APP + "/cloudDataService.do",
+		data: {
+			serviceType: "${basePackage}.service.${dataClassName}DataImportExportService",
+			serviceMethod: "checkDataExcelSheetCount",
+		},
+		success: function(response) {
+			if(response.trim().indexOf("<DOServiceMsg>") == 0) {
+				//Service Msg
+				myShowErrorMsg($(response).find('msg').text());
+			} else {
+				var sheetCount = Number($(response).find('sheetCount').text());
+				if(sheetCount <= 1) {
+					importFileCheckTitleRow(response, 0);
+				} else {
+					showSheetChooser(response, sheetCount);
+				}
+			}
+		},
+		error: function() {
+			myShowErrorMsg(DEFAULT_MSG_ERROR_AJAX);
+		}
+	});
+}
+
+function showSheetChooser(checkSheetResultXml) {
+	var dropdownSheetNode = $('#modal-choose-sheet').find('[id="dropdown-sheet-name"]')[0];
+	var sheetNameList = $(checkSheetResultXml).find('sheetNameList').find('String');
+	
+	//make dropdown
+	$(dropdownSheetNode).find('option').remove();
+	var optionNode;
+	var i;
+	for(i = 0; i < sheetNameList.length; i++) {
+		optionNode = document.createElement('option');
+		optionNode.value = String(i);
+		optionNode.text = $(sheetNameList[i]).text();
+		
+		$(dropdownSheetNode).append(optionNode);
+	}
+	
+	//show dialog
+	$('#modal-choose-sheet').find('.btn-primary').unbind('click').bind('click', function(event) {
+		$('#modal-choose-sheet').modal('hide');
+		//ok button clicked -> checkTitleRow
+		var sheetIndex = $('#modal-choose-sheet').find('[id="dropdown-sheet-name"]')[0].selectedIndex;
+		if(sheetIndex < 0) {
+			sheetIndex = 0;
+		}
+
+		importFileCheckTitleRow(response, sheetIndex);
+	});
+	$('#modal-choose-sheet').modal();
+}
+
+function importFileCheckTitleRow(checkSheetResultXml, sheetIndex) {
+	var fileName = $(checkSheetResultXml).find('importFile').text();
+
+	_dataimpImportFileName = fileName;
+	_dataimpImportSheetIndex = sheetIndex;
+	
+	myAjax({
+		url: WEB_APP + "/cloudDataService.do",
+		type: "post",
+		dataType: "text",
+		data: {
+			serviceType: "${basePackage}.service.${dataClassName}DataImportExportService",
+			serviceMethod: "checkDataExcelTitleRow",
+			fileName: fileName,
+			sheetIndex: sheetIndex
+		},
+		success: function(response) {
+			//DODataImportCheckTitleRowResult
+			showDataImportColInput(response);
+		},
+	});
+	
+}
+
+function showDataImportColInput(checkTitleRowResultXml) {
+	var i;
+	var colMeta, metaDataField, dbCol;
+	
+	//set col name list -------------------
+	var colTitleList = $(checkTitleRowResultXml).find('colTitleList').find('String');
+	var uploadedColMetaList = $(checkTitleRowResultXml).find('colMetaList').find('DODataImportColMetaInfo');
+	var colMeta, metaDataField;
+	var colDispName, colName;
+	
+	$('[id="dataimpColDispName"]').remove();
+	
+	var dataimpColListNode = $('#dataimpColList');
+	var dataimpColNameNodeTmp;
+	for(i = 0; i < uploadedColMetaList.length; i++) {
+		colMeta = uploadedColMetaList[i];
+		colDispName = $(colTitleList[i]).text();
+		
+		dataimpColNameNodeTmp = $(_dataimpColNameNodeCopy).clone();
+		$(dataimpColNameNodeTmp).text(colDispName);
+		
+		if($(colMeta).find('dbCol').length == 0) {
+			//not matched
+			$(dataimpColNameNodeTmp).removeClass('matched-db-col');
+		} else {
+			//matched DB col
+			$(dataimpColNameNodeTmp).removeClass('matched-db-col').addClass('matched-db-col');
+		}
+		
+		$(dataimpColListNode).append(dataimpColNameNodeTmp);
+	}
+	
+	
+	//set input col ------------------- 
+	var inputColMetaList = $(checkTitleRowResultXml).find('lackingColMetaList').find('DODataImportColMetaInfo');
+	var colDispName, colName;
+	var isPrimaryKey;
+	var inputColNode;
+	$('[dataimpColValue="DOColValue"]').remove();
+	var dataimpInputColListNode = $('[dataimpColValue="List"]');
+	for(i = 0; i < inputColMetaList.length; i++) {
+		colMeta = inputColMetaList[i];
+		
+		dbCol = $(colMeta).find('dbCol')[0];
+		metaDataField = $(colMeta).find('metaDataField')[0];
+		colDispName = $(metaDataField).find('fieldDispName').text();
+		colName = $(metaDataField).find('fieldName').text();
+		isPrimaryKey = $(dbCol).find('primaryKey').text();
+		
+		inputColNode = $(_dataimpInputColNodeCopy).clone();
+		$(inputColNode).find('#dataimpInputColDispName').text(colDispName);
+		if(isPrimaryKey == "true") {
+			$(inputColNode).find('#dataimpInputColDispName').removeClass('primarykey').addClass('primarykey');
+		} else {
+			$(inputColNode).find('#dataimpInputColDispName').removeClass('primarykey');
+		}
+		
+		$(inputColNode).find('[dataimpColValue="colName"]').val(colName);
+		
+		$(dataimpInputColListNode).append(inputColNode);
+	}
+	
+	
+	//show dialog ------------------------
+	$('#modal-dataimp-input-required').find('.btn-primary').unbind('click').bind('click', function(event) {
+		$('#modal-dataimp-input-required').modal('hide');
+		importDataExcel();
+	});
+	$('#modal-dataimp-input-required').modal();
+}
+
+function importDataExcel() {
+	var colValueListXml = easyJsDomUtil.mappingDomNodeToDataXml(
+		$('[dataimpColValue="List"]')[0], "dataimpColValue"
+	);
+	
+	myAjax({
+		url: WEB_APP + "/cloudDataService.do",
+		type: "post",
+		dataType: "text",
+		data: {
+			serviceType: "${basePackage}.service.${dataClassName}DataImportExportService",
+			serviceMethod: "importDataExcel",
+			fileName: _dataimpImportFileName,
+			sheetIndex: _dataimpImportSheetIndex,
+			colValueListXml: colValueListXml
+		},
+		success: function(response) {
+			//DODataImportResult
+			showDataImportResult(response);
+		},
+	});
+}
+
+function showDataImportResult(dataImportResultXml) {
+	var tableName = $(dataImportResultXml).find('tableName').text();
+	var tableComment = $(dataImportResultXml).find('tableComment').text();
+	var totalCount = $(dataImportResultXml).find('totalCount').text();
+	var insertedCount = $(dataImportResultXml).find('insertedCount').text();
+	var updatedCount = $(dataImportResultXml).find('updatedCount').text();
+	var errorCount = $(dataImportResultXml).find('errorCount').text();
+	var importResultFile = $(dataImportResultXml).find('importResultFile').text();
+	
+	var msg = "Data of " + tableName + "(" + tableComment + ")" + " imported:\n" 
+		+ "    " + "Total   :" + totalCount + "\n"
+		+ "    " + "Inserted:" + insertedCount + "\n"
+		+ "    " + "Updated:" + updatedCount + "\n"
+		+ "    " + "Error:" + errorCount + "\n"
+		+ "\n"
+		+ "Click 'OK' to download result xlsx"
+		;
+		
+	myShowConfirmMsg(msg, function(){
+		window.location = WEB_APP + "/cloudDataService.do?" 
+			+ "serviceType=" + "${basePackage}.service.${dataClassName}DataImportExportService"
+			+ "&serviceMethod=downloadTempExcel" 
+			+ "&fileName=" + importResultFile; 
+	});
 }
 
 function doExportData() {

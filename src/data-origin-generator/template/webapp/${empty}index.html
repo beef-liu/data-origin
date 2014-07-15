@@ -133,25 +133,93 @@
 
   </div> <!-- end of container -->
 
-	<div id="anim-loading-container" style="position:absolute; width: 100%; height: 100%;">
+	<div id="anim-loading-container" style="position:absolute; width: 100%; height: 100%;display:none;">
 		<div id="anim-loading" style="position:absolute; width: 48px; height: 48px; background: center; background-color: #353535; border-radius: 4px; filter:alpha(Opacity=128);-moz-opacity:0.5;opacity: 0.5;">
 			<img class="icon-rotating" style="background-image: url(myimg/loading_gray.png); background-size:48px 48px; position:absolute; width: 48px; height:48px;" src="myimg/empty.png" />  
 		</div>
 	</div>
 
-	<!-- Modal -->
+	<!-- Modal (alert msg)-->
 	<div id="modal-alert" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		  <div class="modal-dialog">
 		    <div class="modal-content">
 		      <div class="modal-header">
 		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-		        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+		        <h4 class="modal-title" id="myModalLabel"></h4>
 		      </div>
 		      <div class="modal-body">
 		      	<pre id="modal-msg" style="border: none;"></pre>
 		      </div>
 		      <div class="modal-footer">
 		        <button type="button" class="btn btn-primary" style="display: none;float:right;">OK</button>
+		        <button type="button" class="btn btn-default" data-dismiss="modal" style="float:right; margin-right:8px;">Cancel</button>
+		      </div>
+		    </div>
+		  </div>
+	</div>    
+	<!-- Modal (choose sheet)-->
+	<div id="modal-choose-sheet" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Info</h4>
+		      </div>
+		      <div class="modal-body">
+		      	<pre id="modal-msg" style="border: none;">More than 1 sheet in uploaded excel, choose the sheet</pre>
+		      	<div style="padding-left: 8px;">
+		      		<select id="dropdown-sheet-name">
+		      			<option></option>
+		      		</select>
+		      	</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" style="float:right;">OK</button>
+		        <button type="button" class="btn btn-default" data-dismiss="modal" style="float:right; margin-right:8px;">Cancel</button>
+		      </div>
+		    </div>
+		  </div>
+	</div>    
+	<!-- Modal (input required field)-->
+	<div id="modal-dataimp-input-required" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Info</h4>
+		      </div>
+		      <div class="modal-body">
+		      	<span id="modal-msg" style="border: none; background-color: #e1e1e1;">Title row in your excel(</span>
+		      	<span style="background-color: #41aa30;">Green columns</span>
+		      	<span style="border: none; background-color: #e1e1e1;"> matched DB column):</span>
+		      	<div style="overflow: auto;">
+			      	<table>
+			      		<th id="dataimpColList">
+			      			<td id="dataimpColDispName" class="dataimp-input-required-td matched-db-col">001</td>
+			      		</th>
+			      	</table>
+		      	</div>
+
+				<br />
+		      	<span id="modal-msg" style="border: none; background-color: #e1e1e1;">You can set value to update for columns below(Red ones are primary keys):</span>
+		      	<div>
+		  			<table class="my-table-search" style="width: 99%;">
+		  				<tbody>
+		  					<tr>
+		  						<td class="my-td-search" dataimpColValue="List">
+		  							<div dataimpColValue="DOColValue">
+		  								<label id="dataimpInputColDispName" class="dataimp-input-required-label primarykey">001</label>
+		  								<input type="hidden" dataimpColValue="colName"/>
+		  								<input type="text" dataimpColValue="colValue"/>
+		  							</div>
+		  						</td>
+		  					</tr>
+		  				</tbody>
+		  			</table>
+		      	</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" style="float:right;">OK</button>
 		        <button type="button" class="btn btn-default" data-dismiss="modal" style="float:right; margin-right:8px;">Cancel</button>
 		      </div>
 		    </div>

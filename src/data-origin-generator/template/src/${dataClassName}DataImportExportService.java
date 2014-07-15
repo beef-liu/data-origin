@@ -22,19 +22,22 @@ public class ${dataClassName}DataImportExportService extends DODataImportExportS
 			ResponseWrapper response) {
 		return super.checkDataExcelSheetCount(request, response);
 	}
-	
+
 	public String checkDataExcelTitleRow(RequestWrapper request,
-			ResponseWrapper response, int sheetIndex) {
+			ResponseWrapper response,
+			String fileName,
+			int sheetIndex) {
 		String tableName = "${tableName}";
-		return super.checkDataExcelTitleRow(request, response, tableName, sheetIndex);
+		return super.checkDataExcelTitleRow(request, response, tableName, fileName, sheetIndex);
 	}
 	
 	public String importDataExcel(RequestWrapper request,
-			ResponseWrapper response, int sheetIndex,
+			ResponseWrapper response,
+			String fileName,
+			int sheetIndex,
 			String colValueListXml) {
 		String tableName = "${tableName}";
-		return super.importDataExcel(request, response, tableName, sheetIndex,
-				colValueListXml);
+		return super.importDataExcel(request, response, tableName, fileName, sheetIndex, colValueListXml);
 	}
 	
 }

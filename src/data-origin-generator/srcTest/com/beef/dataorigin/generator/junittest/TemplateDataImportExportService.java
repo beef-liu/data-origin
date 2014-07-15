@@ -24,17 +24,20 @@ public class TemplateDataImportExportService extends DODataImportExportService {
 	}
 	
 	public String checkDataExcelTitleRow(RequestWrapper request,
-			ResponseWrapper response, int sheetIndex) {
+			ResponseWrapper response,
+			String fileName,
+			int sheetIndex) {
 		String tableName = "";
-		return super.checkDataExcelTitleRow(request, response, tableName, sheetIndex);
+		return super.checkDataExcelTitleRow(request, response, tableName, fileName, sheetIndex);
 	}
 	
 	public String importDataExcel(RequestWrapper request,
-			ResponseWrapper response, int sheetIndex,
+			ResponseWrapper response,
+			String fileName,
+			int sheetIndex,
 			String colValueListXml) {
 		String tableName = "";
-		return super.importDataExcel(request, response, tableName, sheetIndex,
-				colValueListXml);
+		return super.importDataExcel(request, response, tableName, fileName, sheetIndex, colValueListXml);
 	}
 	
 }

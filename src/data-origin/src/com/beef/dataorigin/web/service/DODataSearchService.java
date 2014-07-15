@@ -24,9 +24,13 @@ public class DODataSearchService {
 		) {
 		Connection conn = null;
 		try {
-			
-			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
-					searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());
+			DOSearchCondition searchCondition = null;
+			if(searchConditionXml == null || searchConditionXml.length() == 0) {
+				searchCondition = new DOSearchCondition(); 
+			} else {
+				searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
+						searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());
+			}
 			
 			conn = DOServiceUtil.getOnEditingDBConnection();
 			
@@ -53,8 +57,13 @@ public class DODataSearchService {
 				return DOServiceMsgUtil.getDefinedMsgXml(DOServiceMsgUtil.ErrorSearchPageSizeExceedMax);
 			}
 			
-			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
-					searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());
+			DOSearchCondition searchCondition = null;
+			if(searchConditionXml == null || searchConditionXml.length() == 0) {
+				searchCondition = new DOSearchCondition(); 
+			} else {
+				searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
+						searchConditionXml, DOSearchCondition.class, DataOriginWebContext.getDataOriginContext());
+			}
 			
 			String[] orderByFieldArray = DODataDaoUtil.splitByDelim(orderByFields, ",");
 			
