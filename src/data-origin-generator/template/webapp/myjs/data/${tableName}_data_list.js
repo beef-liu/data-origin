@@ -404,10 +404,10 @@ function showDataImportResult(dataImportResultXml) {
 	var importResultFile = $(dataImportResultXml).find('importResultFile').text();
 	
 	var msg = "Data of " + tableName + "(" + tableComment + ")" + " imported:\n" 
-		+ "    " + "Total   :" + totalCount + "\n"
-		+ "    " + "Inserted:" + insertedCount + "\n"
-		+ "    " + "Updated:" + updatedCount + "\n"
-		+ "    " + "Error:" + errorCount + "\n"
+		+ "  " + "Total   :" + totalCount + "\n"
+		+ "  " + "Inserted:" + insertedCount + "\n"
+		+ "  " + "Updated :" + updatedCount + "\n"
+		+ "  " + "Error   :" + errorCount + "\n"
 		+ "\n"
 		+ "Click 'OK' to download result xlsx"
 		;
