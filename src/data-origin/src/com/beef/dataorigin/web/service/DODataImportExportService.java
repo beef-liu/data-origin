@@ -60,7 +60,6 @@ public class DODataImportExportService {
 		MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
 		
 		Connection conn = null;
-		InputStream inputExcel = null;
 		OutputStream outputExcel = null;
 		try {
 			DOSearchCondition searchCondition = (DOSearchCondition) XmlDeserializer.stringToObject(
@@ -72,14 +71,14 @@ public class DODataImportExportService {
 					tableName.toLowerCase() + "_data_list.xlsx"
 					);
 			
-			inputExcel = new FileInputStream(templateFile);
+			Workbook workbook = ExcelUtil.createWorkbook(templateFile, isXLSX);
 			outputExcel = new FileOutputStream(outputTempFile);
 
 			conn = DOServiceUtil.getOnEditingDBConnection();
-			
 			DODataExportResult exportResult = DODataImportExportDao.exportDataExcel(
-					conn, inputExcel, outputExcel, isXLSX, dataImportSetting, dbTable, 
+					conn, workbook, outputExcel, dataImportSetting, dbTable, 
 					searchCondition);
+
 			exportResult.setExportResultFile(outputTempFileName);
 			
 			return XmlSerializer.objectToString(exportResult, DODataExportResult.class);
@@ -89,10 +88,6 @@ public class DODataImportExportService {
 		} finally {
 			try {
 				conn.close();
-			} catch(Throwable e) {
-			}
-			try {
-				inputExcel.close();
 			} catch(Throwable e) {
 			}
 			try {
@@ -214,11 +209,8 @@ public class DODataImportExportService {
 		boolean isXLSX = fileName.endsWith(".xlsx");
 		
 		//check columns --------------------------------------
-		InputStream inputExcel = null;
 		try {
-			inputExcel = new FileInputStream(excelImportFile);
-
-			Workbook workBook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
+			Workbook workBook = ExcelUtil.createWorkbook(excelImportFile, isXLSX);
 			Sheet sheet = workBook.getSheetAt(sheetIndex);
 			
 			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
@@ -274,11 +266,6 @@ public class DODataImportExportService {
 		} catch(Throwable e) {
 			logger.error(null, e);
 			return DOServiceMsgUtil.makeMsgXml(e);
-		} finally {
-			try {
-				inputExcel.close();
-			} catch(Throwable e) {
-			}
 		}
 	}
 	
@@ -304,9 +291,8 @@ public class DODataImportExportService {
 		
 		//assigned col values
 		Connection conn = null;
-		InputStream inputExcel = null;
+		boolean isAutoCommit = false;
 		try {
-			inputExcel = new FileInputStream(excelImportFile);
 			
 			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
 			MMetaDataImportSetting mDataImportSetting = DataOriginWebContext.getDataOriginContext().getMMetaDataImportSetting(tableName);
@@ -337,11 +323,12 @@ public class DODataImportExportService {
 			}
 	
 			//update DB
-			conn = DOServiceUtil.getOnEditingDBConnection();
-			
-			Workbook workBook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
+			Workbook workBook = ExcelUtil.createWorkbook(excelImportFile, isXLSX);
 			Sheet sheet = workBook.getSheetAt(sheetIndex);
 			
+			conn = DOServiceUtil.getOnEditingDBConnection();
+			isAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(true);
 			DODataImportResult dataImportResult = DODataImportExportDao.importDataExcel(
 					conn, sheet, 
 					//originFileName, 
@@ -370,11 +357,11 @@ public class DODataImportExportService {
 			return DOServiceMsgUtil.makeMsgXml(e);
 		} finally {
 			try {
-				conn.close();
+				conn.setAutoCommit(isAutoCommit);
 			} catch(Throwable e) {
-			}
+			} 
 			try {
-				inputExcel.close();
+				conn.close();
 			} catch(Throwable e) {
 			}
 		}

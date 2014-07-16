@@ -264,7 +264,7 @@ function showSheetChooser(checkSheetResultXml) {
 			sheetIndex = 0;
 		}
 
-		importFileCheckTitleRow(response, sheetIndex);
+		importFileCheckTitleRow(checkSheetResultXml, sheetIndex);
 	});
 	$('#modal-choose-sheet').modal();
 }
@@ -333,6 +333,13 @@ function showDataImportColInput(checkTitleRowResultXml) {
 	var inputColNode;
 	$('[dataimpColValue="DOColValue"]').remove();
 	var dataimpInputColListNode = $('[dataimpColValue="List"]');
+	
+	if(inputColMetaList.length == 0) {
+		$('#modal-dataimp-input-required-msg').hide();
+	} else {
+		$('#modal-dataimp-input-required-msg').show();
+	}
+	
 	for(i = 0; i < inputColMetaList.length; i++) {
 		colMeta = inputColMetaList[i];
 		

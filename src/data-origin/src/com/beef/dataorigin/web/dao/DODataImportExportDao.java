@@ -21,6 +21,7 @@ import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternCompiler;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.poi.hssf.record.chart.BeginRecord;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -28,6 +29,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 
 import com.beef.dataorigin.context.data.MDBTable;
 import com.beef.dataorigin.context.data.MMetaDataImportSetting;
@@ -52,9 +54,9 @@ public class DODataImportExportDao {
 	
 	public final static int DEFAULT_MAX_COL = 512;
 	
-	private static final short DEFAULT_BG_COLOR_ERROR = IndexedColors.RED.index;
-	private static final short DEFAULT_BG_COLOR_DATA_ROW_INSERTED = IndexedColors.YELLOW.index;
-	private static final short DEFAULT_BG_COLOR_DATA_ROW_UPDATED = IndexedColors.GREEN.index;
+	private static final short DEFAULT_BG_COLOR_ERROR = IndexedColors.ORANGE.index;
+	private static final short DEFAULT_BG_COLOR_DATA_ROW_INSERTED = IndexedColors.LIGHT_YELLOW.index;
+	private static final short DEFAULT_BG_COLOR_DATA_ROW_UPDATED = IndexedColors.LIME.index;
 	
 	private static HashMap<String, Short> _bgColorMap;
 	static {
@@ -133,14 +135,12 @@ public class DODataImportExportDao {
 	 */
 	public static DODataExportResult exportDataExcel(
 			Connection conn,
-			InputStream inputExcel,
+			Workbook workbook,
 			OutputStream outputExcel,
-			boolean isXLSX,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			DOSearchCondition searchCondition
 			) throws IOException, SQLException, ParseException {
-		Workbook workbook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
 		Sheet sheet = workbook.getSheetAt(0);
 		
 		int beginCol = 0;
@@ -240,9 +240,8 @@ public class DODataImportExportDao {
 	
 	public static DODataImportResult importDataExcel(
 			Connection conn,
-			InputStream inputExcel,
-			//String originalFileName,
-			boolean isXLSX, int sheetIndex,
+			Workbook workbook,
+			int sheetIndex,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
@@ -251,7 +250,6 @@ public class DODataImportExportDao {
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
 
-		Workbook workbook = ExcelUtil.createWorkbook(inputExcel, isXLSX);
 		Sheet sheet = workbook.getSheetAt(sheetIndex);
 		
 		List<List<Object>> allRowList = ExcelUtil.readRowsAutoDetectEndCol(sheet, beginCol, maxCol, beginRow);
@@ -327,14 +325,16 @@ public class DODataImportExportDao {
 		String errorMsg = null;
 
 		CellStyle cellStyleOfError = sheet.getWorkbook().createCellStyle();
-		cellStyleOfError.setFillBackgroundColor(getExcelBGColor(dataImportSetting.getBgColorError(), DEFAULT_BG_COLOR_ERROR));
+		cellStyleOfError.setFillForegroundColor(getExcelBGColor(dataImportSetting.getBgColorError(), DEFAULT_BG_COLOR_ERROR));
 		cellStyleOfError.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
 		CellStyle cellStyleOfInserted = sheet.getWorkbook().createCellStyle();
-		cellStyleOfInserted.setFillBackgroundColor(getExcelBGColor(dataImportSetting.getBgColorDataRowInserted(), DEFAULT_BG_COLOR_DATA_ROW_INSERTED));
+		cellStyleOfInserted.setFillForegroundColor(getExcelBGColor(dataImportSetting.getBgColorDataRowInserted(), DEFAULT_BG_COLOR_DATA_ROW_INSERTED));
+		cellStyleOfInserted.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
 		CellStyle cellStyleOfUpdated = sheet.getWorkbook().createCellStyle();
-		cellStyleOfUpdated.setFillBackgroundColor(getExcelBGColor(dataImportSetting.getBgColorDataRowUpdated(), DEFAULT_BG_COLOR_DATA_ROW_UPDATED));
+		cellStyleOfUpdated.setFillForegroundColor(getExcelBGColor(dataImportSetting.getBgColorDataRowUpdated(), DEFAULT_BG_COLOR_DATA_ROW_UPDATED));
+		cellStyleOfUpdated.setFillPattern(CellStyle.SOLID_FOREGROUND);
 		
 		for(int i = 1; i < allRowList.size(); i++) {
 			//verify data row
@@ -587,7 +587,8 @@ public class DODataImportExportDao {
 				for(i = 0; i < colValueAssignList.size(); i++) {
 					importColVal = colValueAssignList.get(i);
 					
-					pstmt.setObject(index++, importColVal.dbVal);
+					dbVal = getDBValueFromExcelValue(importColVal.dbVal, importColVal.getDbCol());
+					pstmt.setObject(index++, dbVal);
 				}
 			}
 			
@@ -718,7 +719,8 @@ public class DODataImportExportDao {
 						continue;
 					}
 					
-					pstmt.setObject(index++, importColVal.dbVal);
+					dbVal = getDBValueFromExcelValue(importColVal.dbVal, importColVal.getDbCol());
+					pstmt.setObject(index++, dbVal);
 				}
 			}
 
@@ -744,7 +746,8 @@ public class DODataImportExportDao {
 						continue;
 					}
 					
-					pstmt.setObject(index++, importColVal.dbVal);
+					dbVal = getDBValueFromExcelValue(importColVal.dbVal, importColVal.getDbCol());
+					pstmt.setObject(index++, dbVal);
 				}
 			}
 		

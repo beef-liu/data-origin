@@ -1,5 +1,7 @@
 package com.beef.dataorigin.util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -125,6 +127,17 @@ public class ExcelUtil {
 		return cellValList;
 	}
 	
+	public static Workbook createWorkbook(File excelFile, boolean isXLSX) throws IOException {
+		InputStream inputExcel = null;
+		try {
+			inputExcel = new FileInputStream(excelFile);
+			
+			return createWorkbook(inputExcel, isXLSX);
+		} finally {
+			inputExcel.close();
+		}
+	}
+
 	public static Workbook createWorkbook(InputStream inputExcel, boolean isXLSX) throws IOException {
 		if (isXLSX) {
 			return new XSSFWorkbook(inputExcel);
