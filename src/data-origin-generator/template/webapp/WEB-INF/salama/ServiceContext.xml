@@ -10,7 +10,7 @@
       <ContextClass>com.salama.service.clouddata.CloudDataServiceContext</ContextClass>
     </ContextSetting>
     <ContextSetting>
-      <ConfigLocation>/WEB-INF/salama/DataOriginWebContext.xml</ConfigLocation>
+      <ConfigLocation>/WEB-INF/data-origin/DataOriginWebContext.xml</ConfigLocation>
       <ContextClass>com.beef.dataorigin.web.context.DataOriginWebContext</ContextClass>
     </ContextSetting>
   </Contexts>

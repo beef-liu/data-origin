@@ -9,9 +9,12 @@ import javax.servlet.ServletContext;
 
 import org.apache.log4j.Logger;
 
+import MetoXML.XmlDeserializer;
+import MetoXML.XmlSerializer;
 import MetoXML.Base.XmlParseException;
 
 import com.beef.dataorigin.context.DataOriginContext;
+import com.beef.dataorigin.web.upload.IDOFilePersistence;
 import com.salama.service.clouddata.CloudDataAppContext;
 import com.salama.service.clouddata.core.AppContext;
 import com.salama.service.clouddata.core.AppServiceContext;
@@ -25,21 +28,47 @@ public class DataOriginWebContext implements CommonContext {
 
 	private final Logger logger = Logger.getLogger(DataOriginWebContext.class);
 
-	private final static String DIR_DATA_ORIGIN_BASE = "WEB-INF/data-origin";
+	private final static String DEFAULT_DIR_DATA_ORIGIN_BASE = "WEB-INF/data-origin";
+	
+	private static DataOriginWebContextConfig _dataOriginWebContextConfig = null;
 	
 	private static DataOriginContext _dataOriginContext = null;
-	
-	
+
+
+	private static IDOFilePersistence _uploadFilePersistence = null;
+
 	public static DataOriginContext getDataOriginContext() {
 		return _dataOriginContext;
+	}
+	
+	public static IDOFilePersistence getUploadFilePersistence() {
+		return _uploadFilePersistence;
 	}
 
 	@Override
 	public void reload(ServletContext servletContext, String configLocation) {
 		try {
-			String baseDirPath = servletContext.getRealPath(DIR_DATA_ORIGIN_BASE);
-			File baseDir = new File(baseDirPath);
+			//WebContext config
+			String configFilePath = servletContext.getRealPath(configLocation);
+			XmlDeserializer xmlDes = new XmlDeserializer();
+			_dataOriginWebContextConfig = (DataOriginWebContextConfig) xmlDes.Deserialize(
+					configFilePath, DataOriginWebContextConfig.class, XmlDeserializer.DefaultCharset);
 			
+			//init file persistenc
+			_uploadFilePersistence = (IDOFilePersistence) Class.forName(
+					_dataOriginWebContextConfig.getUploadFilePersistenceClass()).newInstance(); 
+
+			//base dir of DataOriginContext 
+			String baseDirPath = _dataOriginWebContextConfig.getDataOriginBaseDir();
+			if(baseDirPath == null || baseDirPath.length() == 0) {
+				baseDirPath = servletContext.getRealPath(DEFAULT_DIR_DATA_ORIGIN_BASE);
+			} else if(baseDirPath.startsWith("WEB-INF") || baseDirPath.startsWith("/WEB-INF")) {
+				baseDirPath = servletContext.getRealPath(baseDirPath);
+			} else {
+				//_dataOriginWebContextConfig.getDataOriginBaseDir() is an absolute path
+			}
+			
+			File baseDir = new File(baseDirPath);
 			initDataOriginContext(baseDir);
 			
 		} catch(Throwable e) {

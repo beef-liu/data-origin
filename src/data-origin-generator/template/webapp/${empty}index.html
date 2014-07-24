@@ -9,14 +9,16 @@
     
     <title>$!{tableName}</title>
 
+    <link rel="shortcut icon" href="images/favicon.ico">
+
     <!-- Loading Bootstrap -->
     <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!-- Loading Flat UI -->
     <link href="css/flat-ui.css" rel="stylesheet">
+    
+    <!-- my css -->
     <link href="mycss/my-base.css" rel="stylesheet">
-
-    <link rel="shortcut icon" href="images/favicon.ico">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
     <!--[if lt IE 9]>
@@ -50,8 +52,8 @@
     
     	function loadContentHtml(thisNode) {
     		var showingHtmlName = $('#main-content').attr('htmlName');
-    		var htmlName = $(thisNode).attr('htmlName');
-    		if(showingHtmlName == htmlName) {
+    		var dataListHtmlName = $(thisNode).attr('htmlName');
+    		if(showingHtmlName == dataListHtmlName) {
     			return;
     		}
     		
@@ -66,26 +68,49 @@
     		}
     		
 
-    		//load html ----------------------------------------
+    		//load XXX_data_list.html and XXX_data_list.js ----------------------------------------
 			$.ajax({
-				url: htmlName,
+				url: dataListHtmlName,
 				type: "GET",
 				dataType: "text",
 				success: function(response) {
 					$('#main-content').html(response);
-					$('#main-content').attr('htmlName', htmlName);
+					$('#main-content').attr('htmlName', dataListHtmlName);
 					
 		    		//load js ----------------------------------------
 					var scriptNode = document.createElement("script");
 					//"myjs/data/${tableName}_data_list.js"
-					var scriptPath = "myjs/data/" + htmlName.substring(0, htmlName.length - 4) + "js";
+					var scriptPath = "myjs/data/" + dataListHtmlName.substring(0, dataListHtmlName.length - "html".length) + "js";
 					scriptNode.setAttribute("src", scriptPath);
 					$(scriptNode).load(function() {
 					});
 					document.head.appendChild(scriptNode);
 				}
 			});
+			
+    		//load XXX_data_detail.html and XXX_data_detail.js ----------------------------------------
+    		var dataDetailHtmlName = dataListHtmlName.substring(0, dataListHtmlName.length - "list.html".length) + "detail.html";
+			$.ajax({
+				url: dataDetailHtmlName,
+				type: "GET",
+				dataType: "text",
+				success: function(response) {
+					$('#data_detail_content').html(response);
+					$('#data_detail_content').attr('htmlName', dataDetailHtmlName);
+					
+		    		//load js ----------------------------------------
+					var scriptNode = document.createElement("script");
+					//"myjs/data/${tableName}_data_list.js"
+					var scriptPath = "myjs/data/" + dataDetailHtmlName.substring(0, dataDetailHtmlName.length - "html".length) + "js";
+					scriptNode.setAttribute("src", scriptPath);
+					$(scriptNode).load(function() {
+					});
+					document.head.appendChild(scriptNode);
+				}
+			});
+			
     	}
+    	
     </script>
   </head>
   <body style="height:100%;">
@@ -94,7 +119,7 @@
   	<!-- Header #f3f3f3 #2f4154-->
 	<header class="my-navibar" style="background:#f3f3f3;">
 		<div style="float:left;">
-			<a href="" style="padding:4px;"><img src="myimg/company-logo.png" /></a>
+			<a href="" style="padding:4px;"><img src="myimg/company-logo.png" style="max-height: 32px;" /></a>
 		</div>
 		<div style="float:right;">
 			<a href="#" style="padding-right: 8px;"><img src="myimg/sign_out.png" style="width:22px; height:22px;" /> </a>
@@ -128,6 +153,8 @@
 	  			</li>
 	  		</ul>
 	  	</div>
+	  	
+	  	<!-- main content -->
 	  	<div id="main-content" class="my-main-content" style="">
 	        
 	  	</div>
@@ -136,7 +163,7 @@
 	<!-- Footer -->
 	<footer class="my-footbar" style="background:#ffffff; font-size: small; font-weight: normal;">
 		<div style="float:left;">
-			<a href="" style="padding:4px;"><span>Copyright @ 2014 Salama Soft, Inc</span></a>
+			<a href="" style="padding:4px;"><span>Copyright @ 2014 XXXXX, Inc</span></a>
 		</div>
 	</footer>
 
@@ -235,7 +262,13 @@
 		      </div>
 		    </div>
 		  </div>
-	</div>    
+	</div>
+	<!-- Modal (DataDetail) -->
+	<div id="modal-preview-web-page" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" id="data_detail_content" style="background-color: #ffffff; width:1000px; height:684px;">
+	  </div>
+	</div>
+	    
 
   </body>
 </html>

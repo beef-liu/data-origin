@@ -279,11 +279,22 @@ public class DataOriginContext implements ClassFinder {
 			mDBTable.getUniqueIndexNameList().add(dbTable.getUniqueIndex().get(i).getName());
 		}
 		
+		List<String> pkList = new ArrayList<String>();
 		DBColumn dbCol;
 		for(int i = 0; i < dbTable.getColumns().size(); i++) {
 			dbCol = dbTable.getColumns().get(i);
 			mDBTable.getColumnMap().put(dbCol.getName(), dbCol);
+			
+			if(dbCol.isPrimaryKey()) {
+				pkList.add(dbCol.getName());
+			}
 		}
+		
+		String[] pks = new String[pkList.size()];
+		for(int i = 0; i < pks.length; i++) {
+			pks[i] = pkList.get(i);
+		}
+		mDBTable.setPrimaryKeys(pks);
 
 		return mDBTable;
 	}

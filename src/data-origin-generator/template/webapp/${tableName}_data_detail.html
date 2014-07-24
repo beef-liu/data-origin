@@ -1,0 +1,39 @@
+<!--#set(MetaDataUISetting dataUISetting, MMetaDataUISetting mDataUISetting, DBTable dbTable, MDBTable mDBTable)-->
+		<!-- modified to load dynamicly 
+	    <script src="myjs/data/${tableName}_data_detail.js"></script>
+		-->
+	  		<!-- Content Header -->
+	  		<div id="detail-content-header" style="text-align: center;">
+				<!-------- Search conditions ---------->		  		
+		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 12px;float: right;">
+		  			<div class="my-button-s my-button-bk-danger">
+			  			<a href="#" style="">
+			  				<img src="myimg/btn_save.png" />
+			  			</a>
+		  			</div>
+		  		</div>
+	  			
+	  			<div>
+	  				<h5 style="margin: 8px;">$!{dbTable.comment}</h5>
+	  			</div>
+	  			
+	  		</div>
+	  		
+	  		<!-- Content Table -->
+	  		<div id="detail-content-table" style="height:100%; width: 100%; overflow: auto; background-color: #f3f3f3">
+	  			<table class="" style="width: 99%;">
+	  				<tbody id="detail-table-tbody" style="">
+	  					<tr class="">
+	  						<td class="my-td-detail" dataDetail="DataDetail">
+	  						<!--#for(MetaDataField metaDataField : dataUISetting.fieldList)-->
+	  							<div>
+	  							<!--#set(DBColumn dbCol = mDBTable.columnMap.get(metaDataField.fieldName))-->
+	  								<label>$!{metaDataField.fieldDispName}:</label>
+	  								<input type="text" dataDetail="$!{metaDataField.fieldName}"/>
+	  							</div>
+	  						<!--#end-->
+	  						</td>
+	  					</tr>
+	  				</tbody>
+	  			</table>
+	  		</div>

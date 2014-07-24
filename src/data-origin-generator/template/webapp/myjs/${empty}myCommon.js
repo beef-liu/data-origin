@@ -1,5 +1,6 @@
 var WEB_APP = "/${webContextName}";
 
+var ERROR_MSG_NODE = "<DOServiceMsg>";
 var DEFAULT_MSG_TITLE_ERROR = "Error";
 var DEFAULT_MSG_TITLE_CONFIRM = "Confirm";
 
@@ -23,7 +24,7 @@ function myAjax(args) {
 		success: function(response) {
 			myHideLoading();
 			
-			if(response.trim().indexOf("<DOServiceMsg>") == 0) {
+			if(response.trim().indexOf(ERROR_MSG_NODE) == 0) {
 				//Service Msg
 				myShowErrorMsg($(response).find('msg').text());
 			} else {

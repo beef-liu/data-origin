@@ -15,6 +15,8 @@ public class MDBTable {
     private List<String> _uniqueIndexNameList = new ArrayList<String>();
 
     private Map<String, DBColumn> _columnMap = new HashMap<String, DBColumn>();
+    
+    private String[] _primaryKeys = null;
 
 	public String getTableName() {
 		return _tableName;
@@ -46,6 +48,13 @@ public class MDBTable {
 		return _columnMap;
 	}
     
-    
+
+	public String[] getPrimaryKeys() {
+		return _primaryKeys;
+	}
+
+	public void setPrimaryKeys(String[] primaryKeys) {
+		_primaryKeys = primaryKeys;
+	}
 
 }

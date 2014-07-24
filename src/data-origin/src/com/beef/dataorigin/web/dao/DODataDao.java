@@ -29,6 +29,7 @@ import com.beef.dataorigin.web.util.DOSqlParamUtil;
 import com.salama.modeldriven.util.db.DBColumn;
 import com.salama.modeldriven.util.db.DBTable;
 import com.salama.service.clouddata.util.dao.QueryDataDao;
+import com.salama.service.clouddata.util.dao.UpdateDataDao;
 import com.salama.util.db.JDBCUtil;
 
 public class DODataDao extends AbstractReflectInfoCachedSerializer {
@@ -283,6 +284,29 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		}
 	}
 
+	public static int insertData(
+			Connection conn,
+			String tableName, Object data
+			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		return UpdateDataDao.insertData(conn, tableName, data);
+	}
+	
+	public static int updateDataByPK(
+			Connection conn,
+			String tableName, Object data
+			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
+		return UpdateDataDao.updateData(conn, tableName, data, mDBTable.getPrimaryKeys());
+	}
+
+	public static int deleteDataByPK(
+			Connection conn,
+			String tableName, Object data
+			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
+		return UpdateDataDao.deleteData(conn, tableName, data, mDBTable.getPrimaryKeys());
+	}
+	
 	@Override
 	protected void BackwardToNode(ITreeNode arg0, int arg1) {
 	}
