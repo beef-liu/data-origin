@@ -11,7 +11,7 @@
     </ContextSetting>
     <ContextSetting>
       <ConfigLocation>/WEB-INF/data-origin/DataOriginWebContext.xml</ConfigLocation>
-      <ContextClass>com.beef.dataorigin.web.context.DataOriginWebContext</ContextClass>
+      <ContextClass>${basePackage}.context.MyDataOriginWebContext</ContextClass>
     </ContextSetting>
   </Contexts>
 </ServiceContext>

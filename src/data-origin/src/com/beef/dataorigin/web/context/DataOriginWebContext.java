@@ -19,8 +19,9 @@ import com.salama.service.clouddata.CloudDataAppContext;
 import com.salama.service.clouddata.core.AppContext;
 import com.salama.service.clouddata.core.AppServiceContext;
 import com.salama.service.core.context.CommonContext;
+import com.salama.service.core.context.ServiceContext;
 
-public class DataOriginWebContext implements CommonContext {
+public abstract class DataOriginWebContext implements CommonContext {
 	/**
 	 * 
 	 */
@@ -28,14 +29,14 @@ public class DataOriginWebContext implements CommonContext {
 
 	private final Logger logger = Logger.getLogger(DataOriginWebContext.class);
 
-	private final static String DEFAULT_DIR_DATA_ORIGIN_BASE = "WEB-INF/data-origin";
+	protected final static String DEFAULT_DIR_DATA_ORIGIN_BASE = "WEB-INF/data-origin";
 	
-	private static DataOriginWebContextConfig _dataOriginWebContextConfig = null;
+	protected static DataOriginWebContextConfig _dataOriginWebContextConfig = null;
 	
-	private static DataOriginContext _dataOriginContext = null;
+	protected static DataOriginContext _dataOriginContext = null;
 
 
-	private static IDOFilePersistence _uploadFilePersistence = null;
+	protected static IDOFilePersistence _uploadFilePersistence = null;
 
 	public static DataOriginContext getDataOriginContext() {
 		return _dataOriginContext;
@@ -45,8 +46,7 @@ public class DataOriginWebContext implements CommonContext {
 		return _uploadFilePersistence;
 	}
 
-	@Override
-	public void reload(ServletContext servletContext, String configLocation) {
+	protected void reload(ServletContext servletContext, String configLocation, AppContext appContext) {
 		try {
 			//WebContext config
 			String configFilePath = servletContext.getRealPath(configLocation);
@@ -69,7 +69,7 @@ public class DataOriginWebContext implements CommonContext {
 			}
 			
 			File baseDir = new File(baseDirPath);
-			initDataOriginContext(baseDir);
+			initDataOriginContext(baseDir, appContext);
 			
 		} catch(Throwable e) {
 			logger.error(null, e);
@@ -82,8 +82,8 @@ public class DataOriginWebContext implements CommonContext {
 		_dataOriginContext = null;
 	}
 	
-	private static void initDataOriginContext(File baseDir) throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
-		AppContext appContext = AppServiceContext.getAppContext();
+	private static void initDataOriginContext(File baseDir, AppContext appContext) throws XmlParseException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+		//AppContext appContext = AppServiceContext.getAppContext();
 		_dataOriginContext = new DataOriginContext(baseDir, (CloudDataAppContext) appContext);
 	}
 }

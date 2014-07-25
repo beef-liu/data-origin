@@ -42,7 +42,7 @@ public class DODataDetailService {
 			if(data != null) {
 				return XmlSerializer.objectToString(data, dataClass);
 			} else {
-				return "";
+				return DOServiceMsgUtil.getDefinedMsgXml(DOServiceMsgUtil.ErrorDataDetailDataNotExist);
 			}
 		} catch(Throwable e) {
 			logger.error(null, e);

@@ -12,9 +12,12 @@ import com.beef.dataorigin.web.context.DataOriginWebContext;
 
 public class DOServiceMsgUtil {
 	public final static String ErrorSearchPageSizeExceedMax = "Error.Search.PageSizeOutOfRange";
+
 	public final static String ErrorDataImportSheetMoreThanOne = "Error.DataImport.SheetMoreThanOne";
 	public final static String ErrorDataImportMustExcel = "Error.DataImport.MustUploadExcel";
 	public final static String ErrorDataImportUpdateFailDataNotExist = "Error.DataImport.updateFail.DataNotExist";
+	
+	public final static String ErrorDataDetailDataNotExist = "Error.DataDetail.DataNotExist";
 	
 	public static String getDefinedMsgXml(String msgCode) {
 		return DataOriginWebContext.getDataOriginContext().getServiceMsgXml(msgCode);
@@ -52,9 +55,12 @@ public class DOServiceMsgUtil {
 		List<DOServiceMsg> msgList = new ArrayList<DOServiceMsg>();
 		
 		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorSearchPageSizeExceedMax, "PageSize can not bigger than 500"));
+		
 		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorDataImportMustExcel, "Must upload excel file for data importing"));
 		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorDataImportUpdateFailDataNotExist, "Data updating failed: Not exist"));
 		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorDataImportSheetMoreThanOne, "Please input sheet index"));
+
+		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorDataDetailDataNotExist, "Data not exist"));
 		
 		return msgList;
 	}

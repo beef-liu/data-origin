@@ -226,11 +226,11 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			Connection conn,
 			String tableName, Object data
 			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
-		StringBuilder sql = new StringBuilder();
-		
-		sql.append("select * from ").append(DOSqlParamUtil.wrapNameInSql(DOSqlParamUtil.verifyName(tableName)));
-	
 		DBTable dbTable = DataOriginWebContext.getDataOriginContext().getDBTable(tableName);
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from ").append(DOSqlParamUtil.wrapNameInSql(DOSqlParamUtil.verifyName(dbTable.getTableName())));
+	
 
 		//where conditions -------------------------------------------------------------
 		sql.append(" where ");
@@ -288,7 +288,8 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			Connection conn,
 			String tableName, Object data
 			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
-		return UpdateDataDao.insertData(conn, tableName, data);
+		DBTable dbTable = DataOriginWebContext.getDataOriginContext().getDBTable(tableName);
+		return UpdateDataDao.insertData(conn, dbTable.getTableName(), data);
 	}
 	
 	public static int updateDataByPK(
@@ -296,7 +297,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			String tableName, Object data
 			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
-		return UpdateDataDao.updateData(conn, tableName, data, mDBTable.getPrimaryKeys());
+		return UpdateDataDao.updateData(conn, mDBTable.getTableName(), data, mDBTable.getPrimaryKeys());
 	}
 
 	public static int deleteDataByPK(
@@ -304,7 +305,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			String tableName, Object data
 			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
-		return UpdateDataDao.deleteData(conn, tableName, data, mDBTable.getPrimaryKeys());
+		return UpdateDataDao.deleteData(conn, mDBTable.getTableName(), data, mDBTable.getPrimaryKeys());
 	}
 	
 	@Override

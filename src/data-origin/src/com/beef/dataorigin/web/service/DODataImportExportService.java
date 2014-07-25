@@ -103,15 +103,27 @@ public class DODataImportExportService {
 			String fileName) {
 		try {
 			File downloadTargetFile = getTempExcelFile(request, fileName);
+			String fileExt = getFileExt(downloadTargetFile.getName());
 			
 			response.setContentLength((int)downloadTargetFile.length());
 			response.setContentType(ContentTypeHelper.ApplicationMsExcel);
-			String saveAsFileName = tableName + DateFormatYmdHMS.format(new Date()) + ".xlsx";
+			String saveAsFileName = tableName + DateFormatYmdHMS.format(new Date()) + fileExt;
 			response.setDownloadFileName(request, response, saveAsFileName);
 			
 			response.writeFile(downloadTargetFile);
 		} catch(Throwable e) {
 			logger.error(null, e);
+		}
+	}
+	
+	private static String getFileExt(String fileName) {
+		int index = fileName.lastIndexOf('.');
+		if(index == 0) {
+			return "";
+		} else if (index < 0) {
+			return ".xlsx";
+		} else {
+			return fileName.substring(index);
 		}
 	}
 	
@@ -137,7 +149,8 @@ public class DODataImportExportService {
 		//check columns --------------------------------------
 		InputStream inputExcel = null;
 		OutputStream outputExcel = null;
-		String saveToFileName = newTempExcelFileName();
+		String fileExt = getFileExt(excelMultiFile.multiFile.getOriginalFilename());
+		String saveToFileName = newTempExcelFileName(fileExt);
 		File saveToFile = getTempExcelFile(request, saveToFileName);
 		try {
 			inputExcel = excelMultiFile.multiFile.getInputStream();
@@ -367,8 +380,8 @@ public class DODataImportExportService {
 		}
 	}
 
-	protected String newTempExcelFileName() {
-		return DOServiceUtil.newDataId() + ".xlsx";
+	protected String newTempExcelFileName(String fileExt) {
+		return DOServiceUtil.newDataId() + fileExt;
 	}
 	
 	protected String getResultExcelFileName(String importFileName) {

@@ -134,14 +134,16 @@
 	  					</tr>
 	  				</thead>
 	  				<tbody id="data-tbody" style="" listData="List">
-	  					<tr id="tr-data" class="my-tr" listData="${dataClassName}">
+	  					<tr id="tr-data" class="my-tr" listData="${dataClassName}" primaryKeytrue="Brand" onclick="gotoDetail(this)">
 	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
 	  						<td id="td-row-num" class="my-td"></td>
   						<!--#for(MetaDataField metaDataField : dataUISetting.fieldList)-->
   							<!--#set(DBColumn dbCol = mDBTable.columnMap.get(metaDataField.fieldName))-->
-	  						<td id="td-data-col" class="my-td" listData="${metaDataField.fieldName}" fieldDispFormat="${metaDataField.fieldDispFormat}" isPrimaryKey="${dbCol.primaryKey}"></td>
+	  						<td id="td-data-col" class="my-td" listData="${metaDataField.fieldName}" 
+	  							fieldDispFormat="${metaDataField.fieldDispFormat}" 
+	  							isPrimaryKey="${dbCol.primaryKey}" primaryKey${dbCol.primaryKey}="${metaDataField.fieldName}"></td>
 	  					<!--#end-->
-	  						<td class="my-td"><a href="#" onclick="gotoDetail()"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
+	  						<td class="my-td"><a href="#" onclick="gotoDetail(this)"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
 	  					</tr>
 	  				</tbody>
 	  			</table>

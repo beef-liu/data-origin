@@ -3,33 +3,40 @@
 	    <script src="myjs/data/${tableName}_data_detail.js"></script>
 		-->
 	  		<!-- Content Header -->
-	  		<div id="detail-content-header" style="text-align: center;">
+	  		<div id="detail-content-header" style="text-align: center; height:44px;background-color: #ffffff;">
 				<!-------- Search conditions ---------->		  		
-		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 12px;float: right;">
-		  			<div class="my-button-s my-button-bk-danger">
-			  			<a href="#" style="">
-			  				<img src="myimg/btn_save.png" />
-			  			</a>
-		  			</div>
+		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 16px;float: right;">
+		  			<a href="#" style="">
+		  				<img src="myimg/btn_save_blue.png" style="width: 28px;"/>
+		  			</a>
 		  		</div>
 	  			
-	  			<div>
-	  				<h5 style="margin: 8px;">$!{dbTable.comment}</h5>
+	  			<div style="height:44px;">
+	  				<h5 style="padding: 6px;">$!{dbTable.comment}</h5>
 	  			</div>
 	  			
 	  		</div>
 	  		
 	  		<!-- Content Table -->
-	  		<div id="detail-content-table" style="height:100%; width: 100%; overflow: auto; background-color: #f3f3f3">
+	  		<div id="detail-content-table" style="overflow: auto;">
 	  			<table class="" style="width: 99%;">
 	  				<tbody id="detail-table-tbody" style="">
 	  					<tr class="">
 	  						<td class="my-td-detail" dataDetail="DataDetail">
 	  						<!--#for(MetaDataField metaDataField : dataUISetting.fieldList)-->
-	  							<div>
 	  							<!--#set(DBColumn dbCol = mDBTable.columnMap.get(metaDataField.fieldName))-->
+	  							<div dataColBlock="$!{metaDataField.fieldName}">
+	  								<input type="hidden" name="columnType" value="${dbCol.columnType}" />
+	  								<input type="hidden" name="fieldDispFormat" value="${metaDataField.fieldDispFormat}" />
+	  								<input type="hidden" name="fieldValidateRegex" value="${metaDataField.fieldValidateRegex}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="${metaDataField.fieldDispMaxLength}" />
+	  								
 	  								<label>$!{metaDataField.fieldDispName}:</label>
-	  								<input type="text" dataDetail="$!{metaDataField.fieldName}"/>
+	  							<!--#if(dbCol.columnType.startsWith("varchar")) -->
+	  								<textarea dataDetail="$!{metaDataField.fieldName}"></textarea>
+	  							<!--#else -->
+	  								<input type="text" dataDetail="$!{metaDataField.fieldName}" placeholder="${metaDataField.fieldDispFormat}" maxlength="${metaDataField.fieldDispMaxLength}"/>
+	  							<!--#end -->
 	  							</div>
 	  						<!--#end-->
 	  						</td>
