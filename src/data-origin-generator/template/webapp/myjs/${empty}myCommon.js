@@ -2,10 +2,14 @@ var WEB_APP = "/${webContextName}";
 
 var ERROR_MSG_NODE = "<DOServiceMsg>";
 var DEFAULT_MSG_TITLE_ERROR = "Error";
+var DEFAULT_MSG_TITLE_INFO = "Info";
 var DEFAULT_MSG_TITLE_CONFIRM = "Confirm";
 
 var DEFAULT_MSG_ERROR_AJAX = "Network Error";
 var DEFAULT_MSG_ERROR_INPUT_REQUIRE_NUMBER = "Pease input Number";
+
+var DEFAULT_MSG_CONFIRM_DELETE_DATA = "Are you sure to delete checked data row?\n (Can not be undo)";
+var DEFAULT_MSG_INFO_DID_DELETE_DATA = "Data deleted";
 
 function myAjax(args) {
 	var dataType = "text";
@@ -46,6 +50,11 @@ function myAjax(args) {
 function myShowErrorMsg(msg) {
 	//alert(msg);
 	myShowConfirmMsgDlg(DEFAULT_MSG_TITLE_ERROR, msg);
+}
+
+function myShowInfoMsg(msg) {
+	//alert(msg);
+	myShowConfirmMsgDlg(DEFAULT_MSG_TITLE_INFO, msg);
 }
 
 function myShowConfirmMsg(msg, okClickCallback) {
@@ -98,6 +107,10 @@ function myShowConfirmMsgDlg(title, msg, okClickCallback) {
 	$('#modal-alert').modal();	
 }
 
+function myHideConfirmMsgDlg() {
+	$('#modal-alert').modal('hide');	
+}
+
 function myFormatDataColValue(dispFormat, dataColVal) {
 	var iYY, iMM, iDD;
 	iYY = dispFormat.indexOf("yy");
@@ -117,6 +130,81 @@ function myFormatDataColValue(dispFormat, dataColVal) {
 		//do nothing
 		return dataColVal;
 	}
+}
+
+function myReverseFormatDataColValue(dispFormat, dataColVal) {
+	var iYY, iMM, iDD;
+	iYY = dispFormat.indexOf("yy");
+	iMM = dispFormat.indexOf("MM");
+	iDD = dispFormat.indexOf("dd");
+	if(iYY >= 0 && iMM > 0 && iDD > 0
+		&& iDD > iMM  && iMM > iYY) {
+		//go to reverse format
+		return myParseDateFromFormattedStr(dataColVal, dispFormat).getTime();
+	} else {
+		//do nothing
+		return dataColVal;
+	}
+}
+
+/**
+ * 
+ * @param {Object} dateStr
+ * @param {Object} dateFormat e.g., 'yyyy/MM/dd', 'yyyy/MM/dd HH:mm:ss', 'yyyy-MM-dd', 'yyyy-MM-dd HH:mm:ss'
+ */
+function myParseDateFromFormattedStr(dateStr, dateFormat) {
+	var ymdStr = "";
+	var hmsStr = "";
+	var indexOfSpace = dateStr.indexOf(' ');
+	if(indexOfSpace >= 0) {
+		ymdStr = dateStr.substring(0, indexOfSpace);
+		hmsStr = dateStr.substring(indexOfSpace + 1);
+	} else {
+		if(dateStr.indexOf(':') >= 0) {
+			hmsStr = dateStr;
+		} else {
+			ymdStr = dateStr;
+		}
+	}
+	
+	var curTime = new Date();
+	var ymdhmsArray = [curTime.getFullYear(), curTime.getMonth(), curTime.getDate(), curTime.getHours(), curTime.getMinutes(), curTime.getSeconds()];
+	var i, indexTmp;
+	
+	if(ymdStr.length > 0) {
+		var tokenArray = ymdStr.split(/[/-]/g);
+		
+		indexTmp = 2;
+		for(i = tokenArray.length - 1; i >= 0; i--) {
+			ymdhmsArray[indexTmp] = Number(tokenArray[i]);
+			if(indexTmp == 1) {
+				//month is 0-11
+				ymdhmsArray[indexTmp] --;
+			}
+			
+			indexTmp --;
+		}
+	}
+	
+	if(hmsStr.length > 0) {
+		var tokenArray = hmsStr.split(/[:]/g);
+		
+		indexTmp = 5;
+		for(i = tokenArray.length - 1; i >= 0; i--) {
+			ymdhmsArray[indexTmp] = Number(tokenArray[i]);
+			indexTmp --;
+		}
+	}
+	
+	indexTmp = 0;
+	curTime.setFullYear(ymdhmsArray[indexTmp++]);
+	curTime.setMonth(ymdhmsArray[indexTmp++]);
+	curTime.setDate(ymdhmsArray[indexTmp++]);
+	curTime.setHours(ymdhmsArray[indexTmp++]);
+	curTime.setMinutes(ymdhmsArray[indexTmp++]);
+	curTime.setSeconds(ymdhmsArray[indexTmp++]);
+	
+	return curTime;
 }
 
 function myParseDateFromLong(utcMS) {

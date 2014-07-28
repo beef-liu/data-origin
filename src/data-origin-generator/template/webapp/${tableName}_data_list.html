@@ -31,12 +31,12 @@
 		  					<tr class="my-tr-page-controller">
 		  						<td class="my-td-page-controller">
 						  			<div class="my-button-s my-button-bk-default">
-							  			<a href="#">
+							  			<a href="#" onclick="gotoDataDetailForNew()">
 							  				<img src="myimg/btn-add.png"/>
 							  			</a>
 						  			</div>
 						  			<div class="my-button-s my-button-bk-danger">
-							  			<a href="#" style="">
+							  			<a href="#" style="" onclick="deleteCheckedData()">
 							  				<img src="myimg/btn-delete.png"/>
 							  			</a>
 						  			</div>
@@ -134,7 +134,7 @@
 	  					</tr>
 	  				</thead>
 	  				<tbody id="data-tbody" style="" listData="List">
-	  					<tr id="tr-data" class="my-tr" listData="${dataClassName}" primaryKeytrue="Brand" onclick="gotoDetail(this)">
+	  					<tr id="tr-data" class="my-tr" listData="${dataClassName}" primaryKeytrue="${dataClassName}">
 	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
 	  						<td id="td-row-num" class="my-td"></td>
   						<!--#for(MetaDataField metaDataField : dataUISetting.fieldList)-->
@@ -143,8 +143,13 @@
 	  							fieldDispFormat="${metaDataField.fieldDispFormat}" 
 	  							isPrimaryKey="${dbCol.primaryKey}" primaryKey${dbCol.primaryKey}="${metaDataField.fieldName}"></td>
 	  					<!--#end-->
-	  						<td class="my-td"><a href="#" onclick="gotoDetail(this)"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
+	  						<td class="my-td"><a href="#" onclick="gotoDataDetail(this)"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
 	  					</tr>
 	  				</tbody>
 	  			</table>
+	  		</div>
+	  		<div style="text-align:right; padding:4px 48px 0px 2px; font-size: small;">
+	  			<span style="color: #295ccb; font-weight: bold;"> last query at: </span> <span id="last_query_time_begin" style="min-width: 50px;">00:00:00</span>
+	  			<span style="padding-left:16px; color: #295ccb; font-weight: bold;"> cost: </span> <span id="last_query_time_cost" style="min-width: 50px;">0.000</span>
+	  			<span style="color: #295ccb;"> (second)</span>
 	  		</div>

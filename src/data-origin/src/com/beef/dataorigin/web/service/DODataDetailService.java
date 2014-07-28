@@ -1,6 +1,8 @@
 package com.beef.dataorigin.web.service;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -66,6 +68,7 @@ public class DODataDetailService {
 	 */
 	protected String deleteDataByPK(String tableName, String dataXml) {
 		Connection conn = null;
+		boolean autoCommit = false;
 		try {
 			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
 			Class<?> dataClass = DataOriginWebContext.getDataOriginContext().findClass(dataImportSetting.getDataClassName());
@@ -75,6 +78,10 @@ public class DODataDetailService {
 			
 			//update DB
 			conn = DOServiceUtil.getOnEditingDBConnection();
+			
+			autoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(true);
+			
 			int updCnt = DODataDao.deleteDataByPK(conn, tableName, dataPK);
 			
 			if(updCnt > 0) {
@@ -87,6 +94,51 @@ public class DODataDetailService {
 			
 			return DOServiceMsgUtil.makeMsgXml(e);
 		} finally {
+			try {
+				conn.setAutoCommit(autoCommit);;
+			} catch(Throwable e) {
+			}
+			try {
+				conn.close();
+			} catch(Throwable e) {
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param tableName
+	 * @param dataListXml
+	 * @return count of deleted data
+	 */
+	protected String deleteDataByPKList(String tableName, String dataListXml) {
+		Connection conn = null;
+		boolean autoCommit = false;
+		try {
+			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
+			Class<?> dataClass = DataOriginWebContext.getDataOriginContext().findClass(dataImportSetting.getDataClassName());
+			
+			List dataList = (List) XmlDeserializer.stringToObject(
+					dataListXml, ArrayList.class, DataOriginWebContext.getDataOriginContext());
+			
+			//update DB
+			conn = DOServiceUtil.getOnEditingDBConnection();
+			
+			autoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(true);
+			
+			int updCnt = DODataDao.deleteDataByPKList(conn, tableName, dataList);
+			
+			return String.valueOf(updCnt);
+		} catch(Throwable e) {
+			logger.error(null, e);
+			
+			return DOServiceMsgUtil.makeMsgXml(e);
+		} finally {
+			try {
+				conn.setAutoCommit(autoCommit);;
+			} catch(Throwable e) {
+			}
 			try {
 				conn.close();
 			} catch(Throwable e) {
@@ -104,12 +156,17 @@ public class DODataDetailService {
 			String tableName, String dataXml
 			) {
 		Connection conn = null;
+		boolean autoCommit = false;
 		try {
 			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
 			
 			Class<?> dataClass = DataOriginWebContext.getDataOriginContext().findClass(dataImportSetting.getDataClassName());
 			
 			conn = DOServiceUtil.getOnEditingDBConnection();
+			
+			autoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(true);
+
 			Object data = XmlDeserializer.stringToObject(
 					dataXml, dataClass, DataOriginWebContext.getDataOriginContext());
 			
@@ -124,6 +181,10 @@ public class DODataDetailService {
 			
 			return DOServiceMsgUtil.makeMsgXml(e);
 		} finally {
+			try {
+				conn.setAutoCommit(autoCommit);;
+			} catch(Throwable e) {
+			}
 			try {
 				conn.close();
 			} catch(Throwable e) {
@@ -141,12 +202,17 @@ public class DODataDetailService {
 			String tableName, String dataXml
 			) {
 		Connection conn = null;
+		boolean autoCommit = false;
 		try {
 			MetaDataImportSetting dataImportSetting = DataOriginWebContext.getDataOriginContext().getMetaDataImportSetting(tableName);
 			
 			Class<?> dataClass = DataOriginWebContext.getDataOriginContext().findClass(dataImportSetting.getDataClassName());
 			
 			conn = DOServiceUtil.getOnEditingDBConnection();
+
+			autoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(true);
+
 			Object data = XmlDeserializer.stringToObject(
 					dataXml, dataClass, DataOriginWebContext.getDataOriginContext());
 			
@@ -161,6 +227,10 @@ public class DODataDetailService {
 			
 			return DOServiceMsgUtil.makeMsgXml(e);
 		} finally {
+			try {
+				conn.setAutoCommit(autoCommit);;
+			} catch(Throwable e) {
+			}
 			try {
 				conn.close();
 			} catch(Throwable e) {

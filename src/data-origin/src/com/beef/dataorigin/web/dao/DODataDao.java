@@ -55,7 +55,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
 		MMetaDataUISetting mMetaDataUISetting = DataOriginWebContext.getDataOriginContext().getMMetaDataUISetting(tableName);
 
-		sql.append("select * from ").append(DOSqlParamUtil.wrapNameInSql(mDBTable.getTableName()));
+		sql.append("select * from ").append(DOSqlParamUtil.quoteSqlIdentifier(mDBTable.getTableName()));
 		
 		//where conditions -------------------------------------------------------------
 		List<Object> colValueListForStmt = new ArrayList<Object>();
@@ -79,7 +79,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 				if(i > 0) {
 					sql.append(",");
 				}
-				sql.append(DOSqlParamUtil.wrapNameInSql(orderByFields[i]));
+				sql.append(DOSqlParamUtil.quoteSqlIdentifier(orderByFields[i]));
 			}
 		}
 
@@ -114,7 +114,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
 		MMetaDataUISetting mMetaDataUISetting = DataOriginWebContext.getDataOriginContext().getMMetaDataUISetting(tableName);
 
-		sql.append("select count(1) from ").append(DOSqlParamUtil.wrapNameInSql(mDBTable.getTableName()));
+		sql.append("select count(1) from ").append(DOSqlParamUtil.quoteSqlIdentifier(mDBTable.getTableName()));
 		
 		//where conditions -------------------------------------------------------------
 		List<Object> colValueListForStmt = new ArrayList<Object>();
@@ -194,12 +194,12 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		//append field value
 		if(DOSqlParamUtil.isNumberColType(colType)) {
 			if(fieldVals.length == 1) {
-				sqlWhereConditions.append(DOSqlParamUtil.wrapNameInSql(dataField.getFieldName())).append(" = ? ");
+				sqlWhereConditions.append(DOSqlParamUtil.quoteSqlIdentifier(dataField.getFieldName())).append(" = ? ");
 				colValueListForStmt.add(DODataDaoUtil.parseDateOrNumberToNumber(fieldVals[0]));
 			} else {
 				int valsAppendCnt = 0;
 				if(fieldVals[0] != null) {
-					sqlWhereConditions.append(DOSqlParamUtil.wrapNameInSql(dataField.getFieldName())).append(" >= ? ");
+					sqlWhereConditions.append(DOSqlParamUtil.quoteSqlIdentifier(dataField.getFieldName())).append(" >= ? ");
 					colValueListForStmt.add(DODataDaoUtil.parseDateOrNumberToNumber(fieldVals[0]));
 					valsAppendCnt ++;
 				}
@@ -207,13 +207,13 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 					if(valsAppendCnt > 0) {
 						sqlWhereConditions.append(" and ");
 					}
-					sqlWhereConditions.append(DOSqlParamUtil.wrapNameInSql(dataField.getFieldName())).append(" <= ? ");
+					sqlWhereConditions.append(DOSqlParamUtil.quoteSqlIdentifier(dataField.getFieldName())).append(" <= ? ");
 					colValueListForStmt.add(DODataDaoUtil.parseDateOrNumberToNumber(fieldVals[1]));
 					valsAppendCnt ++;
 				}
 			}
 		} else {
-			sqlWhereConditions.append(DOSqlParamUtil.wrapNameInSql(dataField.getFieldName())).append(" like concat(concat('%', ?), '%') ");
+			sqlWhereConditions.append(DOSqlParamUtil.quoteSqlIdentifier(dataField.getFieldName())).append(" like concat(concat('%', ?), '%') ");
 			colValueListForStmt.add(fieldVal);
 		}
 		
@@ -229,7 +229,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		DBTable dbTable = DataOriginWebContext.getDataOriginContext().getDBTable(tableName);
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("select * from ").append(DOSqlParamUtil.wrapNameInSql(DOSqlParamUtil.verifyName(dbTable.getTableName())));
+		sql.append("select * from ").append(DOSqlParamUtil.quoteSqlIdentifier(DOSqlParamUtil.verifyName(dbTable.getTableName())));
 	
 
 		//where conditions -------------------------------------------------------------
@@ -249,7 +249,7 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 				sql.append(" and ");
 			}
 			
-			sql.append(DOSqlParamUtil.wrapNameInSql(dbCol.getName())).append(" = ? ");
+			sql.append(DOSqlParamUtil.quoteSqlIdentifier(dbCol.getName())).append(" = ? ");
 			
 			propDesc = findPropertyDescriptor(dbCol.getName(), data.getClass());
 			propVal = propDesc.getReadMethod().invoke(data, (Object[])null);
@@ -306,6 +306,19 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
 		return UpdateDataDao.deleteData(conn, mDBTable.getTableName(), data, mDBTable.getPrimaryKeys());
+	}
+
+	public static int deleteDataByPKList(
+			Connection conn,
+			String tableName, List dataList
+			) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
+		int updCnt = 0;
+		for(int i = 0; i < dataList.size(); i++) {
+			updCnt += UpdateDataDao.deleteData(conn, mDBTable.getTableName(), dataList.get(i), mDBTable.getPrimaryKeys());
+		}
+		
+		return updCnt;
 	}
 	
 	@Override

@@ -24,4 +24,8 @@ public class TemplateDataDetailService extends DODataDetailService {
 		return super.insertData(tableName, dataXml);
 	}
 
+	public String deleteDataByPKList(String dataXmlList) {
+		String tableName = "";
+		return super.deleteDataByPKList(tableName, dataXmlList);
+	}
 }

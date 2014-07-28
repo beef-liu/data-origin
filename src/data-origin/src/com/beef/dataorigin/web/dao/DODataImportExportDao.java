@@ -500,7 +500,7 @@ public class DODataImportExportDao {
 			int index;
 			int i;
 			StringBuilder sql = new StringBuilder();
-			sql.append("insert into ").append(DOSqlParamUtil.wrapNameInSql(tableName)).append(" (");
+			sql.append("insert into ").append(DOSqlParamUtil.quoteSqlIdentifier(tableName)).append(" (");
 
 			DODataImportColMetaInfo colMeta = null;
 			index = 0;
@@ -512,9 +512,9 @@ public class DODataImportExportDao {
 				}
 				
 				if(index == 0) {
-					sql.append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName()));
+					sql.append(DOSqlParamUtil.quoteSqlIdentifier(colMeta.getDbCol().getName()));
 				} else {
-					sql.append(",").append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName()));
+					sql.append(",").append(DOSqlParamUtil.quoteSqlIdentifier(colMeta.getDbCol().getName()));
 				}
 				
 				index++;
@@ -525,9 +525,9 @@ public class DODataImportExportDao {
 					importColVal = colValueAssignList.get(i);
 					
 					if(index == 0) {
-						sql.append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName()));
+						sql.append(DOSqlParamUtil.quoteSqlIdentifier(importColVal.getDbCol().getName()));
 					} else {
-						sql.append(",").append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName()));
+						sql.append(",").append(DOSqlParamUtil.quoteSqlIdentifier(importColVal.getDbCol().getName()));
 					}
 					
 					index++;
@@ -631,7 +631,7 @@ public class DODataImportExportDao {
 				if(index > 0) {
 					sql.append(",");
 				}
-				sql.append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName())).append(" = ? ");
+				sql.append(DOSqlParamUtil.quoteSqlIdentifier(colMeta.getDbCol().getName())).append(" = ? ");
 				
 				index++;
 			}
@@ -647,7 +647,7 @@ public class DODataImportExportDao {
 					if(index > 0) {
 						sql.append(",");
 					}
-					sql.append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName())).append(" = ? ");
+					sql.append(DOSqlParamUtil.quoteSqlIdentifier(importColVal.getDbCol().getName())).append(" = ? ");
 					
 					index++;
 				}
@@ -669,7 +669,7 @@ public class DODataImportExportDao {
 				if(index > 0) {
 					sql.append(" and ");
 				}
-				sql.append(DOSqlParamUtil.wrapNameInSql(colMeta.getDbCol().getName())).append(" = ?");
+				sql.append(DOSqlParamUtil.quoteSqlIdentifier(colMeta.getDbCol().getName())).append(" = ?");
 				
 				index++;
 			}
@@ -685,7 +685,7 @@ public class DODataImportExportDao {
 					if(index > 0) {
 						sql.append(" and ");
 					}
-					sql.append(DOSqlParamUtil.wrapNameInSql(importColVal.getDbCol().getName())).append(" = ? ");
+					sql.append(DOSqlParamUtil.quoteSqlIdentifier(importColVal.getDbCol().getName())).append(" = ? ");
 					
 					index++;
 				}

@@ -45,7 +45,7 @@ public class DOSqlParamUtil {
 		return false;
 	}
 
-	public static String wrapNameInSql(String name) {
+	public static String quoteSqlIdentifier(String name) {
 		return "`" + name + "`";
 	}
 	

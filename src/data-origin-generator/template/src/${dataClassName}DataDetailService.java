@@ -24,4 +24,9 @@ public class ${dataClassName}DataDetailService extends DODataDetailService {
 		return super.insertData(tableName, dataXml);
 	}
 	
+	public String deleteDataByPKList(String dataListXml) {
+		String tableName = "${tableName}";
+		return super.deleteDataByPKList(tableName, dataListXml);
+	}
+	
 }

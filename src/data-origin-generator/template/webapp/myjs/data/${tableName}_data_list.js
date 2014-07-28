@@ -483,6 +483,8 @@ function resetPageController() {
 }
 
 function searchData() {
+	var timeOfSearchBegin = new Date();
+	
 	myAjax({
 		url: WEB_APP + "/cloudDataService.do",
 		type: "post",
@@ -498,6 +500,10 @@ function searchData() {
 		},
 		success: function(response) {
 			reloadData(response);
+			
+			var timeCostOfSearch = ((new Date()).getTime() - timeOfSearchBegin.getTime()) / 1000.0;
+			$('#last_query_time_begin').text(timeOfSearchBegin.formatToStr('HH:mm:ss'));
+			$('#last_query_time_cost').text(timeCostOfSearch);
 		},
 	});
 } 

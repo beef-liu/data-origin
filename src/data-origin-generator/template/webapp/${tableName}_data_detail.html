@@ -5,8 +5,15 @@
 	  		<!-- Content Header -->
 	  		<div id="detail-content-header" style="text-align: center; height:44px;background-color: #ffffff;">
 				<!-------- Search conditions ---------->		  		
-		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 16px;float: right;">
-		  			<a href="#" style="">
+		  		<div style="line-height: 44px; padding-left: 12px;float: left;">
+		  			<div class="my-button-s my-button-bk-default">
+			  			<a href="#" onclick="$('#modal-data-detail').modal('hide')" style="">
+			  				Cancel
+			  			</a>
+		  			</div>
+		  		</div>
+		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 12px;float: right;">
+		  			<a href="#" onclick="saveDetailData(this)" style="">
 		  				<img src="myimg/btn_save_blue.png" style="width: 28px;"/>
 		  			</a>
 		  		</div>
@@ -18,7 +25,7 @@
 	  		</div>
 	  		
 	  		<!-- Content Table -->
-	  		<div id="detail-content-table" style="overflow: auto;">
+	  		<div id="detail-content-table" style="overflow: auto; height:640px;">
 	  			<table class="" style="width: 99%;">
 	  				<tbody id="detail-table-tbody" style="">
 	  					<tr class="">
@@ -32,7 +39,7 @@
 	  								<input type="hidden" name="fieldDispMaxLength" value="${metaDataField.fieldDispMaxLength}" />
 	  								
 	  								<label>$!{metaDataField.fieldDispName}:</label>
-	  							<!--#if(dbCol.columnType.startsWith("varchar")) -->
+	  							<!--#if(dbCol.columnType.startsWith("varchar") && metaDataField.fieldDispMaxLength > 50) -->
 	  								<textarea dataDetail="$!{metaDataField.fieldName}"></textarea>
 	  							<!--#else -->
 	  								<input type="text" dataDetail="$!{metaDataField.fieldName}" placeholder="${metaDataField.fieldDispFormat}" maxlength="${metaDataField.fieldDispMaxLength}"/>

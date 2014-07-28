@@ -68,9 +68,12 @@
     		}
     		
 
+			//timestamp param for avoid caching js
+			var timestampParam = "?timestamp=" + (new Date()).getTime();
+			
     		//load XXX_data_list.html and XXX_data_list.js ----------------------------------------
 			$.ajax({
-				url: dataListHtmlName,
+				url: dataListHtmlName + timestampParam,
 				type: "GET",
 				dataType: "text",
 				success: function(response) {
@@ -81,7 +84,7 @@
 					var scriptNode = document.createElement("script");
 					//"myjs/data/${tableName}_data_list.js"
 					var scriptPath = "myjs/data/" + dataListHtmlName.substring(0, dataListHtmlName.length - "html".length) + "js";
-					scriptNode.setAttribute("src", scriptPath);
+					scriptNode.setAttribute("src", scriptPath + timestampParam);
 					$(scriptNode).load(function() {
 					});
 					document.head.appendChild(scriptNode);
@@ -91,7 +94,7 @@
     		//load XXX_data_detail.html and XXX_data_detail.js ----------------------------------------
     		var dataDetailHtmlName = dataListHtmlName.substring(0, dataListHtmlName.length - "list.html".length) + "detail.html";
 			$.ajax({
-				url: dataDetailHtmlName,
+				url: dataDetailHtmlName + timestampParam,
 				type: "GET",
 				dataType: "text",
 				success: function(response) {
@@ -102,7 +105,7 @@
 					var scriptNode = document.createElement("script");
 					//"myjs/data/${tableName}_data_list.js"
 					var scriptPath = "myjs/data/" + dataDetailHtmlName.substring(0, dataDetailHtmlName.length - "html".length) + "js";
-					scriptNode.setAttribute("src", scriptPath);
+					scriptNode.setAttribute("src", scriptPath + timestampParam);
 					$(scriptNode).load(function() {
 					});
 					document.head.appendChild(scriptNode);
@@ -176,7 +179,7 @@
 	</div>
 
 	<!-- Modal (alert msg)-->
-	<div id="modal-alert" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div id="modal-alert" class="modal fade bs-example-modal-lg" style="z-index: 2000;" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		  <div class="modal-dialog">
 		    <div class="modal-content">
 		      <div class="modal-header">

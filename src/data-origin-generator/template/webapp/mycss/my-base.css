@@ -89,7 +89,7 @@
 	text-align: center;
 	font-size: smaller;
 	border-bottom: 1px solid #e5e5e5;
-	height: 40px;
+	height: 34px;
 }
 
 .my-tr:hover {
@@ -339,18 +339,20 @@
 .my-td-detail label {
 	padding-top: 4px;
 	font-weight: bold;
-	width: 30%; 
+	width: 25%; 
 	line-height: 20px;
 	vertical-align: top;
 	/*background-color: #f3f3f3;*/
+	color: #0051f4;
 }
 .my-td-detail input {
 	text-align: left;
 	vertical-align: text-bottom; 
 	border: 1px solid gray;
 	padding-left: 8px;
+	font-size: smaller;
 	height: 34px;
-	width:65%;
+	width:70%;
 }
 .my-td-detail textarea {
 	resize: none;
@@ -358,6 +360,7 @@
 	vertical-align: text-bottom; 
 	border: 1px solid gray;
 	padding-left: 8px;
-	width:65%;
+	font-size: smaller;
+	width:70%;
 	height: 102px;
 }
