@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DataOriginWebContextConfig>
   <dataOriginBaseDir>WEB-INF/data-origin</dataOriginBaseDir>
-  <uploadFilePersistenceClass>com.beef.dataorigin.web.upload.DODefaultFilePersistence</uploadFilePersistenceClass>
+  <uploadFilePersistenceClass>com.beef.dataorigin.web.upload.persistence.DODefaultUploadFilePersistence</uploadFilePersistenceClass>
 </DataOriginWebContextConfig>

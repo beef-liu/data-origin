@@ -27,5 +27,6 @@
 	<classpathentry kind="lib" path="lib/SalamaCloudDataService.jar"/>
 	<classpathentry kind="lib" path="lib/SalamaReflect.jar"/>
 	<classpathentry kind="lib" path="lib/oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/EasyImageUtil.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

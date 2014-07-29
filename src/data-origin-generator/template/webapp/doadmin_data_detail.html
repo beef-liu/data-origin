@@ -1,0 +1,90 @@
+<!---->
+		<!-- modified to load dynamicly 
+	    <script src="myjs/data/doadmin_data_detail.js"></script>
+		-->
+	  		<!-- Content Header -->
+	  		<div id="detail-content-header" style="text-align: center; height:44px;background-color: #ffffff;">
+				<!-------- Search conditions ---------->		  		
+		  		<div style="line-height: 44px; padding-left: 12px;float: left;">
+		  			<div class="my-button-s my-button-bk-default">
+			  			<a href="#" onclick="$('#modal-data-detail').modal('hide')" style="">
+			  				Cancel
+			  			</a>
+		  			</div>
+		  		</div>
+		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 12px;float: right;">
+		  			<a href="#" onclick="saveDetailData(this)" style="">
+		  				<img src="myimg/btn_save_blue.png" style="width: 28px;"/>
+		  			</a>
+		  		</div>
+	  			
+	  			<div style="height:44px;">
+	  				<h5 style="padding: 6px;">Admin</h5>
+	  			</div>
+	  			
+	  		</div>
+	  		
+	  		<!-- Content Table -->
+	  		<div id="detail-content-table" style="overflow: auto; height:640px;">
+	  			<table class="" style="width: 99%;">
+	  				<tbody id="detail-table-tbody" style="">
+	  					<tr class="">
+	  						<td class="my-td-detail" dataDetail="DataDetail">
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="admin_id">
+	  								<input type="hidden" name="columnType" value="char(32)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,32}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="32" />
+	  								
+	  								<label>Admin ID:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="admin_id" placeholder="" maxlength="32"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="priviledge_roles">
+	  								<input type="hidden" name="columnType" value="varchar(6000)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,6000}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="6000" />
+	  								
+	  								<label>roles(tableA:rw|tableB:rw|...|tableN:rw):</label>
+	  							<!-- -->
+	  								<textarea dataDetail="priviledge_roles"></textarea>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="name">
+	  								<input type="hidden" name="columnType" value="varchar(45)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,45}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="45" />
+	  								
+	  								<label>name:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="name" placeholder="" maxlength="45"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="update_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>update time(UTC):</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  						</td>
+	  					</tr>
+	  				</tbody>
+	  			</table>
+	  		</div>

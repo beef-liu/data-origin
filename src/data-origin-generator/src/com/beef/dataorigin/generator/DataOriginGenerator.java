@@ -1,8 +1,10 @@
 package com.beef.dataorigin.generator;
 
 import java.beans.IntrospectionException;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -79,7 +81,7 @@ public class DataOriginGenerator {
 		}
 	}
 	
-	protected DataOriginGenerator() throws ClassNotFoundException, SQLException {
+	protected DataOriginGenerator() throws ClassNotFoundException, SQLException, IOException {
 		_generatorContext = new DataOriginGeneratorContext();
 	}
 	
@@ -90,13 +92,11 @@ public class DataOriginGenerator {
 		generateDBDataClass();
 		
 		generateMeta();
-		
 	}
 	
 	protected void generateWeb(WebGenerateOverwriteFlag overwriteFlg) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, XmlParseException, InstantiationException, NoSuchMethodException {
 		WebGenerator.generateAll(_generatorContext, overwriteFlg);
 	}
-	
 	
 	protected void generateDBTableDefinition() throws ClassNotFoundException, SQLException, IOException, IntrospectionException, IllegalAccessException, InvocationTargetException {
 		//output db tables xml

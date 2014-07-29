@@ -1,6 +1,11 @@
 package com.beef.dataorigin.web.util;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -57,7 +62,7 @@ public class DOServiceUtil {
 	public static String newDataId() {
 		return _dataIdCreator.newDataId();
 	}
-
+	
 	private static class DataIdCreator {
 		private final static int ID_SEQ_MIN = 0;
 		private final static int ID_SEQ_MAX = 0x01000000;

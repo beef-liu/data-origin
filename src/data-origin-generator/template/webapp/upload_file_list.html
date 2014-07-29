@@ -1,0 +1,95 @@
+	  		<!-- Content Header -->
+	  		<div id="content-header-upload-file-list">
+				<!-------- Search conditions ---------->		  		
+		  		<div id="content-search-region-upload-file-list" style="line-height: 34px;">
+		  			<table class="my-table-search" style="width: 99%;">
+		  				<tbody id="search-tbody-upload-file-list" style="" searchCondition="DOSearchCondition">
+		  					<tr class="">
+		  						<td class="my-td-search" searchCondition="searchConditionItemList">
+		  							<div searchCondition="DOSearchConditionItem">
+		  								<label>File Id</label>
+		  								<input type="hidden" searchCondition="fieldName" value="searchCondItem.fieldName" />
+		  								<input type="text" searchCondition="fieldValue" />
+		  							</div>
+		  						</td>
+		  					</tr>
+		  				</tbody>
+		  			</table>
+		  		</div>
+
+				<!-------- Button for table operation ---------->		  		
+		  		<div id="content-table-button-region-upload-file-list" style="line-height: 34px;">
+		  			<table class="my-table-page-controller" style="width: 99%;">
+		  				<tbody>
+		  					<tr class="my-tr-page-controller">
+		  						<td class="my-td-page-controller">
+						  			<div class="my-button-s my-button-bk-default">
+							  			<a href="#" onclick="gotoDataDetailForNew()">
+							  				<img src="myimg/btn-add.png"/>
+							  			</a>
+						  			</div>
+						  			<div class="my-button-s my-button-bk-danger">
+							  			<a href="#" style="" onclick="deleteCheckedData()">
+							  				<img src="myimg/btn-delete.png"/>
+							  			</a>
+						  			</div>
+						  			
+						  			<div class="my-button-s my-button-bk-default" style="height:34px;">
+							  			<a id="btn-upload-file-list-upload" href="#" style="padding: 10px 20px;">
+							  				<img src="myimg/xls-up.png" style="width:24px;height:24px;"/>
+							  			</a>
+						  				<form id="form-upload-file-list" enctype="multipart/form-data" style="position: relative; top: -35px;z-index: -1; cursor: pointer;">
+						  					<input type="file" id="file-upload-file-list-file" name="dataImpFile" style="position: relative; top: -35px; width:64px; height:35px; opacity: 0; z-index: -1; cursor: pointer; " accept="application/ms-excel"/>
+						  				</form>
+						  			</div>
+						  			
+						  			<div style="float: right;">
+							  			<div class="my-button-s my-button-bk-info" style="margin-right:72px;">
+								  			<a href="#" style="padding-left: 60px; padding-right: 60px;" onclick="doSearch()">
+								  				<img src="myimg/btn-search.png" style="width: 20px; height: 20px;"/>
+								  			</a>
+							  			</div>
+						  			</div>
+						  			
+		  						</td>
+		  					</tr>
+		  				</tbody>
+		  			</table>
+		  		</div>
+		  		
+	  		</div>
+	  		
+	  		<!-- Content Table -->
+	  		<div id="content-table-upload-file-list" style="height:100%; width: 100%; overflow: auto;">
+	  			<table class="my-table" style="width: 99%;">
+	  				<thead class="my-thead">
+	  					<tr class="my-head-tr">
+	  						<th id="th-checkbox-upload-file-list" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
+	  						<th id="th-row-num-upload-file-list" class="my-th" style="width:36px;">No.</th>
+	  						
+	  						<th class="my-th-sort nosort" listHead="metaDataField.fieldName" onclick="setSortCol()"><span>Title</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="metaDataField.fieldName" onclick="setSortCol()"><span>Title</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="metaDataField.fieldName" onclick="setSortCol()"><span>Title</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="metaDataField.fieldName" onclick="setSortCol()"><span>Title</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="metaDataField.fieldName" onclick="setSortCol()"><span>Title</span> <img src="myimg/empty.png"/> </th>
+	  						
+	  						<th class="my-th" style="width:36px;"></th>
+	  					</tr>
+	  				</thead>
+	  				<tbody id="data-tbody-upload-file-list" style="" listData="List">
+	  					<tr id="tr-data-upload-file-list" class="my-tr" listData="${dataClassName}" primaryKeytrue="${dataClassName}">
+	  						<td id="td-checkbox-upload-file-list" class="my-td"><input type="checkbox" id="table-check-row-upload-file-list"></td>
+	  						<td id="td-row-num-upload-file-list" class="my-td"></td>
+	  						<td id="td-data-col-upload-file-list" class="my-td" listData="metaDataField.fieldName" 
+	  							fieldDispFormat="${metaDataField.fieldDispFormat}" 
+	  							isPrimaryKey="${dbCol.primaryKey}" primaryKey${dbCol.primaryKey}="metaDataField.fieldName"></td>
+	  						<td class="my-td"><a href="#" onclick="gotoDataDetail(this)"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
+	  					</tr>
+	  				</tbody>
+	  			</table>
+	  		</div>
+	  		<div style="text-align:right; padding:4px 48px 0px 2px; font-size: small;">
+	  			<span style="color: #295ccb; font-weight: bold;"> last query at: </span> <span id="last_query_time_begin" style="min-width: 50px;">00:00:00</span>
+	  			<span style="padding-left:16px; color: #295ccb; font-weight: bold;"> cost: </span> <span id="last_query_time_cost" style="min-width: 50px;">0.000</span>
+	  			<span style="color: #295ccb;"> (second)</span>
+	  		</div>

@@ -1,25 +1,19 @@
-package com.beef.dataorigin.web.upload;
+package com.beef.dataorigin.web.upload.persistence;
 
-import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.ServletContext;
 
-import MetoXML.XmlDeserializer;
-import MetoXML.XmlSerializer;
-import MetoXML.Base.XmlParseException;
-
 import com.beef.dataorigin.web.util.DODataDaoUtil;
 
-public class DODefaultFilePersistence implements IDOFilePersistence {
-	public final static String DEFAULT_FILE_PERSISTENCE_DIR_VIRTUAL_PATH = "/uploaded_file";
-	public final static String DEFAULT_FILE_TEMP_DIR_VIRTUAL_PATH = "/WEB-INF/temp";
-	public final static String DEFAULT_FILE_META_EXT = ".dofilemeta";
+public class DODefaultUploadFilePersistence implements IDOUploadFilePersistence {
+	//public final static String DEFAULT_FILE_META_EXT = ".dofilemeta";
+	
+	protected final static String DEFAULT_FILE_PERSISTENCE_DIR_VIRTUAL_PATH = "/uploaded_file";
 	
 	private String _webContextPath;
 	
@@ -37,29 +31,47 @@ public class DODefaultFilePersistence implements IDOFilePersistence {
 			_persistenceDir.mkdirs();
 		}
 		
+		/*
 		String tempDirPath = servletContext.getRealPath(DEFAULT_FILE_TEMP_DIR_VIRTUAL_PATH);
 		_tempDir = new File(tempDirPath);
 		if(!_tempDir.exists()) {
 			_tempDir.mkdirs();
 		}
+		*/
 	}
 	
 	@Override
-	public void destroy() throws DOFilePersistenceException {
+	public void destroy() throws DOUploadFilePersistenceException {
 	}
 
 	@Override
-	public DOFilePersistenceMeta putFile(InputStream fileInput, String fileId,
+	public String putFile(InputStream fileInput, String fileId,
 			long contentLength, String contentType)
+			throws DOUploadFilePersistenceException {
+		try {
+			//save file
+			writeFile(fileInput, fileId);
+
+			String fileDownloadUrl = _webContextPath + DEFAULT_FILE_PERSISTENCE_DIR_VIRTUAL_PATH + "/" + fileId;
+			
+			return fileDownloadUrl;
+		} catch (Exception e) {
+			throw new DOUploadFilePersistenceException(e);
+		}
+	}
+	
+	/*
+	@Override
+	public DOUploadFileMeta putFile(InputStream fileInput, DOUploadFileMeta fileMeta)
 			throws DOFilePersistenceException {
 		
 		try {
 			//create meta
-			DOFilePersistenceMeta fileMeta = new DOFilePersistenceMeta();
-			fileMeta.setFileId(fileId);
-			fileMeta.setContentLength(contentLength);
-			fileMeta.setContentType(contentType);
-			fileMeta.setDownloadUrl(_webContextPath + DEFAULT_FILE_PERSISTENCE_DIR_VIRTUAL_PATH + "/" + fileId);
+//			DOUploadFileMeta fileMeta = new DOUploadFileMeta();
+//			fileMeta.setFileId(fileId);
+//			fileMeta.setContentLength(contentLength);
+//			fileMeta.setContentType(contentType);
+//			fileMeta.setDownloadUrl(_webContextPath + DEFAULT_FILE_PERSISTENCE_DIR_VIRTUAL_PATH + "/" + fileId);
 			
 			//save meta
 			writeMetaFile(fileMeta);
@@ -72,9 +84,11 @@ public class DODefaultFilePersistence implements IDOFilePersistence {
 			throw new DOFilePersistenceException(e);
 		}
 	}
+	*/
 	
+	/*
 	@Override
-	public DOFilePersistenceMeta getFileMeta(String fileId)
+	public DOUploadFileMeta getFileMeta(String fileId)
 			throws DOFilePersistenceException {
 		try {
 			return readMetaFile(fileId);
@@ -82,23 +96,24 @@ public class DODefaultFilePersistence implements IDOFilePersistence {
 			throw new DOFilePersistenceException(e);
 		}
 	}
+	*/
 
 	@Override
-	public InputStream getFile(String fileId) throws DOFilePersistenceException {
+	public InputStream getFile(String fileId) throws DOUploadFilePersistenceException {
 		try {
 			File file = new File(_persistenceDir, fileId);
 			return new FileInputStream(file);
 		} catch (Exception e) {
-			throw new DOFilePersistenceException(e);
+			throw new DOUploadFilePersistenceException(e);
 		}
 	}
 
 	@Override
-	public void deleteFile(String fileId) throws DOFilePersistenceException {
+	public void deleteFile(String fileId) throws DOUploadFilePersistenceException {
 		File file = new File(_persistenceDir, fileId);
 		file.delete();
 		
-		deleteMetaFile(fileId);
+		//deleteMetaFile(fileId);
 	}
 
 	private void writeFile(InputStream fileInput, String fileId) throws IOException {
@@ -116,25 +131,27 @@ public class DODefaultFilePersistence implements IDOFilePersistence {
 		}
 	}
 	
+	/*
 	private void deleteMetaFile(String fileId) {
 		File metaFile = new File(_persistenceDir, fileId + DEFAULT_FILE_META_EXT);
 		metaFile.delete();
 	}
 
-	private DOFilePersistenceMeta readMetaFile(String fileId) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, XmlParseException, InstantiationException, NoSuchMethodException {
+	private DOUploadFileMeta readMetaFile(String fileId) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException, XmlParseException, InstantiationException, NoSuchMethodException {
 		File metaFile = new File(_persistenceDir, fileId + DEFAULT_FILE_META_EXT);
 		
 		XmlDeserializer xmlDes = new XmlDeserializer();
-		DOFilePersistenceMeta fileMeta = (DOFilePersistenceMeta) xmlDes.Deserialize(metaFile.getAbsolutePath(), DOFilePersistenceMeta.class, XmlDeserializer.DefaultCharset);
+		DOUploadFileMeta fileMeta = (DOUploadFileMeta) xmlDes.Deserialize(metaFile.getAbsolutePath(), DOUploadFileMeta.class, XmlDeserializer.DefaultCharset);
 		
 		return fileMeta;
 	}
 	
-	private void writeMetaFile(DOFilePersistenceMeta fileMeta) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException {
+	private void writeMetaFile(DOUploadFileMeta fileMeta) throws IOException, IntrospectionException, IllegalAccessException, InvocationTargetException {
 		File metaFile = new File(_persistenceDir, fileMeta.getFileId() + DEFAULT_FILE_META_EXT);
 		
 		XmlSerializer xmlSer = new XmlSerializer();
-		xmlSer.Serialize(metaFile.getAbsolutePath(), fileMeta, DOFilePersistenceMeta.class, XmlDeserializer.DefaultCharset);
+		xmlSer.Serialize(metaFile.getAbsolutePath(), fileMeta, DOUploadFileMeta.class, XmlDeserializer.DefaultCharset);
 	}
+	*/
 	
 }

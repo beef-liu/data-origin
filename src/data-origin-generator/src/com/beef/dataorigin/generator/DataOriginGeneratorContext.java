@@ -1,21 +1,33 @@
 package com.beef.dataorigin.generator;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import com.beef.dataorigin.context.DataOriginContext;
 import com.beef.dataorigin.context.DataOriginDirManager;
+import com.beef.dataorigin.generator.util.DataOriginGeneratorUtil;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import com.salama.modeldriven.util.db.DBTable;
 import com.salama.modeldriven.util.db.mysql.MysqlTableInfoUtil;
 import com.salama.util.ResourceUtil;
 
 public class DataOriginGeneratorContext {
+	private final static Logger logger = Logger.getLogger(DataOriginGeneratorContext.class);
+	
 	public final static String DefaultCharsetName = "utf-8";
 	public final static Charset DefaultCharset = Charset.forName(DefaultCharsetName);
 
@@ -53,13 +65,18 @@ public class DataOriginGeneratorContext {
 	private String _outputWebProjectJavaPackage;
 	private String _outputWebContextName;
 	
+	private HashSet<String> _builtInTableNameSet = new HashSet<String>();
+	
 	private Properties _dataOriginProperties = null;
-	public DataOriginGeneratorContext() throws ClassNotFoundException, SQLException {
+	public DataOriginGeneratorContext() throws ClassNotFoundException, SQLException, IOException {
 		_dataOriginProperties = ResourceUtil.getProperties("/data-origin-generator.properties");
 		
 		makeBaseDir();
 		
+		initBuiltinDBTables();
+		
 		initDBTables();
+		
 	}
 	
 	protected void makeBaseDir() {
@@ -74,6 +91,60 @@ public class DataOriginGeneratorContext {
 			baseDir.mkdirs();
 		}
 		_dataOriginDirManager = new DataOriginDirManager(baseDir);
+	}
+	
+	protected void initBuiltinDBTables() throws IOException {
+		_builtInTableNameSet.add("DOAdmin");
+		_builtInTableNameSet.add("DOUploadFileMeta");
+		
+		InputStream sqlSourceInput = DataOriginGenerator.class.getResourceAsStream("/data-origin-db.sql");
+		ByteArrayOutputStream bytesOutput = new ByteArrayOutputStream();
+		
+		DataOriginGeneratorUtil.copy(sqlSourceInput, bytesOutput);
+		
+		String sqlSource = bytesOutput.toString(DataOriginGeneratorContext.DefaultCharsetName);
+		
+		String[] createTableSqlArray = sqlSource.split("(;[ \t\r]*[\n]+)");
+		
+		Connection conn = null;
+		
+		try {
+			conn = createConnectionOfOnEditingDB();
+			
+			PreparedStatement stmt = null;
+			for(int i = 0; i < createTableSqlArray.length; i++) {
+				try {
+					stmt = conn.prepareStatement(createTableSqlArray[i]);
+					stmt.executeUpdate();
+				} catch(Exception e) {
+					if((e.getClass() == MySQLSyntaxErrorException.class 
+							&& ((MySQLSyntaxErrorException)e).getSQLState().equals("42S01")
+						)
+						||
+						(e.getClass() == com.mysql.jdbc.exceptions.MySQLSyntaxErrorException.class
+							&& ((com.mysql.jdbc.exceptions.MySQLSyntaxErrorException)e).getSQLState().equals("42S01")
+						)
+					) {
+						//table exists
+						logger.info("initBuiltinDBTables() table exists:\n" + createTableSqlArray[i]);
+					} else {
+						throw e;
+					}
+				} finally {
+					try {
+						stmt.close();
+					} catch(Throwable e) {
+					}
+				}
+			} 
+		} catch(Throwable e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch(Throwable e) {
+			}
+		}
 	}
 	
 	protected void initDBTables() throws ClassNotFoundException, SQLException {

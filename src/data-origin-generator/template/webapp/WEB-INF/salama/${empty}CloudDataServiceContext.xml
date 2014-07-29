@@ -6,7 +6,7 @@
 		<CloudDataAppConfig>
 			<appId>dotest</appId>
 			<basePackage>${basePackage}</basePackage>
-			<exposedPackage>com.beef.dataorigin.web.service,${basePackage}.service</exposedPackage>
+			<exposedPackage>${basePackage}.service, com.beef.dataorigin.web.service</exposedPackage>
 		</CloudDataAppConfig>
 	</appConfigs>
 </CloudDataServiceContext>
