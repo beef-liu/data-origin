@@ -1,31 +1,31 @@
-package com.beef.dataorigin.web.service;
+package ${basePackage}.service;
 
 import com.beef.dataorigin.web.service.DODataDetailService;
 
-public class DOUploadFileMetaDataDetailService extends DODataDetailService {
+public class DOAdminDataDetailService extends DODataDetailService {
 
 	public String findDataByPK(String dataXml) {
-		String tableName = "douploadfilemeta";
+		String tableName = "doadmin";
 		return super.findDataByPK(tableName, dataXml);
 	}
 	
 	public String deleteDataByPK(String dataXml) {
-		String tableName = "douploadfilemeta";
+		String tableName = "doadmin";
 		return super.deleteDataByPK(tableName, dataXml);
 	}
 
 	public String updateDataByPK(String dataXml) {
-		String tableName = "douploadfilemeta";
+		String tableName = "doadmin";
 		return super.updateDataByPK(tableName, dataXml);
 	}
 	
 	public String insertData(String dataXml) {
-		String tableName = "douploadfilemeta";
+		String tableName = "doadmin";
 		return super.insertData(tableName, dataXml);
 	}
 	
 	public String deleteDataByPKList(String dataListXml) {
-		String tableName = "douploadfilemeta";
+		String tableName = "doadmin";
 		return super.deleteDataByPKList(tableName, dataListXml);
 	}
 	

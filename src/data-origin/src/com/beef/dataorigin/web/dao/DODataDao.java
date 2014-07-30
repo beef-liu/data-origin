@@ -2,6 +2,7 @@ package com.beef.dataorigin.web.dao;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,6 +18,7 @@ import org.apache.poi.hslf.blip.Metafile;
 
 import CollectionCommon.ITreeNode;
 import MetoXML.AbstractReflectInfoCachedSerializer;
+import MetoXML.XmlSerializer;
 
 import com.beef.dataorigin.context.data.MDBTable;
 import com.beef.dataorigin.context.data.MMetaDataUISetting;
@@ -44,12 +46,27 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 	 * @return xml of data list
 	 * @throws ParseException 
 	 * @throws SQLException 
+	 * @throws IOException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalAccessException 
+	 * @throws IntrospectionException 
+	 * @throws InstantiationException 
+	 * @throws ClassNotFoundException 
 	 */
 	public static String searchDataXmlBySearchCondition(
 			Connection conn,
 			int beginIndex, int pageSize, 
 			String tableName, DOSearchCondition searchCondition,
-			String[] orderByFields) throws ParseException, SQLException {
+			String[] orderByFields) throws ParseException, SQLException, IntrospectionException, IllegalAccessException, InvocationTargetException, IOException, ClassNotFoundException, InstantiationException {
+		List dataList = searchDataListBySearchCondition(conn, beginIndex, pageSize, tableName, searchCondition, orderByFields);
+		return XmlSerializer.objectToString(dataList, ArrayList.class);
+	}
+	
+	public static List searchDataListBySearchCondition(
+			Connection conn,
+			int beginIndex, int pageSize, 
+			String tableName, DOSearchCondition searchCondition,
+			String[] orderByFields) throws ParseException, SQLException, ClassNotFoundException, InstantiationException, InvocationTargetException, IllegalAccessException {
 		StringBuilder sql = new StringBuilder();
 		
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(tableName);
@@ -100,7 +117,8 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 				stmt.setObject(index++, colValueListForStmt.get(i));
 			}
 			
-			return QueryDataDao.findDataXml(stmt, "List", mMetaDataUISetting.getDataClassName());
+			Class<?> dataClass = DataOriginWebContext.getDataOriginContext().findClass(mMetaDataUISetting.getDataClassName());
+			return QueryDataDao.findData(stmt, dataClass);
 		} finally {
 			stmt.close();
 		}

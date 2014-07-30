@@ -35,9 +35,14 @@ import com.salama.util.ResourceUtil;
 public class DataOriginGenerator {
 	private final static Logger logger = Logger.getLogger(DataOriginGenerator.class);
 
+	public final static String TASK_TYPE_GENERATE_WEB = "web";
+	
+	public static enum DataOriginGenerateTaskType {GenerateMeta, GenerateWeb};
+
+	
 	public static enum WebGenerateOverwriteFlag {NoOverwrite, OverwriteAll, OverwriteGeneratedFileOnly};
-	public static String WebGenerateOverwriteFlagStringOverwriteAll = "wa";
-	public static String WebGenerateOverwriteFlagStringOverwriteGeneratedFileOnly = "wg";
+	public final static String WebGenerateOverwriteFlagStringOverwriteAll = "wa";
+	public final static String WebGenerateOverwriteFlagStringOverwriteGeneratedFileOnly = "wg";
 	
 	
 	public final static Charset DefaultCharset = Charset.forName("utf-8");
@@ -53,14 +58,13 @@ public class DataOriginGenerator {
 	
 	public static void main(String[] args) {
 		try {
-			DataOriginGenerator generator = new DataOriginGenerator();
-
 			if(args == null || args.length == 0) {
+				DataOriginGenerator generator = new DataOriginGenerator(DataOriginGenerateTaskType.GenerateMeta);
 				generator.generateAllSettings();
 			} else {
 				String taskType = args[0];
-				if(taskType.equals("web")) {
-					
+				if(taskType.equals(TASK_TYPE_GENERATE_WEB)) {
+					DataOriginGenerator generator = new DataOriginGenerator(DataOriginGenerateTaskType.GenerateWeb);
 					WebGenerateOverwriteFlag overwriteFlg = WebGenerateOverwriteFlag.NoOverwrite;
 					
 					if(args.length >= 2) {
@@ -81,8 +85,8 @@ public class DataOriginGenerator {
 		}
 	}
 	
-	protected DataOriginGenerator() throws ClassNotFoundException, SQLException, IOException {
-		_generatorContext = new DataOriginGeneratorContext();
+	protected DataOriginGenerator(DataOriginGenerateTaskType taskType) throws ClassNotFoundException, SQLException, IOException {
+		_generatorContext = new DataOriginGeneratorContext(taskType);
 	}
 	
 	
@@ -103,7 +107,7 @@ public class DataOriginGenerator {
 		String dbTableName;
 		DBTable dbTable;
 		File dbTableFile; 
-		for(int i = 0; i < _generatorContext.getDbTableNameList().size(); i++) {
+		for(int i = 0; i < _generatorContext.getDbTableList().size(); i++) {
 			dbTable = _generatorContext.getDbTableList().get(i);
 			dbTableName = dbTable.getTableName();
 			
@@ -123,7 +127,9 @@ public class DataOriginGenerator {
 		String dataOriginSettingName = DataOriginSetting.class.getSimpleName() + ".xml";
 		File dataOriginSettingDest = new File(_generatorContext.getDataOriginDirManager().getBaseDir(), dataOriginSettingName);
 		if(!dataOriginSettingDest.exists()) {
-			File dataOriginSettingSrc = new File(new File(_generatorContext.getTemplateDir(), DataOriginGeneratorContext.DIR_DATA_ORIGIN_BASE), dataOriginSettingName);
+			File dataOriginSettingSrc = new File(
+					new File(_generatorContext.getTemplateDir(), DataOriginGeneratorContext.DIR_DATA_ORIGIN_BASE), 
+					dataOriginSettingName);
 			DataOriginGeneratorUtil.copyFile(dataOriginSettingSrc, dataOriginSettingDest);
 		}
 		

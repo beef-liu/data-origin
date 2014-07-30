@@ -11,6 +11,33 @@ var DEFAULT_MSG_ERROR_INPUT_REQUIRE_NUMBER = "Pease input Number";
 var DEFAULT_MSG_CONFIRM_DELETE_DATA = "Are you sure to delete checked data row?\n (Can not be undo)";
 var DEFAULT_MSG_INFO_DID_DELETE_DATA = "Data deleted";
 
+function showUploadFileList() {
+	/*
+	var divForUploadFileList = "";
+	divForUploadFileList += '<div id="dialog_upload_file_list" style="z-index: 1800;" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">';
+	divForUploadFileList += '  <div class="modal-dialog" style="background-color: #ffffff; width:1000px; height:600px;">';
+	divForUploadFileList += '    <iframe src="${empty}douploadfilemeta_data_list.html" style="overflow:auto; width:1000px; height:600px; padding: 2px 2px 2px 10px; margin:0px;"></iframe>';
+	divForUploadFileList += '  </div>';
+	divForUploadFileList += '</div>';
+	
+	var divNode = $('#dialog_upload_file_list');
+	if(divNode.length == 0) {
+		$(document.body).append(divForUploadFileList);
+	}
+	
+	$('#dialog_upload_file_list').modal();
+	*/
+	var newWindowW = 1000;
+	var newWindowX = ($(document.body).width() - newWindowW) / 2;
+	var newWindowY = 10;
+	var newWindow = window.open("${empty}douploadfilemeta_data_list.html",
+		'newwindow',
+		"modal=yes,height=600,width=" + newWindowW + ",top=" + newWindowY + ",left=" + newWindowX + ",toolbar=no,menubar=no,scrollbars=yes,resizable=no,location=no,status=no",
+		true
+		);
+	//newWindow.moveTo(newWindowX, newWindowY);
+}
+
 function myAjax(args) {
 	var dataType = "text";
 	if(args.dataType != undefined) {

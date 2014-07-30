@@ -97,6 +97,8 @@ public class TemplateGenerator {
 			boolean isJavaFile, boolean needGenerateFile,
 			DBTable dbTable
 			) throws IOException, ParseException {
+		logger.debug("generateTemplateFile() file:" + file.getAbsolutePath());
+
 		File destFile;
 		Template template;
 		Map<String, Object> templateParamMap = createTemplateParamMap(dataOriginContext, generatorContext, dbTable);
@@ -358,6 +360,8 @@ public class TemplateGenerator {
 		httlParams.put(TEMPLATE_PARAM_NAME_WEB_CONTEXT_NAME, generatorContext.getOutputWebContextName());
 
 		if(dbTable != null) {
+			logger.debug("createTemplateParamMap() tableName:" + dbTable.getTableName());
+			
 			httlParams.put(TEMPLATE_PARAM_NAME_TABLE_NAME, dbTable.getTableName().toLowerCase());
 			httlParams.put(TEMPLATE_PARAM_NAME_DATA_CLASS_NAME, dataOriginContext.getMetaDataUISetting(dbTable.getTableName()).getDataClassName());
 			

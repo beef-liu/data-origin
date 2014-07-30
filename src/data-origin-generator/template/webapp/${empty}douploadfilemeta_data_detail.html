@@ -28,126 +28,101 @@
 	  		<div id="detail-content-table" style="overflow: auto; height:640px;">
 	  			<table class="" style="width: 99%;">
 	  				<tbody id="detail-table-tbody" style="">
+	  					<tr>
+	  						<td class="my-td-detail">
+					  			<div style="">
+						  			<a href="#" onclick="showUploadFileList()">
+						  				<img src="myimg/cloud_upload.png" style="height:32px;"/>
+						  			</a>
+					  			</div>
+	  						</td>
+	  					</tr>
 	  					<tr class="">
 	  						<td class="my-td-detail" dataDetail="DataDetail">
-	  						<!---->
-	  							<!---->
-	  							<div dataColBlock="file_id">
-	  								<input type="hidden" name="columnType" value="char(32)" />
-	  								<input type="hidden" name="fieldDispFormat" value="" />
-	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,32}" />
-	  								<input type="hidden" name="fieldDispMaxLength" value="32" />
-	  								
-	  								<label>:</label>
-	  							<!-- -->
-	  								<input type="text" dataDetail="file_id" placeholder="" maxlength="32"/>
-	  							<!-- -->
-	  							</div>
-	  						<!---->
-	  							<!---->
-	  							<div dataColBlock="content_type">
-	  								<input type="hidden" name="columnType" value="varchar(255)" />
-	  								<input type="hidden" name="fieldDispFormat" value="" />
-	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
-	  								<input type="hidden" name="fieldDispMaxLength" value="255" />
-	  								
-	  								<label>:</label>
-	  							<!-- -->
-	  								<textarea dataDetail="content_type"></textarea>
-	  							<!-- -->
-	  							</div>
-	  						<!---->
-	  							<!---->
-	  							<div dataColBlock="content_length">
-	  								<input type="hidden" name="columnType" value="bigint(20)" />
-	  								<input type="hidden" name="fieldDispFormat" value="" />
-	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
-	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
-	  								
-	  								<label>:</label>
-	  							<!-- -->
-	  								<input type="text" dataDetail="content_length" placeholder="" maxlength="20"/>
-	  							<!-- -->
-	  							</div>
-	  						<!---->
-	  							<!---->
-	  							<div dataColBlock="file_ext">
-	  								<input type="hidden" name="columnType" value="char(10)" />
-	  								<input type="hidden" name="fieldDispFormat" value="" />
-	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{0,10}" />
-	  								<input type="hidden" name="fieldDispMaxLength" value="10" />
-	  								
-	  								<label>file extension name:</label>
-	  							<!-- -->
-	  								<input type="text" dataDetail="file_ext" placeholder="" maxlength="10"/>
-	  							<!-- -->
-	  							</div>
-	  						<!---->
-	  							<!---->
-	  							<div dataColBlock="download_url">
-	  								<input type="hidden" name="columnType" value="varchar(255)" />
-	  								<input type="hidden" name="fieldDispFormat" value="" />
-	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
-	  								<input type="hidden" name="fieldDispMaxLength" value="255" />
-	  								
-	  								<label>:</label>
-	  							<!-- -->
-	  								<textarea dataDetail="download_url"></textarea>
-	  							<!-- -->
-	  							</div>
-	  						<!---->
-	  							<!---->
-	  							<div dataColBlock="content_hash_code">
-	  								<input type="hidden" name="columnType" value="varchar(64)" />
-	  								<input type="hidden" name="fieldDispFormat" value="" />
-	  								<input type="hidden" name="fieldValidateRegex" value=".{0,64}" />
-	  								<input type="hidden" name="fieldDispMaxLength" value="64" />
-	  								
-	  								<label>:</label>
-	  							<!-- -->
-	  								<textarea dataDetail="content_hash_code"></textarea>
-	  							<!-- -->
-	  							</div>
-	  						<!---->
-	  							<!---->
 	  							<div dataColBlock="thumbnail">
 	  								<input type="hidden" name="columnType" value="varchar(6000)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,6000}" />
 	  								<input type="hidden" name="fieldDispMaxLength" value="6000" />
 	  								
-	  								<label>:</label>
-	  							<!-- -->
-	  								<textarea dataDetail="thumbnail"></textarea>
-	  							<!-- -->
+	  								<label>Thumbnail:</label>
+	  								<input type="hidden" dataDetail="thumbnail" maxlength="255" />
+	  								<img id="upload_file_thumbnail" />
 	  							</div>
-	  						<!---->
-	  							<!---->
 	  							<div dataColBlock="file_tag">
 	  								<input type="hidden" name="columnType" value="varchar(255)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
 	  								<input type="hidden" name="fieldDispMaxLength" value="255" />
 	  								
-	  								<label>file tag for searching through keyword:</label>
-	  							<!-- -->
-	  								<textarea dataDetail="file_tag"></textarea>
-	  							<!-- -->
+	  								<label>File Tag:</label>
+	  								<input type="text" dataDetail="file_tag" placeholder="" maxlength="255"/>
 	  							</div>
-	  						<!---->
-	  							<!---->
+	  							<div dataColBlock="content_type">
+	  								<input type="hidden" name="columnType" value="varchar(255)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="255" />
+	  								
+	  								<label>Content Type:</label>
+	  								<input type="text" dataDetail="content_type" placeholder="" maxlength="255"/>
+	  							</div>
+	  							<div dataColBlock="file_id">
+	  								<input type="hidden" name="columnType" value="char(32)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,32}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="32" />
+	  								
+	  								<label>File Id:</label>
+	  								<input type="text" dataDetail="file_id" placeholder="" maxlength="32" readonly="readonly"/>
+	  							</div>
+	  							<div dataColBlock="content_length">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>Byte Length:</label>
+	  								<input type="text" dataDetail="content_length" placeholder="" maxlength="20" readonly="readonly"/>
+	  							</div>
+	  							<div dataColBlock="file_ext">
+	  								<input type="hidden" name="columnType" value="char(10)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{0,10}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="10" />
+	  								
+	  								<label>File Extension:</label>
+	  								<input type="text" dataDetail="file_ext" placeholder="" maxlength="10" readonly="readonly"/>
+	  							</div>
+	  							<div dataColBlock="download_url">
+	  								<input type="hidden" name="columnType" value="varchar(255)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="255" />
+	  								
+	  								<label>Download Url:</label>
+	  								<input type="text" dataDetail="download_url" placeholder="" maxlength="255" readonly="readonly"/>
+	  							</div>
+	  						<!--
+	  							<div dataColBlock="content_hash_code">
+	  								<input type="hidden" name="columnType" value="varchar(64)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,64}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="64" />
+	  								
+	  								<label>Hash Code:</label>
+	  								<input type="text" dataDetail="content_hash_code" placeholder="" maxlength="64" readonly="readonly"/>
+	  							</div>
 	  							<div dataColBlock="update_time">
 	  								<input type="hidden" name="columnType" value="bigint(20)" />
 	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
 	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
 	  								
-	  								<label>:</label>
-	  							<!-- -->
-	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
-	  							<!-- -->
+	  								<label>Update Time:</label>
+	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20" readonly="readonly"/>
 	  							</div>
-	  						<!---->
+	  						-->
 	  						</td>
 	  					</tr>
 	  				</tbody>

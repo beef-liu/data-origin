@@ -139,7 +139,7 @@
 	  	<div class="my-left-menu" style="background: white;">
 	  		<ul style="padding-left: 4px;">
 	  			<li>
-	  				<div class="my-menu-group">Super Admin</div>
+	  				<div class="my-menu-group">Admin</div>
 	  				<ul>
 	  					<li class="my-menu-item"><a href="#">menu0</a></li>
 	  					<li class="my-menu-item"><a href="#">menu1</a></li>
@@ -150,7 +150,9 @@
 	  				<div class="my-menu-group">Data Management</div>
 	  				<ul>
 					<!--#for(DBTable table : tables)-->
+						<!--#if(!table.tableName.equalsIgnoreCase("DOAdmin") && !table.tableName.equalsIgnoreCase("DOUploadFileMeta")) -->
 	  					<li id="data-menu-item" class="my-menu-item" htmlName="${table.tableName.toLowerCase()}_data_list.html" onclick="loadContentHtml(this)"><a href="#">${table.comment}</a></li>
+	  					<!--#end -->
 	  				<!--#end-->
 	  				</ul>
 	  			</li>

@@ -23,6 +23,7 @@ import MetoXML.XmlSerializer;
 
 import com.beef.dataorigin.generator.DataOriginGenerator;
 import com.beef.dataorigin.generator.DataOriginGeneratorContext;
+import com.beef.dataorigin.generator.DataOriginGenerator.DataOriginGenerateTaskType;
 import com.salama.modeldriven.util.db.DBTable;
 import com.salama.modeldriven.util.db.mysql.MysqlTableInfoUtil;
 
@@ -31,7 +32,7 @@ public class HttlTest {
 
 	public HttlTest() {
 		try {
-			_generatorContext = new DataOriginGeneratorContext();		
+			_generatorContext = new DataOriginGeneratorContext(DataOriginGenerateTaskType.GenerateMeta);		
 		} catch(Throwable e) {
 			e.printStackTrace();
 		}

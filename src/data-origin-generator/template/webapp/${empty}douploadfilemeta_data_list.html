@@ -1,7 +1,60 @@
-<!---->
-		<!-- modified to load dynamicly 
-	    <script src="myjs/data/douploadfilemeta_data_list.js"></script>
-		-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="max-age=1" />
+    
+    <title>File Upload Mangement</title>
+
+    <link rel="shortcut icon" href="images/favicon.ico">
+
+    <!-- Loading Bootstrap -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Loading Flat UI -->
+    <link href="css/flat-ui.css" rel="stylesheet">
+    
+    <!-- my css -->
+    <link href="mycss/my-base.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="js/jquery.ui.touch-punch.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-select.js"></script>
+    <script src="js/bootstrap-switch.js"></script>
+    <script src="js/flatui-checkbox.js"></script>
+    <script src="js/flatui-radio.js"></script>
+    <script src="js/jquery.tagsinput.js"></script>
+    <script src="js/jquery.placeholder.js"></script>
+
+    
+    <script src="myjs/lib/md5.js"></script>
+    <script src="myjs/lib/salama/easyJsDomUtil.js"></script>
+    <script src="myjs/lib/easyUpload.js"></script>
+    <script src="myjs/lib/urlparams.js"></script>
+    
+    <script src="myjs/${empty}myCommon.js"></script>
+    
+    <script src="myjs/data/${empty}douploadfilemeta_data_list.js"></script>
+    <script src="myjs/data/${empty}douploadfilemeta_data_detail.js"></script>
+    
+  </head>
+  <body style="height:100%;">
+  <div class="container" style="width: 100%;padding:0;">
+	
+	<!-- Content -->
+    <div class="my-container" style="top:0px;bottom:0px;">
+	  	<!-- main content -->
+	  	<div id="my-main-content" class="my-main-content" style="">
 	  		<!-- Content Header -->
 	  		<div id="content-header">
 				<!-------- Search conditions ---------->		  		
@@ -13,28 +66,28 @@
 		  						<!---->
 		  							<div searchCondition="DOSearchConditionItem">
 		  							<!---->
-		  								<label>:</label>
+		  								<label>File ID:</label>
 		  								<input type="hidden" searchCondition="fieldName" value="file_id" />
 		  								<input type="text" searchCondition="fieldValue" />
 		  							</div>
-		  						<!---->
+		  							<!--
 		  							<div searchCondition="DOSearchConditionItem">
-		  							<!---->
 		  								<label>:</label>
 		  								<input type="hidden" searchCondition="fieldName" value="content_type" />
 		  								<input type="text" searchCondition="fieldValue" />
 		  							</div>
+		  							-->
 		  						<!---->
 		  							<div searchCondition="DOSearchConditionItem">
 		  							<!---->
-		  								<label>:</label>
-		  								<input type="hidden" searchCondition="fieldName" value="content_length" />
+		  								<label>File Tag:</label>
+		  								<input type="hidden" searchCondition="fieldName" value="file_tag" />
 		  								<input type="text" searchCondition="fieldValue" />
 		  							</div>
 		  						<!---->
 		  							<div searchCondition="DOSearchConditionItem">
 		  							<!---->
-		  								<label>file extension name:</label>
+		  								<label>file extension(.png, .jpg):</label>
 		  								<input type="hidden" searchCondition="fieldName" value="file_ext" />
 		  								<input type="text" searchCondition="fieldValue" />
 		  							</div>
@@ -61,7 +114,7 @@
 							  				<img src="myimg/btn-delete.png"/>
 							  			</a>
 						  			</div>
-						  			
+						  			<!--						  			
 						  			<div class="my-button-s my-button-bk-default" style="height:34px;">
 							  			<a id="btn-data-import" href="#" style="padding: 10px 20px;">
 							  				<img src="myimg/xls-up.png" style="width:24px;height:24px;"/>
@@ -76,6 +129,7 @@
 							  				<img src="myimg/xls-down.png" style="width:24px;height:24px;"/>
 							  			</a>
 						  			</div>
+						  			-->
 						  			
 						  			<div style="float: right;">
 							  			<div class="my-button-s my-button-bk-info" style="margin-right:72px;">
@@ -148,24 +202,26 @@
 	  					<tr class="my-head-tr">
 	  						<th id="th-checkbox" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
 	  						<th id="th-row-num" class="my-th" style="width:36px;">No.</th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="thumbnail" onclick="setSortCol()"><span>Thumbnail</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="file_tag" onclick="setSortCol()"><span>File Tag</span> <img src="myimg/empty.png"/> </th>
   						<!---->
-	  						<th class="my-th-sort nosort" listHead="file_id" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="file_id" onclick="setSortCol()"><span>File ID</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="content_type" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="content_type" onclick="setSortCol()"><span>Content Type</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="content_length" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="content_length" onclick="setSortCol()"><span>Byte Length</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="file_ext" onclick="setSortCol()"><span>file extension name</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="file_ext" onclick="setSortCol()"><span>File Ext</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="download_url" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="download_url" onclick="setSortCol()"><span>Download Url</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
+	  						<!--
 	  						<th class="my-th-sort nosort" listHead="content_hash_code" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  						-->
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="thumbnail" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
-	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="file_tag" onclick="setSortCol()"><span>file tag for searching through keyword</span> <img src="myimg/empty.png"/> </th>
-	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="update_time" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="update_time" onclick="setSortCol()"><span>Update Time</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
 	  						<th class="my-th" style="width:36px;"></th>
 	  					</tr>
@@ -174,6 +230,19 @@
 	  					<tr id="tr-data" class="my-tr" listData="DOUploadFileMeta" primaryKeytrue="DOUploadFileMeta">
 	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
 	  						<td id="td-row-num" class="my-td"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td"  
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="thumbnail">
+	  							<input type="hidden" listData="thumbnail" />
+	  							<img id="upload_file_thumbnail" src="" />
+	  						</td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="file_tag" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="file_tag"></td>
   						<!---->
   							<!---->
 	  						<td id="td-data-col" class="my-td" listData="file_id" 
@@ -201,19 +270,11 @@
 	  							isPrimaryKey="false" primaryKeyfalse="download_url"></td>
 	  					<!---->
   							<!---->
+  							<!--
 	  						<td id="td-data-col" class="my-td" listData="content_hash_code" 
 	  							fieldDispFormat="" 
 	  							isPrimaryKey="false" primaryKeyfalse="content_hash_code"></td>
-	  					<!---->
-  							<!---->
-	  						<td id="td-data-col" class="my-td" listData="thumbnail" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="thumbnail"></td>
-	  					<!---->
-  							<!---->
-	  						<td id="td-data-col" class="my-td" listData="file_tag" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="file_tag"></td>
+	  						-->
 	  					<!---->
   							<!---->
 	  						<td id="td-data-col" class="my-td" listData="update_time" 
@@ -225,8 +286,49 @@
 	  				</tbody>
 	  			</table>
 	  		</div>
-	  		<div style="text-align:right; padding:4px 48px 0px 2px; font-size: small;">
+	  		<div id="data-table-footer" style="text-align:right; padding:4px 48px 0px 2px; font-size: small;">
 	  			<span style="color: #295ccb; font-weight: bold;"> last query at: </span> <span id="last_query_time_begin" style="min-width: 50px;">00:00:00</span>
 	  			<span style="padding-left:16px; color: #295ccb; font-weight: bold;"> cost: </span> <span id="last_query_time_cost" style="min-width: 50px;">0.000</span>
 	  			<span style="color: #295ccb;"> (second)</span>
 	  		</div>
+	  	
+	  	</div> <!-- end of main content -->
+    </div> <!-- end of my container -->
+
+  </div> <!-- end of container -->
+
+	<div id="anim-loading-container" style="position:absolute; width: 100%; height: 100%;display:none;">
+		<div id="anim-loading" style="position:absolute; width: 48px; height: 48px; background: center; background-color: #353535; border-radius: 4px; filter:alpha(Opacity=128);-moz-opacity:0.5;opacity: 0.5;">
+			<img class="icon-rotating" style="background-image: url(myimg/loading_gray.png); background-size:48px 48px; position:absolute; width: 48px; height:48px;" src="myimg/empty.png" />  
+		</div>
+	</div>
+
+	<!-- Modal (alert msg)-->
+	<div id="modal-alert" class="modal fade bs-example-modal-lg" style="z-index: 2000;" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title" id="myModalLabel"></h4>
+		      </div>
+		      <div class="modal-body">
+		      	<div style="overflow: auto; height: 200px;">
+			      	<pre id="modal-msg" style="border: none;"></pre>
+		      	</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" style="display: none;float:right;">OK</button>
+		        <button type="button" class="btn btn-default" data-dismiss="modal" style="float:right; margin-right:8px;">Cancel</button>
+		      </div>
+		    </div>
+		  </div>
+	</div>    
+	    
+	<!-- Modal (DataDetail) -->
+	<div id="modal-data-detail" class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" id="data_detail_content" style="background-color: #f3f3f3; width:800px; height:400px;">
+	  </div>
+	</div>
+
+  </body>
+</html>

@@ -10,15 +10,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.beef.dataorigin.context.DataOriginContext;
 import com.beef.dataorigin.context.DataOriginDirManager;
+import com.beef.dataorigin.generator.DataOriginGenerator.DataOriginGenerateTaskType;
 import com.beef.dataorigin.generator.util.DataOriginGeneratorUtil;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import com.salama.modeldriven.util.db.DBTable;
@@ -65,18 +63,20 @@ public class DataOriginGeneratorContext {
 	private String _outputWebProjectJavaPackage;
 	private String _outputWebContextName;
 	
-	private HashSet<String> _builtInTableNameSet = new HashSet<String>();
+	//private HashSet<String> _builtInTableNameSet = new HashSet<String>();
 	
 	private Properties _dataOriginProperties = null;
-	public DataOriginGeneratorContext() throws ClassNotFoundException, SQLException, IOException {
+	public DataOriginGeneratorContext(DataOriginGenerateTaskType taskType) throws ClassNotFoundException, SQLException, IOException {
+		
 		_dataOriginProperties = ResourceUtil.getProperties("/data-origin-generator.properties");
 		
 		makeBaseDir();
 		
-		initBuiltinDBTables();
-		
 		initDBTables();
 		
+		if(taskType == DataOriginGenerateTaskType.GenerateMeta) {
+			initBuiltinDBTables();
+		}
 	}
 	
 	protected void makeBaseDir() {
@@ -94,21 +94,19 @@ public class DataOriginGeneratorContext {
 	}
 	
 	protected void initBuiltinDBTables() throws IOException {
-		_builtInTableNameSet.add("DOAdmin");
-		_builtInTableNameSet.add("DOUploadFileMeta");
-		
-		InputStream sqlSourceInput = DataOriginGenerator.class.getResourceAsStream("/data-origin-db.sql");
-		ByteArrayOutputStream bytesOutput = new ByteArrayOutputStream();
-		
-		DataOriginGeneratorUtil.copy(sqlSourceInput, bytesOutput);
-		
-		String sqlSource = bytesOutput.toString(DataOriginGeneratorContext.DefaultCharsetName);
-		
-		String[] createTableSqlArray = sqlSource.split("(;[ \t\r]*[\n]+)");
-		
 		Connection conn = null;
 		
 		try {
+			//create builtin tables -----------------------------------------------------
+			//read sql of create table
+			InputStream sqlSourceInput = DataOriginGenerator.class.getResourceAsStream("/data-origin-db.sql");
+			ByteArrayOutputStream bytesOutput = new ByteArrayOutputStream();
+			DataOriginGeneratorUtil.copy(sqlSourceInput, bytesOutput);
+			String sqlSource = bytesOutput.toString(DataOriginGeneratorContext.DefaultCharsetName);
+			//split to array of create table sql
+			String[] createTableSqlArray = sqlSource.split("(;[ \t\r]*[\n]+)");
+
+			//DB operation
 			conn = createConnectionOfOnEditingDB();
 			
 			PreparedStatement stmt = null;
@@ -136,7 +134,13 @@ public class DataOriginGeneratorContext {
 					} catch(Throwable e) {
 					}
 				}
-			} 
+			}
+			
+			
+			//add dbTable into list -----------------------------------------------
+			addDBTableByTableName(conn, "DOAdmin");
+			addDBTableByTableName(conn, "DOUploadFileMeta");
+			
 		} catch(Throwable e) {
 			e.printStackTrace();
 		} finally {
@@ -145,6 +149,14 @@ public class DataOriginGeneratorContext {
 			} catch(Throwable e) {
 			}
 		}
+		
+	}
+	
+	private void addDBTableByTableName(Connection conn, String dbTableName) throws SQLException {
+		_dbTableNameList.add(dbTableName);
+
+		DBTable dbTable = MysqlTableInfoUtil.GetTable(conn, dbTableName);
+		_dbTableList.add(dbTable);
 	}
 	
 	protected void initDBTables() throws ClassNotFoundException, SQLException {

@@ -17,6 +17,18 @@ var _dataimpImportFileName = "";
 var _dataimpImportSheetIndex = 0;
 
 $(document).ready(function() {
+	var dataDetailHtmlName = "${empty}douploadfilemeta_data_detail.html";
+	var timestampParam = "?timestamp=" + (new Date()).getTime();
+	$.ajax({
+		url: dataDetailHtmlName + timestampParam,
+		type: "GET",
+		dataType: "text",
+		success: function(response) {
+			$('#data_detail_content').html(response);
+		}
+	});
+	
+	
 	initUI();
 	
 	doSearch();
@@ -24,9 +36,10 @@ $(document).ready(function() {
 
 <!------------------ Functions for UI ----------------------------->
 function resizeTableHeight() {
-	var mainContentHeight = $('#main-content').height();
+	var mainContentHeight = $('#my-main-content').height();
 	var contentHeaderHeight = $('#content-header').height();
-	var footerHeight = $('.my-footbar').height();
+	//var footerHeight = $('.my-footbar').height();
+	var footerHeight = 26;
 	var newContentTableHeight = mainContentHeight - contentHeaderHeight - footerHeight;
 	$('#content-table').height(newContentTableHeight); 
 	//alert("mainContentHeight:" + mainContentHeight + " contentHeaderHeight" + contentHeaderHeight);

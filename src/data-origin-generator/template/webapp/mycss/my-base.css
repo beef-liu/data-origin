@@ -364,3 +364,7 @@
 	width:70%;
 	height: 102px;
 }
+
+input[readonly="readonly"] {
+	background-color: #e3e3e3;
+}

@@ -8,7 +8,14 @@ public class DOUploadFileMeta extends DOUploadFilePersistenceMeta {
 	private String _file_tag = null;
 	private long _update_time = 0;
 	
+	private String _thumbnail_download_url = null;
 	
+	public String getThumbnail_download_url() {
+		return _thumbnail_download_url;
+	}
+	public void setThumbnail_download_url(String thumbnail_download_url) {
+		_thumbnail_download_url = thumbnail_download_url;
+	}
 	public String getFile_ext() {
 		return _file_ext;
 	}
