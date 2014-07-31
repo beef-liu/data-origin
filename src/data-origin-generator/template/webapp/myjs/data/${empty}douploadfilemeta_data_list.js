@@ -17,6 +17,7 @@ var _dataimpImportFileName = "";
 var _dataimpImportSheetIndex = 0;
 
 $(document).ready(function() {
+	//load douploadfilemeta_data_detail.html ----------------------------------
 	var dataDetailHtmlName = "${empty}douploadfilemeta_data_detail.html";
 	var timestampParam = "?timestamp=" + (new Date()).getTime();
 	$.ajax({
@@ -25,6 +26,20 @@ $(document).ready(function() {
 		dataType: "text",
 		success: function(response) {
 			$('#data_detail_content').html(response);
+			
+			//img event
+			var defaultImgSrc = $('#img_upload_file_upload')[0].src;
+			$('#img_upload_file_upload').error(function() {
+				//set default img
+				$('#img_upload_file_upload')[0].src = defaultImgSrc;
+			});
+			$('#link_upload_file_upload').click(function() {
+				$('#file_upload_file').click();
+			});
+			$('#file_upload_file').bind('change', function(event) {
+				uploadFileUpload();
+			});
+			
 		}
 	});
 	
@@ -495,10 +510,16 @@ function resetPageController() {
 	
 }
 
-function searchData() {
+function searchData(noLoadingAnimation) {
 	var timeOfSearchBegin = new Date();
+	var ajaxFunc;
+	if(noLoadingAnimation) {
+		ajaxFunc = $.ajax;
+	} else {
+		ajaxFunc = myAjax;
+	}
 	
-	myAjax({
+	ajaxFunc({
 		url: WEB_APP + "/cloudDataService.do",
 		type: "post",
 		dataType: "text",
@@ -533,6 +554,12 @@ function reloadData(dataListXml) {
         	//row num
         	var rowNum = _curPageIndex * _curPageSize + index + 1;
         	$(dataDomNode).find('[id="td-row-num"]').text(rowNum);
+
+			var thumbnail_download_url = $(dataDomNode).find('[listData="thumbnail_download_url"]').val();
+			if(thumbnail_download_url != "") {
+				thumbnail_download_url = myUrlAddParam(thumbnail_download_url, "timestamp=" + (new Date()).getTime());
+			}
+        	$(dataDomNode).find('[id="upload_file_thumbnail"]')[0].src = thumbnail_download_url;
         	
         	//format
         	var dataColNodes = $(dataDomNode).find('[id="td-data-col"]');

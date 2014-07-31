@@ -1,5 +1,6 @@
 package com.beef.dataorigin.web.upload;
 
+import java.awt.Point;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
@@ -7,11 +8,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -20,20 +20,15 @@ import MetoXML.XmlSerializer;
 import com.beef.dataorigin.web.context.DataOriginWebContext;
 import com.beef.dataorigin.web.dao.DODataDao;
 import com.beef.dataorigin.web.data.DOUploadFileMeta;
-import com.beef.dataorigin.web.service.DODataDetailService;
 import com.beef.dataorigin.web.upload.persistence.DOUploadFilePersistenceException;
 import com.beef.dataorigin.web.util.DODataDaoUtil;
 import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 import com.beef.dataorigin.web.util.DOServiceUtil;
-import com.salama.modeldriven.util.db.DBTable;
-import com.salama.modeldriven.util.db.mysql.MysqlTableInfoUtil;
 import com.salama.service.core.net.RequestWrapper;
 import com.salama.service.core.net.ResponseWrapper;
 import com.salama.service.core.net.http.HttpResponseWrapper;
 import com.salama.service.core.net.http.MultipartFile;
 import com.salama.service.core.net.http.MultipartRequestWrapper;
-import com.salama.util.db.DBMetaUtil;
-import com.salama.util.db.JDBCUtil;
 import com.salama.util.easyimage.ImageUtil;
 
 public class DOUploadFileService {
@@ -43,9 +38,15 @@ public class DOUploadFileService {
 	
 	protected static int _thumbnailHeight = 128;
 	
-	protected String uploadFile(RequestWrapper request,
-			String fileId, String fileTag) {
+	protected String uploadFile(RequestWrapper request) {
 		try {
+			String fileId = request.getParameter("fileId");
+			if(fileId == null || fileId.length() == 0) {
+				fileId = DOServiceUtil.newDataId();
+			}
+			
+			String fileTag = "";
+			
 			MultipartRequestWrapper multipartRequest = (MultipartRequestWrapper)request;
 			MultipartFile multipartFile = getMultipartFileFromRequest(multipartRequest);
 			
@@ -106,6 +107,7 @@ public class DOUploadFileService {
 			String fileTag
 			) throws DOUploadFilePersistenceException, ParseException, SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException, IOException {
 		Connection conn = null;
+		boolean autoCommit = false; 
 		try {
 			DOUploadFileMeta fileMeta = new DOUploadFileMeta();
 			fileMeta.setFile_id(fileId);
@@ -121,19 +123,77 @@ public class DOUploadFileService {
 			fileMeta.setDownload_url(downloadUrl);
 			
 			//create thumbnail ------------------
-			createThumbnail(fileInput, fileId, fileMeta.getFile_ext());
+			String imageFormat = getImageFormat(fileMeta.getFile_ext());
+			if(imageFormat != null) {
+				InputStream savedFileInput = null;
+				try {
+					
+					savedFileInput = DataOriginWebContext.getUploadFilePersistence().getFile(fileId);
+					Point imageSize = ImageUtil.getImageSize(savedFileInput);
+					savedFileInput.close();
+					
+					
+					savedFileInput = DataOriginWebContext.getUploadFilePersistence().getFile(fileId);
+					createThumbnail(savedFileInput, fileId, fileMeta.getFile_ext(), imageFormat, imageSize.x, imageSize.y);
+					
+					fileMeta.setThumbnail_download_url(getThumbnailVirtualPath(fileMeta));
+				} finally {
+					try {
+						savedFileInput.close();
+					} catch(Throwable e) {
+					}
+				}
+			}
 			
 			//insert or update file meta ------------------
 			conn = DOServiceUtil.getOnEditingDBConnection();
-			int updCnt = DODataDao.updateDataByPK(conn, TABLE_NAME_DO_UPLOAD_FILE_META, fileMeta);
+			autoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(true);
+			
+			int updCnt = updateDataForUpload(conn, fileMeta);
 			if(updCnt == 0) {
 				DODataDao.insertData(conn, TABLE_NAME_DO_UPLOAD_FILE_META, fileMeta);
+			} else {
+				fileMeta = (DOUploadFileMeta) DODataDao.searchDataByPK(conn, TABLE_NAME_DO_UPLOAD_FILE_META, fileMeta);
 			}
 			
 			return fileMeta;
 		} finally {
 			try {
+				conn.setAutoCommit(autoCommit);;
+			} catch(Throwable e) {
+			}
+			try {
 				conn.close();
+			} catch(Throwable e) {
+			}
+		}
+	}
+	
+	private final static String SQL_UPDATE_BY_PK = "update DOUploadFileMeta set " 
+			+ " content_type = ?, content_length = ?, " 
+			+ " file_ext = ?, download_url = ?, thumbnail_download_url = ?, content_hash_code = ?, " 
+			+ " update_time = ? where file_id = ?";
+	protected static int updateDataForUpload(Connection conn, DOUploadFileMeta data) throws SQLException {
+		PreparedStatement stmt = null;
+		
+		try {
+			stmt = conn.prepareStatement(SQL_UPDATE_BY_PK);
+			
+			int index = 1;
+			stmt.setString(index++, data.getContent_type());
+			stmt.setLong(index++, data.getContent_length());
+			stmt.setString(index++, data.getFile_ext());
+			stmt.setString(index++, data.getDownload_url());
+			stmt.setString(index++, data.getThumbnail_download_url());
+			stmt.setString(index++, data.getContent_hash_code());
+			stmt.setLong(index++, data.getUpdate_time());
+			stmt.setString(index++, data.getFile_id());
+			
+			return stmt.executeUpdate();
+		} finally {
+			try {
+				stmt.close();
 			} catch(Throwable e) {
 			}
 		}
@@ -188,20 +248,31 @@ public class DOUploadFileService {
 			
 	}
 
-	protected void createThumbnail(InputStream fileInput, String fileId, String fileExt) throws IOException {
+	protected void createThumbnail(InputStream fileInput, 
+			String fileId, String fileExt, String imageFormat,
+			int originalImageWidth, int originalImageHeight 
+			) throws IOException {
 		File thumbnailFile = getThumbnailFile(fileId, fileExt);
 		boolean imgAllowEmptyRegion = false;
 		
-		String format;
-		if(fileExt.equalsIgnoreCase(".jpg") || fileExt.equalsIgnoreCase(".jpeg")) {
-			format = ImageUtil.IMAGE_FORMAT_JPEG;
-		} else if(fileExt.equalsIgnoreCase(".gif")) {
-			format = ImageUtil.IMAGE_FORMAT_GIF;
-		} else {
+		ImageUtil.createImage(fileInput, originalImageWidth, originalImageHeight, 
+				0, _thumbnailHeight, thumbnailFile, imgAllowEmptyRegion, imageFormat);
+	}
+
+	protected String getImageFormat(String fileExt) {
+		String format = null;
+		if(".png".equalsIgnoreCase(fileExt)) {
 			format = ImageUtil.IMAGE_FORMAT_PNG;
+		} else if(".jpg".equalsIgnoreCase(fileExt) || ".jpeg".equalsIgnoreCase(fileExt)) {
+			format = ImageUtil.IMAGE_FORMAT_JPEG;
+		} else if(".gif".equalsIgnoreCase(fileExt)) {
+			format = ImageUtil.IMAGE_FORMAT_GIF;
+		} else if(".bmp".equalsIgnoreCase(fileExt)) {
+			format = ImageUtil.IMAGE_FORMAT_PNG;
+		} else {
 		}
 		
-		ImageUtil.createImage(fileInput, 0, _thumbnailHeight, thumbnailFile, imgAllowEmptyRegion, format);
+		return format;
 	}
 	
 	protected File getThumbnailFile(String fileId, String fileExt) {
@@ -216,17 +287,4 @@ public class DOUploadFileService {
 		
 		return originalFileName.substring(index).toLowerCase();
 	}
-	
-	protected static boolean isImageFileExt(String fileExt) {
-		if(fileExt.equalsIgnoreCase(".png") 
-				|| fileExt.equalsIgnoreCase(".jpg")
-				|| fileExt.equalsIgnoreCase(".jpeg")
-				|| fileExt.equalsIgnoreCase(".gif")
-				) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
 }

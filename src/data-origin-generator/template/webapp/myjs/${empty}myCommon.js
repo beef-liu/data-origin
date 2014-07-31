@@ -30,7 +30,7 @@ function showUploadFileList() {
 	var newWindowW = 1000;
 	var newWindowX = ($(document.body).width() - newWindowW) / 2;
 	var newWindowY = 10;
-	var newWindow = window.open("${empty}douploadfilemeta_data_list.html",
+	var newWindow = window.open("${empty}douploadfilemeta_data_list.html" + "?timestamp=" + (new Date()).getTime(),
 		'newwindow',
 		"modal=yes,height=600,width=" + newWindowW + ",top=" + newWindowY + ",left=" + newWindowX + ",toolbar=no,menubar=no,scrollbars=yes,resizable=no,location=no,status=no",
 		true
@@ -283,4 +283,17 @@ function myStrPadLeft(strIn, padChar, expectingLen) {
         len++;  
     }  
     return strResult;  
+}
+
+function myUrlAddParam(url, paramStr) {
+	if(url.indexOf("?") < 0) {
+		url += "?";
+	} else {
+		if(url.charAt(url.length - 1) != "?") {
+			url += "&";
+		}
+	}
+	url += paramStr;
+	
+	return url;
 }  

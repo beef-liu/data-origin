@@ -1,6 +1,40 @@
 //0:update 1:insert
 var _dataDetailMode = 0;
 
+function uploadFileUpload() {
+	var fileId = "";
+	if(_dataDetailMode == 0) {
+		fileId = $('input[dataDetail="file_id"]').val();
+	}
+	
+	easyUpload.upload({
+		form: $('#form_upload_file'),
+		url: WEB_APP + "/cloudDataService.do",
+		data: {
+			serviceType: "${basePackage}.service.MyDOUploadFileService",
+			serviceMethod: "uploadFile",
+			fileId: fileId,
+		},
+		success: function(response) {
+			$('#file_upload_file').val('');
+			
+			if(response.trim().indexOf("<DOServiceMsg>") == 0) {
+				//Service Msg
+				myShowErrorMsg($(response).find('msg').text());
+			} else {
+				loadDataDetail(response);
+				
+				searchData(true);
+			}
+		},
+		error: function() {
+			$('#file_upload_file').val('');
+			
+			myShowErrorMsg(DEFAULT_MSG_ERROR_AJAX);
+		}
+	});
+}
+
 function deleteCheckedData() {
 	var dataRowCheckBoxNodeList = $('#data-tbody').find('input[type="checkbox"][id="table-check-row"]');
 	var i;
@@ -51,7 +85,7 @@ function deleteCheckedData() {
 					
 				},
 			});
-		}, 100);
+		}, 500);
 	});
 }
 
@@ -59,7 +93,13 @@ function gotoDataDetailForNew() {
 	_dataDetailMode = 1;
 	
 	//clear all input field
+	$('#img_upload_file_upload')[0].src = "";
+	$('#link_upload_file_download_url')[0].href = "";
+	$('#link_upload_file_download_url>span').text("");
+	
 	$('input[dataDetail],textarea[dataDetail]').val('');
+	
+	$('div[hideWhenNewFile]').hide();
 	
 	$('#modal-data-detail').modal();
 }
@@ -87,32 +127,42 @@ function gotoDataDetail(thisNode) {
 		},
 		success: function(response) {
 			//load data, and show it
-			var dataDetailNode = $('[dataDetail="DataDetail"]')[0]; 
-			var dataXmlDoc = easyJsDomUtil.parseXML(response);
-			
-			easyJsDomUtil.mappingDataXmlNodeToDomNode(
-				dataDetailNode, "dataDetail", dataXmlDoc.firstChild
-			);
-			
-			formatColValInput();
+			loadDataDetail(response);
 			
 			$('#modal-data-detail').modal();
 		},
 	});
 }
 
+function loadDataDetail(dataDetailXml) {
+	$('div[hideWhenNewFile]').show();
+
+	var dataDetailNode = $('[dataDetail="DataDetail"]')[0]; 
+	var dataXmlDoc = easyJsDomUtil.parseXML(dataDetailXml);
+	
+	easyJsDomUtil.mappingDataXmlNodeToDomNode(
+		dataDetailNode, "dataDetail", dataXmlDoc.firstChild
+	);
+	
+	formatColValInput();
+	
+	var download_url = $(dataDetailXml).find("download_url").text();
+	$('#link_upload_file_download_url')[0].href = download_url;
+	$('#link_upload_file_download_url>span').text(download_url);
+	
+	var thumbnail_download_url = $(dataDetailXml).find("thumbnail_download_url").text();
+	thumbnail_download_url = myUrlAddParam(thumbnail_download_url, "timestamp=" + (new Date()).getTime());
+	$('#img_upload_file_upload')[0].src = thumbnail_download_url;
+	
+}
+
 function saveDetailData(thisNode) {
 	var serviceMethod;
 	var msgPrefix;
-	if(_dataDetailMode == 1) {
-		//insert mode
-		serviceMethod = "insertData";
-		msgPrefix = "Inserting data";
-	} else {
-		//update mode
-		serviceMethod = "updateDataByPK";
-		msgPrefix = "Updating data";
-	}
+
+	//update mode
+	serviceMethod = "updateDataByPK";
+	msgPrefix = "Updating data";
 	
 	var dataDetailNode = $('[dataDetail="DataDetail"]')[0];
 	var dataXml = easyJsDomUtil.mappingDomNodeToDataXml(dataDetailNode, "dataDetail");

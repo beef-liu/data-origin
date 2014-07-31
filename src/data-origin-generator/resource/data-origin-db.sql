@@ -13,6 +13,7 @@ CREATE  TABLE `DOUploadFileMeta` (
   `content_length` BIGINT NULL DEFAULT 0 COMMENT 'Content Length',
   `file_ext` CHAR(10) NULL COMMENT 'file extension name',
   `download_url` VARCHAR(255) NULL COMMENT 'Download Url',
+  `thumbnail_download_url` VARCHAR(255) NULL COMMENT 'Download Url for thumbnail',
   `content_hash_code` VARCHAR(64) NULL COMMENT 'Content Hash Code',
   `file_tag` VARCHAR(255) NULL COMMENT 'file tag (for searching through keyword)',
   `update_time` BIGINT NULL DEFAULT 0 COMMENT 'update time(UTC)',

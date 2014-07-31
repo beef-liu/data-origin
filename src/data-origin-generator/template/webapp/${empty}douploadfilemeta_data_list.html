@@ -48,13 +48,13 @@
     <script src="myjs/data/${empty}douploadfilemeta_data_detail.js"></script>
     
   </head>
-  <body style="height:100%;">
-  <div class="container" style="width: 100%;padding:0;">
+  <body style="height:100%; overflow-x: hidden;">
+  <div class="container" style="width: 100%;">
 	
 	<!-- Content -->
-    <div class="my-container" style="top:0px;bottom:0px;">
+    <div class="my-container" style="top:0px;bottom:0px;left: 4px;">
 	  	<!-- main content -->
-	  	<div id="my-main-content" class="my-main-content" style="">
+	  	<div id="my-main-content" class="my-main-content">
 	  		<!-- Content Header -->
 	  		<div id="content-header">
 				<!-------- Search conditions ---------->		  		
@@ -203,7 +203,7 @@
 	  						<th id="th-checkbox" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
 	  						<th id="th-row-num" class="my-th" style="width:36px;">No.</th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="thumbnail" onclick="setSortCol()"><span>Thumbnail</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="thumbnail_download_url" onclick="setSortCol()"><span>Thumbnail</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
 	  						<th class="my-th-sort nosort" listHead="file_tag" onclick="setSortCol()"><span>File Tag</span> <img src="myimg/empty.png"/> </th>
   						<!---->
@@ -234,9 +234,9 @@
   							<!---->
 	  						<td id="td-data-col" class="my-td"  
 	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="thumbnail">
-	  							<input type="hidden" listData="thumbnail" />
-	  							<img id="upload_file_thumbnail" src="" />
+	  							isPrimaryKey="false" primaryKeyfalse="thumbnail_download_url">
+	  							<input type="hidden" listData="thumbnail_download_url" />
+	  							<img id="upload_file_thumbnail" src="" style="max-width: 48px; max-height: 48px;"/>
 	  						</td>
 	  					<!---->
   							<!---->

@@ -99,8 +99,18 @@
 
 .my-td {
 	text-align: center;
-	cursor: pointer;
+	/*cursor: pointer;*/
 	border: 1px solid #e5e5e5;
+}
+
+.my-td::selection {
+    background:#51bb4f; 
+}
+.my-td::-moz-selection {
+    background:#51bb4f; 
+}
+.my-td::-webkit-selection {
+    background:#51bb4f; 
 }
 
 .my-table-search {

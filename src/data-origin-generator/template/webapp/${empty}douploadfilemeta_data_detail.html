@@ -25,31 +25,26 @@
 	  		</div>
 	  		
 	  		<!-- Content Table -->
-	  		<div id="detail-content-table" style="overflow: auto; height:640px;">
+	  		<div id="detail-content-table" style="overflow: auto; height:640px; padding: 2px 4px;">
 	  			<table class="" style="width: 99%;">
 	  				<tbody id="detail-table-tbody" style="">
 	  					<tr>
 	  						<td class="my-td-detail">
-					  			<div style="">
-						  			<a href="#" onclick="showUploadFileList()">
-						  				<img src="myimg/cloud_upload.png" style="height:32px;"/>
+	  							<div style="height:144px;">
+						  			<a id="link_upload_file_upload" href="#" style="padding: 10px 10px;">
+		  								<img id="img_upload_file_upload" src="myimg/cloud_upload.png" style="min-width:32px; min-height: 32px; max-height: 128px; max-width: 400px; vertical-align: middle;"/>
 						  			</a>
-					  			</div>
+					  				<form id="form_upload_file" enctype="multipart/form-data" style="position: relative; top: -124px; padding: 10px 0px; z-index: -1; cursor: pointer;">
+					  					<input type="file" id="file_upload_file" name="file1" style="width:120px; height:120px; opacity: 0; " />
+					  				</form>
+	  							</div>
+	  							<a id="link_upload_file_download_url"><span style="padding-left: 4px;"></span></a>
 	  						</td>
 	  					</tr>
+	  					<tr><td><div style="height:10px;"></div></td></tr>
 	  					<tr class="">
 	  						<td class="my-td-detail" dataDetail="DataDetail">
-	  							<div dataColBlock="thumbnail">
-	  								<input type="hidden" name="columnType" value="varchar(6000)" />
-	  								<input type="hidden" name="fieldDispFormat" value="" />
-	  								<input type="hidden" name="fieldValidateRegex" value=".{0,6000}" />
-	  								<input type="hidden" name="fieldDispMaxLength" value="6000" />
-	  								
-	  								<label>Thumbnail:</label>
-	  								<input type="hidden" dataDetail="thumbnail" maxlength="255" />
-	  								<img id="upload_file_thumbnail" />
-	  							</div>
-	  							<div dataColBlock="file_tag">
+	  							<div dataColBlock="file_tag" hideWhenNewFile>
 	  								<input type="hidden" name="columnType" value="varchar(255)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
@@ -58,7 +53,7 @@
 	  								<label>File Tag:</label>
 	  								<input type="text" dataDetail="file_tag" placeholder="" maxlength="255"/>
 	  							</div>
-	  							<div dataColBlock="content_type">
+	  							<div dataColBlock="content_type" hideWhenNewFile>
 	  								<input type="hidden" name="columnType" value="varchar(255)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
@@ -67,7 +62,7 @@
 	  								<label>Content Type:</label>
 	  								<input type="text" dataDetail="content_type" placeholder="" maxlength="255"/>
 	  							</div>
-	  							<div dataColBlock="file_id">
+	  							<div dataColBlock="file_id" hideWhenNewFile>
 	  								<input type="hidden" name="columnType" value="char(32)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,32}" />
@@ -76,7 +71,7 @@
 	  								<label>File Id:</label>
 	  								<input type="text" dataDetail="file_id" placeholder="" maxlength="32" readonly="readonly"/>
 	  							</div>
-	  							<div dataColBlock="content_length">
+	  							<div dataColBlock="content_length" hideWhenNewFile>
 	  								<input type="hidden" name="columnType" value="bigint(20)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
@@ -85,7 +80,7 @@
 	  								<label>Byte Length:</label>
 	  								<input type="text" dataDetail="content_length" placeholder="" maxlength="20" readonly="readonly"/>
 	  							</div>
-	  							<div dataColBlock="file_ext">
+	  							<div dataColBlock="file_ext" hideWhenNewFile>
 	  								<input type="hidden" name="columnType" value="char(10)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{0,10}" />
@@ -94,7 +89,8 @@
 	  								<label>File Extension:</label>
 	  								<input type="text" dataDetail="file_ext" placeholder="" maxlength="10" readonly="readonly"/>
 	  							</div>
-	  							<div dataColBlock="download_url">
+	  						<!--
+	  							<div dataColBlock="download_url" hideWhenNewFile>
 	  								<input type="hidden" name="columnType" value="varchar(255)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,255}" />
@@ -103,7 +99,6 @@
 	  								<label>Download Url:</label>
 	  								<input type="text" dataDetail="download_url" placeholder="" maxlength="255" readonly="readonly"/>
 	  							</div>
-	  						<!--
 	  							<div dataColBlock="content_hash_code">
 	  								<input type="hidden" name="columnType" value="varchar(64)" />
 	  								<input type="hidden" name="fieldDispFormat" value="" />
@@ -121,6 +116,15 @@
 	  								
 	  								<label>Update Time:</label>
 	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20" readonly="readonly"/>
+	  							</div>
+	  							<div dataColBlock="thumbnail" style="display: none; ">
+	  								<input type="hidden" name="columnType" value="varchar(6000)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,6000}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="6000" />
+	  								
+	  								<input type="hidden" dataDetail="thumbnail_download_url" maxlength="255" />
+	  								<img id="upload_file_thumbnail" style="max-width: 128px; max-height: 128px;"/>
 	  							</div>
 	  						-->
 	  						</td>

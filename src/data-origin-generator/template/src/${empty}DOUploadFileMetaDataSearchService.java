@@ -53,14 +53,6 @@ public class DOUploadFileMetaDataSearchService extends DODataSearchService {
 			List listData = DODataDao.searchDataListBySearchCondition(
 					conn, beginIndex, pageSize, tableName, searchCondition, orderByFieldArray);
 			
-			//set thumbnail virtual path
-			DOUploadFileMeta fileMeta;
-			for(int i = 0; i < listData.size(); i++) {
-				fileMeta = (DOUploadFileMeta) listData.get(i);
-				
-				fileMeta.setThumbnail_download_url(DOUploadFileService.getThumbnailVirtualPath(fileMeta));
-			}
-			
 			return XmlSerializer.objectToString(listData, ArrayList.class);
 		} catch(Throwable e) {
 			logger.error(null, e);
