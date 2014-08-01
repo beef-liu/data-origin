@@ -1,0 +1,181 @@
+<!---->
+		<!-- modified to load dynamicly 
+	    <script src="myjs/data/dodatamodificationcommittask_data_detail.js"></script>
+		-->
+	  		<!-- Content Header -->
+	  		<div id="detail-content-header" style="text-align: center; height:44px;background-color: #ffffff;">
+				<!-------- Search conditions ---------->		  		
+		  		<div style="line-height: 44px; padding-left: 12px;float: left;">
+		  			<div class="my-button-s my-button-bk-default">
+			  			<a href="#" onclick="$('#modal-data-detail').modal('hide')" style="">
+			  				Cancel
+			  			</a>
+		  			</div>
+		  		</div>
+		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 12px;float: right;">
+		  			<a href="#" onclick="saveDetailData(this)" style="">
+		  				<img src="myimg/btn_save_blue.png" style="width: 28px;"/>
+		  			</a>
+		  		</div>
+	  			
+	  			<div style="height:44px;">
+	  				<h5 style="padding: 6px;"></h5>
+	  			</div>
+	  			
+	  		</div>
+	  		
+	  		<!-- Content Table -->
+	  		<div id="detail-content-table" style="overflow: auto; height:640px;">
+	  			<table class="" style="width: 99%;">
+	  				<tbody id="detail-table-tbody" style="">
+	  					<tr class="">
+	  						<td class="my-td-detail" dataDetail="DataDetail">
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="task_id">
+	  								<input type="hidden" name="columnType" value="char(32)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,32}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="32" />
+	  								
+	  								<label>:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="task_id" placeholder="" maxlength="32"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="table_name">
+	  								<input type="hidden" name="columnType" value="char(64)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,64}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="64" />
+	  								
+	  								<label>:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="table_name" placeholder="" maxlength="64"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="schedule_commit_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{1,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>time(utc) to commit data into production DB:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="schedule_commit_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="sql_primary_key">
+	  								<input type="hidden" name="columnType" value="varchar(45)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{1,45}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="45" />
+	  								
+	  								<label>SQL condition clause of primary key (e.g, k1 = 'a' and k2 = 'b'):</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="sql_primary_key" placeholder="" maxlength="45"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="commit_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="commit_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="retried_count">
+	  								<input type="hidden" name="columnType" value="int(11)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,11}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="11" />
+	  								
+	  								<label>:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="retried_count" placeholder="" maxlength="11"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="max_retry">
+	  								<input type="hidden" name="columnType" value="int(11)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,11}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="11" />
+	  								
+	  								<label>:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="max_retry" placeholder="" maxlength="11"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="commit_status">
+	  								<input type="hidden" name="columnType" value="int(11)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{1,11}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="11" />
+	  								
+	  								<label>0:wait to commit 1:success -1:fail:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="commit_status" placeholder="" maxlength="11"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="error_msg">
+	  								<input type="hidden" name="columnType" value="varchar(6000)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,6000}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="6000" />
+	  								
+	  								<label>error msg at last committing:</label>
+	  							<!-- -->
+	  								<textarea dataDetail="error_msg"></textarea>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="update_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>task updated time:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="update_admin">
+	  								<input type="hidden" name="columnType" value="char(32)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{0,32}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="32" />
+	  								
+	  								<label>admin:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="update_admin" placeholder="" maxlength="32"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  						</td>
+	  					</tr>
+	  				</tbody>
+	  			</table>
+	  		</div>

@@ -1,0 +1,250 @@
+<!---->
+		<!-- modified to load dynamicly 
+	    <script src="myjs/data/dodatamodificationcommittask_data_list.js"></script>
+		-->
+	  		<!-- Content Header -->
+	  		<div id="content-header">
+				<!-------- Search conditions ---------->		  		
+		  		<div id="content-search-region" style="line-height: 34px;">
+		  			<table class="my-table-search" style="width: 99%;">
+		  				<tbody id="search-tbody" style="" searchCondition="DOSearchCondition">
+		  					<tr class="">
+		  						<td class="my-td-search" searchCondition="searchConditionItemList">
+		  						<!---->
+		  							<div searchCondition="DOSearchConditionItem">
+		  							<!---->
+		  								<label>:</label>
+		  								<input type="hidden" searchCondition="fieldName" value="task_id" />
+		  								<input type="text" searchCondition="fieldValue" />
+		  							</div>
+		  						<!---->
+		  							<div searchCondition="DOSearchConditionItem">
+		  							<!---->
+		  								<label>:</label>
+		  								<input type="hidden" searchCondition="fieldName" value="table_name" />
+		  								<input type="text" searchCondition="fieldValue" />
+		  							</div>
+		  						<!---->
+		  							<div searchCondition="DOSearchConditionItem">
+		  							<!---->
+		  								<label>time(utc) to commit data into production DB:</label>
+		  								<input type="hidden" searchCondition="fieldName" value="schedule_commit_time" />
+		  								<input type="text" searchCondition="fieldValue" />
+		  							</div>
+		  						<!---->
+		  							<div searchCondition="DOSearchConditionItem">
+		  							<!---->
+		  								<label>SQL condition clause of primary key (e.g, k1 = 'a' and k2 = 'b'):</label>
+		  								<input type="hidden" searchCondition="fieldName" value="sql_primary_key" />
+		  								<input type="text" searchCondition="fieldValue" />
+		  							</div>
+		  						<!---->
+		  						</td>
+		  					</tr>
+		  				</tbody>
+		  			</table>
+		  		</div>
+
+				<!-------- Button for table operation ---------->		  		
+		  		<div id="content-table-button-region" style="line-height: 34px;">
+		  			<table class="my-table-page-controller" style="width: 99%;">
+		  				<tbody>
+		  					<tr class="my-tr-page-controller">
+		  						<td class="my-td-page-controller">
+						  			<div class="my-button-s my-button-bk-default">
+							  			<a href="#" onclick="gotoDataDetailForNew()">
+							  				<img src="myimg/btn-add.png"/>
+							  			</a>
+						  			</div>
+						  			<div class="my-button-s my-button-bk-danger">
+							  			<a href="#" style="" onclick="deleteCheckedData()">
+							  				<img src="myimg/btn-delete.png"/>
+							  			</a>
+						  			</div>
+						  			
+						  			<div class="my-button-s my-button-bk-default" style="height:34px;">
+							  			<a id="btn-data-import" href="#" style="padding: 10px 20px;">
+							  				<img src="myimg/xls-up.png" style="width:24px;height:24px;"/>
+							  			</a>
+						  				<form id="form-import-data" enctype="multipart/form-data" style="position: relative; top: -35px;z-index: -1; cursor: pointer;">
+						  					<input type="file" id="file-data-import" name="dataImpFile" style="position: relative; top: -35px; width:64px; height:35px; opacity: 0; z-index: -1; cursor: pointer; " accept="application/ms-excel"/>
+						  				</form>
+						  			</div>
+						  			<div class="my-button-s my-button-bk-default">
+							  			<a href="#" style="padding: 10px 20px;" onclick="doExportData()">
+							  				<img src="myimg/xls-down.png" style="width:24px;height:24px;"/>
+							  			</a>
+						  			</div>
+						  			<div style="padding-left:34px;">
+							  			<a href="#" onclick="showUploadFileList()">
+							  				<img src="myimg/cloud_upload.png" style="height:32px;"/>
+							  			</a>
+						  			</div>
+						  			
+						  			<div style="float: right;">
+							  			<div class="my-button-s my-button-bk-info" style="margin-right:72px;">
+								  			<a href="#" style="padding-left: 60px; padding-right: 60px;" onclick="doSearch()">
+								  				<img src="myimg/btn-search.png" style="width: 20px; height: 20px;"/>
+								  			</a>
+							  			</div>
+
+										<div id="pagesize_chooser" class="row" style="padding: 2px; margin-right: 22px; height: 38px;">
+											<div class="" style="float:left; margin-right: 4px;">
+												<label style="">Page row count:</label>
+											</div>			  		
+					
+										  <select name="pagesize_list" class="select-block" style="display: none;">
+										    <option value="20">20</option>
+										    <option value="50" selected="selected">50</option>
+										    <option value="100">100</option>
+										    <option value="200">200</option>
+										  </select>
+										  <div class="btn-group select select-block" style="float:left; padding: 0px; width: 60px; margin-right: 8px;">
+										  	<button class="btn dropdown-toggle clearfix btn-info" data-toggle="dropdown" style="padding:2px; width: 80px; height: 34px; ">
+										  		<span id="page_size_selected" class="filter-option pull-left" style="top:8px;">50</span>&nbsp;
+										  		<span class="caret" ></span>
+										    </button>
+										    <span class="dropdown-arrow dropdown-arrow-info"></span>
+										    <ul id="pagesize_dropdown" class="dropdown-menu dropdown-info" role="menu" style="max-height: 180px; overflow-y: auto; min-height: 108px;min-width:60px;">
+										    	<li rel="0" ><a tabindex="-1" href="#" class="" ><span class="pull-left">20</span></a></li>
+										    	<li rel="1" class="selected"><a tabindex="-1" href="#" class="" ><span class="pull-left">50</span></a></li>
+										    	<li rel="2" ><a tabindex="-1" href="#" class="" ><span class="pull-left">100</span></a></li>
+										    	<li rel="3" ><a tabindex="-1" href="#" class="" ><span class="pull-left">200</span></a></li>
+										    </ul>
+										  </div>
+										  
+										</div>
+						  				
+							  			<div class="" style="display: table-cell; padding: 2px; width: 60px;">
+								  			<div class="form-group" style="margin: 0px; ">
+								  				<input id="input-page-go" type="text" class="form-control" style="height:34px;"/>
+								  			</div>
+							  			</div>
+							  			<div class="my-button-s my-button-bk-default" style="margin-right: 16px;">
+								  			<a id="btn-page-go" href="#">
+								  				<span>Go</span>
+								  			</a>
+							  			</div>
+
+							  			<div class="pagination my-pagination" style="margin: 0px; padding: 2px;">
+											<ul style="padding:0px;">
+								              <li class="previous" style="padding:0px;"><a href="#" id="btn-prev-page" class="fui-arrow-left" style="padding:8px;"></a></li>
+								              <li id="page-num" style="color: #000; padding:0px;">1</li>
+								              <li style="padding-left: 4px; padding:0px; color: #000;">/</li>
+								              <li id="page-count" style="color: #000; padding:0px;">1</li>
+								              <li class="next" style="padding:0px;"><a href="#" id="btn-next-page" class="fui-arrow-right" style="padding:8px;"></a></li>
+								            </ul>			  				
+							  			</div>
+						  			</div>
+						  			
+		  						</td>
+		  					</tr>
+		  				</tbody>
+		  			</table>
+		  		</div>
+		  		
+	  		</div>
+	  		
+	  		<!-- Content Table -->
+	  		<div id="content-table" style="height:100%; width: 100%; overflow: auto;">
+	  			<table class="my-table" style="width: 99%;">
+	  				<thead class="my-thead">
+	  					<tr class="my-head-tr">
+	  						<th id="th-checkbox" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
+	  						<th id="th-row-num" class="my-th" style="width:36px;">No.</th>
+  						<!---->
+	  						<th class="my-th-sort nosort" listHead="task_id" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="table_name" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="schedule_commit_time" onclick="setSortCol()"><span>time(utc) to commit data into production DB</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="sql_primary_key" onclick="setSortCol()"><span>SQL condition clause of primary key (e.g, k1 = 'a' and k2 = 'b')</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="commit_time" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="retried_count" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="max_retry" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="commit_status" onclick="setSortCol()"><span>0:wait to commit 1:success -1:fail</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="error_msg" onclick="setSortCol()"><span>error msg at last committing</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="update_time" onclick="setSortCol()"><span>task updated time</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="update_admin" onclick="setSortCol()"><span>admin</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th" style="width:36px;"></th>
+	  					</tr>
+	  				</thead>
+	  				<tbody id="data-tbody" style="" listData="List">
+	  					<tr id="tr-data" class="my-tr" listData="DODataModificationCommitTask" primaryKeytrue="DODataModificationCommitTask">
+	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
+	  						<td id="td-row-num" class="my-td"></td>
+  						<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="task_id" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="true" primaryKeytrue="task_id"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="table_name" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="table_name"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="schedule_commit_time" 
+	  							fieldDispFormat="yyyy-MM-dd HH:mm:ss" 
+	  							isPrimaryKey="false" primaryKeyfalse="schedule_commit_time"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="sql_primary_key" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="sql_primary_key"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="commit_time" 
+	  							fieldDispFormat="yyyy-MM-dd HH:mm:ss" 
+	  							isPrimaryKey="false" primaryKeyfalse="commit_time"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="retried_count" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="retried_count"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="max_retry" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="max_retry"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="commit_status" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="commit_status"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="error_msg" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="error_msg"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="update_time" 
+	  							fieldDispFormat="yyyy-MM-dd HH:mm:ss" 
+	  							isPrimaryKey="false" primaryKeyfalse="update_time"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="update_admin" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="update_admin"></td>
+	  					<!---->
+	  						<td class="my-td"><a href="#" onclick="gotoDataDetail(this)"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
+	  					</tr>
+	  				</tbody>
+	  			</table>
+	  		</div>
+	  		<div style="text-align:right; padding:4px 48px 0px 2px; font-size: small;">
+	  			<span style="color: #295ccb; font-weight: bold;"> last query at: </span> <span id="last_query_time_begin" style="min-width: 50px;">00:00:00</span>
+	  			<span style="padding-left:16px; color: #295ccb; font-weight: bold;"> cost: </span> <span id="last_query_time_cost" style="min-width: 50px;">0.000</span>
+	  			<span style="color: #295ccb;"> (second)</span>
+	  		</div>
