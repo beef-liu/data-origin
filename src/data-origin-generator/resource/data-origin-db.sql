@@ -26,6 +26,7 @@ CREATE TABLE `DODataModificationCommitTask` (
   `table_name` char(64) NOT NULL,
   `schedule_commit_time` bigint(20) NOT NULL COMMENT 'time(utc) to commit data into production DB',
   `sql_primary_key` varchar(45) NOT NULL COMMENT 'SQL condition clause of primary key (e.g, k1 = ''a'' and k2 = ''b'')',
+  `mod_type` INT NULL DEFAULT 1 COMMENT '0: update  1:insert  -1:delete',
   `commit_time` bigint(20) DEFAULT '0',
   `retried_count` int(11) DEFAULT '0',
   `max_retry` int(11) DEFAULT '0',

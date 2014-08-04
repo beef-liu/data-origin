@@ -22,7 +22,7 @@ import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 
 public class DODataDaoUtilTest {
 
-	@Ignore
+	@Test
 	public void test1() {
 		try {
 			DataOriginSetting setting = new DataOriginSetting();
@@ -35,7 +35,7 @@ public class DODataDaoUtilTest {
 		}
 	}
 	
-	@Test
+	@Ignore
 	public void test2() {
 		try {
 			DataOriginWebContextConfig config = new DataOriginWebContextConfig();

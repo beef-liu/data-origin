@@ -49,6 +49,16 @@ public class DODataModificationCommitTask implements Serializable {
 		_sql_primary_key = value;
 	}
 
+	private int _mod_type = 0;
+
+	public int getMod_type() {
+		return _mod_type;
+	}
+
+	public void setMod_type(int value) {
+		_mod_type = value;
+	}
+
 	private long _commit_time = 0;
 
 	public long getCommit_time() {
