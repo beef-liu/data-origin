@@ -3,6 +3,7 @@ package com.beef.dataorigin.web.datacommittask;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -305,13 +306,17 @@ public class DODataModificationCommitTaskScheduler {
 						}
 					} else {
 						//insert or update
-						if(dataCommitTask.getMod_type() == 0) {
-							//update
-							updCnt = UpdateDataDao.updateData(connOfProd, 
-									_table_name, data, mDBTable.getPrimaryKeys());
-						} else {
+						try {
 							//insert
 							updCnt = UpdateDataDao.insertData(connOfProd, _table_name, data);
+						} catch(SQLException sqle) {
+							if(sqle.getClass().getSimpleName().equalsIgnoreCase("MySQLIntegrityConstraintViolationException")) {
+								//duplicated key, then update
+								updCnt = UpdateDataDao.updateData(connOfProd, 
+										_table_name, data, mDBTable.getPrimaryKeys());
+							} else {
+								throw sqle;
+							}
 						}
 					}
 				} catch(Throwable e) {
@@ -326,7 +331,6 @@ public class DODataModificationCommitTaskScheduler {
 					if(updCnt == 0) {
 						dataCommitTask.setCommit_status(DODataModificationCommitTaskSchedulerDao.TASK_COMMIT_STATUS_FAIL);
 						dataCommitTask.setError_msg("Committing data to ProductionDB failed: updated count is 0");
-						return updCnt;
 					}
 					
 					if(dataCommitTask.getCommit_status() != DODataModificationCommitTaskSchedulerDao.TASK_COMMIT_STATUS_FAIL) {

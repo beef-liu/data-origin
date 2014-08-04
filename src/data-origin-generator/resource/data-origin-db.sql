@@ -22,10 +22,9 @@ CREATE  TABLE `DOUploadFileMeta` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Upload File';
 
 CREATE TABLE `DODataModificationCommitTask` (
-  `task_id` char(32) NOT NULL,
   `table_name` char(64) NOT NULL,
   `schedule_commit_time` bigint(20) NOT NULL COMMENT 'time(utc) to commit data into production DB',
-  `sql_primary_key` varchar(45) NOT NULL COMMENT 'SQL condition clause of primary key (e.g, k1 = ''a'' and k2 = ''b'')',
+  `sql_primary_key` varchar(255) NOT NULL COMMENT 'SQL condition clause of primary key (e.g, k1 = ''a'' and k2 = ''b'')',
   `mod_type` INT NULL DEFAULT 1 COMMENT '0: update  1:insert  -1:delete',
   `commit_time` bigint(20) DEFAULT '0',
   `retried_count` int(11) DEFAULT '0',
@@ -34,8 +33,7 @@ CREATE TABLE `DODataModificationCommitTask` (
   `error_msg` varchar(6000) DEFAULT NULL COMMENT 'error msg at last committing',
   `update_time` bigint(20) DEFAULT NULL COMMENT 'task updated time',
   `update_admin` char(32) DEFAULT NULL COMMENT 'admin',
-  PRIMARY KEY (`task_id`),
-  UNIQUE KEY `uniq_idx` (`table_name`,`schedule_commit_time`,`sql_primary_key`)
+  PRIMARY KEY (`table_name`,`schedule_commit_time`,`sql_primary_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Data Modification Commit Task';
 
 

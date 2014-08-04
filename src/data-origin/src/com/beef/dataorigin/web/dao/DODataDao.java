@@ -4,10 +4,18 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +40,7 @@ import com.salama.modeldriven.util.db.DBColumn;
 import com.salama.modeldriven.util.db.DBTable;
 import com.salama.service.clouddata.util.dao.QueryDataDao;
 import com.salama.service.clouddata.util.dao.UpdateDataDao;
+import com.salama.util.db.DBUtil;
 import com.salama.util.db.JDBCUtil;
 
 public class DODataDao extends AbstractReflectInfoCachedSerializer {
@@ -337,6 +346,90 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		}
 		
 		return updCnt;
+	}
+	
+	public static String makeSqlConditionOfPrimaryKey(
+			Connection conn,
+			String tableName, Object data
+			) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		DBTable dbTable = DataOriginWebContext.getDataOriginContext().getDBTable(tableName);
+		
+		StringBuilder sql = new StringBuilder();
+
+		//conditions of primary keys ----------------------------
+		DBColumn dbCol;
+		PropertyDescriptor propDesc;
+		Object propVal;
+		int appendedKeyCount = 0;
+		Class<?> type;
+		for(int i = 0; i < dbTable.getColumns().size(); i++) {
+			dbCol = dbTable.getColumns().get(i);
+			
+			if(!dbCol.isPrimaryKey()) {
+				continue;
+			}
+			
+			if(appendedKeyCount > 0) {
+				sql.append(" and ");
+			}
+			
+			sql.append(DOSqlParamUtil.quoteSqlIdentifier(dbCol.getName())).append(" = ");
+			
+			propDesc = findPropertyDescriptor(dbCol.getName(), data.getClass());
+			propVal = propDesc.getReadMethod().invoke(data, (Object[])null);
+			
+			type = propDesc.getPropertyType();
+			if(
+				(
+					Byte.class.isAssignableFrom(type)
+					|| Short.class.isAssignableFrom(type)
+					|| Integer.class.isAssignableFrom(type)
+					|| Long.class.isAssignableFrom(type)
+					|| Float.class.isAssignableFrom(type)
+					|| Double.class.isAssignableFrom(type)
+					|| byte.class == type
+					|| short.class == type
+					|| int.class == type
+					|| long.class == type
+					|| float.class == type
+					|| double.class == type
+				)
+				&&
+				(
+					!dbCol.getColumnType().startsWith("char")
+					&& !dbCol.getColumnType().startsWith("varchar")
+				)
+			) {
+				if(propVal == null) {
+					sql.append("0");
+				} else {
+					String propValStr = String.valueOf(propVal);
+					//assure it is a number
+					if(propValStr.indexOf('.') >= 0) {
+						Double.parseDouble(propValStr);
+					} else {
+						Long.parseLong(propValStr);
+					}
+					sql.append(String.valueOf(propVal));
+				}
+			} else if(String.class.isAssignableFrom(type)) {
+				if(propVal == null) {
+					sql.append("''");
+				} else {
+					sql.append("'").append(DBUtil.replaceQuote((String) propVal)).append("'");
+				}
+			} else {
+				if(propVal == null) {
+					sql.append("''");
+				} else {
+					sql.append("'").append(DBUtil.replaceQuote(String.valueOf(propVal))).append("'");
+				}
+			}
+
+			appendedKeyCount++;
+		}
+		
+		return sql.toString();
 	}
 	
 	@Override

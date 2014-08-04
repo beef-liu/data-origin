@@ -9,16 +9,6 @@ public class DODataModificationCommitTask implements Serializable {
 	 */
 	private static final long serialVersionUID = 4269285485943363121L;
 	
-	private String _task_id = "";
-
-	public String getTask_id() {
-		return _task_id;
-	}
-
-	public void setTask_id(String value) {
-		_task_id = value;
-	}
-
 	private String _table_name = "";
 
 	public String getTable_name() {
