@@ -1,9 +1,11 @@
 package com.beef.dataorigin.web.dao;
 
 import java.awt.Color;
+import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,6 +44,8 @@ import com.beef.dataorigin.web.data.DODataImportColMetaInfo;
 import com.beef.dataorigin.web.data.DODataImportResult;
 import com.beef.dataorigin.web.data.DOSearchCondition;
 import com.beef.dataorigin.web.data.DOSearchConditionItem;
+import com.beef.dataorigin.web.datacommittask.dao.DODataModificationCommitTaskSchedulerDao;
+import com.beef.dataorigin.web.datacommittask.dao.DODataModificationCommitTaskSchedulerDao.DataModificationCommitTaskModType;
 import com.beef.dataorigin.web.util.DODataDaoUtil;
 import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 import com.beef.dataorigin.web.util.DOSqlParamUtil;
@@ -323,6 +327,12 @@ public class DODataImportExportDao {
 		int updateCnt = 0;
 		boolean isUpdate = false;
 		String errorMsg = null;
+		
+		//TODO
+		String adminId = "";
+		long schedule_commit_time = DataOriginWebContext.getDefaultDataModificationCommitScheduleTime();
+		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(dbTable.getTableName());
+		
 
 		CellStyle cellStyleOfError = sheet.getWorkbook().createCellStyle();
 		cellStyleOfError.setFillForegroundColor(getExcelBGColor(dataImportSetting.getBgColorError(), DEFAULT_BG_COLOR_ERROR));
@@ -390,6 +400,8 @@ public class DODataImportExportDao {
 				
 				errorRowCount++;
 			} else {
+				DODataModificationCommitTaskSchedulerDao.createDataCommitTask(conn, mDBTable, data, modType, schedule_commit_time, adminId);
+
 				//success
 				if(isUpdate) {
 					setCellStyleToRow(sheet.getRow(i), cellStyleOfUpdated, beginCol, endCol);
@@ -900,6 +912,14 @@ public class DODataImportExportDao {
 		public void setDbVal(Object dbVal) {
 			this.dbVal = dbVal;
 		}
+	}
+	
+	protected void createDataCommitTask(Connection conn, String tableName, Object data,
+			DataModificationCommitTaskModType modType) throws IllegalArgumentException, SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
+		
+		DODataModificationCommitTaskSchedulerDao.createDataCommitTask(conn, mDBTable, data, modType, schedule_commit_time, adminId);
+		
+		DODataModificationCommitTaskSchedulerDao.refreshDataCommitTaskBundle(conn, tableName, schedule_commit_time);
 	}
 	
 }

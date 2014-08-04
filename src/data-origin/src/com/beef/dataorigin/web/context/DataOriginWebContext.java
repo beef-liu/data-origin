@@ -3,6 +3,8 @@ package com.beef.dataorigin.web.context;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.servlet.ServletContext;
@@ -41,6 +43,7 @@ public abstract class DataOriginWebContext implements CommonContext {
 	protected static IDOUploadFilePersistence _uploadFilePersistence = null;
 	private static String _webContextPath;
 	private static File _thumbnailPersistenceDir;
+
 	
 	public static String getWebContextPath() {
 		return _webContextPath;
@@ -49,13 +52,28 @@ public abstract class DataOriginWebContext implements CommonContext {
 		return _thumbnailPersistenceDir;
 	}
 
-
 	public static DataOriginContext getDataOriginContext() {
 		return _dataOriginContext;
 	}
 	
 	public static IDOUploadFilePersistence getUploadFilePersistence() {
 		return _uploadFilePersistence;
+	}
+	
+	public static long getDefaultDataModificationCommitScheduleTime() {
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.set(Calendar.HOUR_OF_DAY, 23);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		
+		long curTime = System.currentTimeMillis();
+		long minAheadTime = 300*1000;
+		if((cal.getTimeInMillis() - curTime) <= minAheadTime) {
+			return curTime + minAheadTime;
+		} else {
+			return cal.getTimeInMillis();
+		}
 	}
 
 	protected void reload(ServletContext servletContext, String configLocation, AppContext appContext) {

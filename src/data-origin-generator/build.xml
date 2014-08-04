@@ -7,7 +7,7 @@
 	<property name="src.dir"         value="src"/>
 	<property name="bin.dir"         value="bin"/>
 	<property name="bintemp.dir"     value="binTemp"/>
-	<property name="jar.name"        value="ata-origin-generator.jar"/>
+	<property name="jar.name"        value="data-origin-generator.jar"/>
 	
 	<!--
 	<target name="cleandir" description="clean the bin dir"> 

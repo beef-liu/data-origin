@@ -19,6 +19,7 @@ import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 import com.beef.dataorigin.web.util.DOServiceUtil;
 import com.salama.service.clouddata.util.dao.QueryDataDao;
 import com.salama.service.clouddata.util.dao.UpdateDataDao;
+import com.salama.util.db.JDBCUtil;
 
 public class DODataModificationCommitTaskSchedulerDao {
 	private final static Logger logger = Logger.getLogger(DODataModificationCommitTaskSchedulerDao.class);
@@ -33,6 +34,11 @@ public class DODataModificationCommitTaskSchedulerDao {
 	public final static int TASK_COMMIT_STATUS_SUCCESS = 1;
 	public final static int TASK_COMMIT_STATUS_FAIL = -1;
 	
+	public final static int TASK_BUNDLE_STATUS_WAIT_TO_START = 0;
+	public final static int TASK_BUNDLE_STATUS_STARTED = 1;
+	public final static int TASK_BUNDLE_STATUS_FINISHED = 2;
+	
+	/*
 	private static final String SQL_FIND_TASK_BUNDLE_WAIT_TO_EXECUTE = "select "
 			+ "   `table_name`, schedule_commit_time, count(1) as cnt"
 			+ " from DODataModificationCommitTask"
@@ -61,7 +67,7 @@ public class DODataModificationCommitTaskSchedulerDao {
 				data.setData_row_count_of_total(rs.getInt("cnt"));
 				data.setSchedule_commit_time(rs.getLong("schedule_commit_time"));
 				data.setData_row_count_of_did_commit(0);
-				data.setTask_bundle_status(DODataModificationCommitTaskBundle.SCHEDULE_TASK_STATUS_WAIT_TO_START);
+				data.setTask_bundle_status(TASK_BUNDLE_STATUS_WAIT_TO_START);
 				
 				dataList.add(data);
 			}
@@ -75,7 +81,46 @@ public class DODataModificationCommitTaskSchedulerDao {
 			}
 		}
 	}
+	*/
 
+	private static final String SQL_FIND_TASK_BUNDLE_WAIT_TO_EXECUTE = "select "
+			+ " *"
+			+ " from DODataModificationCommitTaskBundle"
+			+ " where task_bundle_status = 0"
+			+ " order by schedule_commit_time limit ?, ?"
+			;
+	public static List<DODataModificationCommitTaskBundle> findTaskBundleWaitToExecute(Connection conn, int maxCount
+			) throws SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		PreparedStatement stmt = null;
+		
+		try {
+			stmt = conn.prepareStatement(SQL_FIND_TASK_BUNDLE_WAIT_TO_EXECUTE);
+			
+			int index = 1;
+			stmt.setInt(index++, 0);
+			stmt.setInt(index++, maxCount);
+			
+			ResultSet rs = stmt.executeQuery();
+			
+			List<DODataModificationCommitTaskBundle> dataList = new ArrayList<DODataModificationCommitTaskBundle>();
+			DODataModificationCommitTaskBundle data;
+			boolean isIgnorePropertiesNotExist = true;
+			while(rs.next()) {
+				data = (DODataModificationCommitTaskBundle) JDBCUtil.ResultSetToData(rs, DODataModificationCommitTaskBundle.class, isIgnorePropertiesNotExist);
+				
+				dataList.add(data);
+			}
+			
+			return dataList;
+		} finally {
+			try {
+				stmt.close();
+			} catch(Throwable e) {
+				logger.error(null, e);
+			}
+		}
+	}
+	
 
 	private static final String SQL_FIND_TASK_TO_EXECUTE = "select * "
 			+ " from DODataModificationCommitTask"
@@ -142,10 +187,101 @@ public class DODataModificationCommitTaskSchedulerDao {
 		}
 	}
 
+	private static final String SQL_GROUP_COUNT_DATA_COMMIT_TASK = "select "
+			+ "   `table_name`, schedule_commit_time, commit_status, count(1) as cnt"
+			+ " from DODataModificationCommitTask"
+			+ " where table_name = ? and schedule_commit_time = ? "
+			+ " group by `table_name`, schedule_commit_time, commit_status "
+			;
+	private static final String SQL_REFRESH_DATA_COMMIT_TASK_BUNDLE = " update DODataModificationCommitTaskBundle set"
+			+ "  data_row_count_of_total = ?, "
+			+ "  data_row_count_of_did_commit = ?, "
+			+ "  update_time = ? "
+			+ " where table_name = ? and schedule_commit_time = ?"
+			;
+	
+	public static int refreshDataCommitTaskBundle(
+			Connection conn,
+			String table_name,
+			long schedule_commit_time
+			) throws SQLException {
+		PreparedStatement stmt = null;
+		
+		int countOfWaitToCommit = 0;
+		int countOfSuccess = 0;
+		int countOfFail = 0;
+		
+		try {
+			stmt = conn.prepareStatement(SQL_GROUP_COUNT_DATA_COMMIT_TASK);
+			
+			int index = 1;
+			stmt.setString(index++, table_name);
+			stmt.setLong(index++, schedule_commit_time);
+			
+			ResultSet rs = stmt.executeQuery();
+
+			int cnt;
+			int commit_status;
+			while(rs.next()) {
+				commit_status = rs.getInt("commit_status");
+				cnt = rs.getInt("cnt");
+				
+				if(commit_status == TASK_COMMIT_STATUS_WAIT_TO_COMMIT) {
+					countOfWaitToCommit = cnt;
+				} else if(commit_status == TASK_COMMIT_STATUS_SUCCESS) {
+					countOfSuccess = cnt;
+				} else if(commit_status == TASK_COMMIT_STATUS_FAIL) {
+					countOfFail = cnt;
+				}
+			}
+			
+			
+		} finally {
+			try {
+				stmt.close();
+			} catch(Throwable e) {
+				logger.error(null, e);
+			}
+		}
+		
+		try {
+			stmt = conn.prepareStatement(SQL_REFRESH_DATA_COMMIT_TASK_BUNDLE);
+			
+			int index = 1;
+			stmt.setInt(index++, countOfWaitToCommit + countOfSuccess + countOfFail);
+			stmt.setInt(index++, countOfSuccess + countOfFail);
+			stmt.setLong(index++, System.currentTimeMillis());
+			stmt.setString(index++, table_name);
+			stmt.setLong(index++, schedule_commit_time);
+			
+			return stmt.executeUpdate();
+		} finally {
+			try {
+				stmt.close();
+			} catch(Throwable e) {
+				logger.error(null, e);
+			}
+		}
+		
+	}
+
 	public static int createDataCommitTask(
 			Connection conn,
 			MDBTable mDBTable,
 			Object data, 
+			DataModificationCommitTaskModType modType,
+			long schedule_commit_time,
+			String adminId
+			) throws SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IllegalArgumentException, IntrospectionException {
+		String sqlPrimaryKey = DODataDao.makeSqlConditionOfPrimaryKey(conn, mDBTable.getTableName(), data);
+		
+		return createDataCommitTaskBySqlPK(conn, mDBTable, sqlPrimaryKey, modType, schedule_commit_time, adminId);
+	}
+	
+	public static int createDataCommitTaskBySqlPK(
+			Connection conn,
+			MDBTable mDBTable,
+			String sqlPrimaryKey, 
 			DataModificationCommitTaskModType modType,
 			long schedule_commit_time,
 			String adminId
@@ -166,7 +302,6 @@ public class DODataModificationCommitTaskSchedulerDao {
 		dataCommitTask.setCommit_status(TASK_COMMIT_STATUS_WAIT_TO_COMMIT);
 		dataCommitTask.setSchedule_commit_time(schedule_commit_time);
 		
-		String sqlPrimaryKey = DODataDao.makeSqlConditionOfPrimaryKey(conn, mDBTable.getTableName(), data);
 		dataCommitTask.setSql_primary_key(sqlPrimaryKey);
 
 		dataCommitTask.setTable_name(mDBTable.getTableName());

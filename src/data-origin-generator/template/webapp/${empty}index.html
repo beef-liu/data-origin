@@ -138,6 +138,7 @@
     <div id="my-container" class="my-container">
 	  	<div class="my-left-menu" style="background: white;">
 	  		<ul style="padding-left: 4px;">
+	  		<!--
 	  			<li>
 	  				<div class="my-menu-group">Admin</div>
 	  				<ul>
@@ -146,11 +147,13 @@
 	  					<li class="my-menu-item"><a href="#">menu2</a></li>
 	  				</ul>
 	  			</li>
+	  		-->
 	  			<li>
 	  				<div class="my-menu-group">Data Management</div>
 	  				<ul>
+	  					<li id="data-menu-item" class="my-menu-item" htmlName="dodatamodificationcommittaskbundle_data_list.html" onclick="loadContentHtml(this)"><a href="#">Data Modification Task</a></li>
 					<!--#for(DBTable table : tables)-->
-						<!--#if(!table.tableName.equalsIgnoreCase("DOAdmin") && !table.tableName.equalsIgnoreCase("DOUploadFileMeta")) -->
+						<!--#if(!table.tableName.equalsIgnoreCase("DOAdmin") && !table.tableName.equalsIgnoreCase("DOUploadFileMeta") && !table.tableName.equalsIgnoreCase("DODataModificationCommitTask") && !table.tableName.equalsIgnoreCase("DODataModificationCommitTaskBundle")) -->
 	  					<li id="data-menu-item" class="my-menu-item" htmlName="${table.tableName.toLowerCase()}_data_list.html" onclick="loadContentHtml(this)"><a href="#">${table.comment}</a></li>
 	  					<!--#end -->
 	  				<!--#end-->

@@ -1,6 +1,6 @@
 <!---->
 		<!-- modified to load dynamicly 
-	    <script src="myjs/data/dodatamodificationcommittask_data_list.js"></script>
+	    <script src="myjs/data/dodatamodificationcommittaskbundle_data_list.js"></script>
 		-->
 	  		<!-- Content Header -->
 	  		<div id="content-header">
@@ -10,23 +10,28 @@
 		  				<tbody id="search-tbody" style="" searchCondition="DOSearchCondition">
 		  					<tr class="">
 		  						<td class="my-td-search" searchCondition="searchConditionItemList">
+		  						<!---->
 		  							<div searchCondition="DOSearchConditionItem">
+		  							<!---->
 		  								<label>Table Name:</label>
 		  								<input type="hidden" searchCondition="fieldName" value="table_name" />
 		  								<input type="text" searchCondition="fieldValue" />
 		  							</div>
+		  						<!---->
 		  							<div searchCondition="DOSearchConditionItem">
-		  								<label>Schedule Time</label>
-		  								<input type="hidden" searchCondition="fieldName" value="schedule_commit_time" style="width:160px;"/>
-		  								<input type="text" searchCondition="fieldValue" />
+		  							<!---->
+		  								<label>Schedule Time:</label>
+		  								<input type="hidden" searchCondition="fieldName" value="schedule_commit_time" />
+		  								<input type="text" searchCondition="fieldValue" style="width:200px;"/>
 		  							</div>
-		  							<!--
+		  						<!---->
 		  							<div searchCondition="DOSearchConditionItem">
-		  								<label>SQL condition clause of primary key (e.g, k1 = 'a' and k2 = 'b'):</label>
-		  								<input type="hidden" searchCondition="fieldName" value="sql_primary_key" />
-		  								<input type="text" searchCondition="fieldValue" />
+		  							<!---->
+		  								<label>Task Status(0:wait to start 1:started 2:finished):</label>
+		  								<input type="hidden" searchCondition="fieldName" value="task_bundle_status" />
+		  								<input type="text" searchCondition="fieldValue"/>
 		  							</div>
-		  							-->
+		  						<!---->
 		  						</td>
 		  					</tr>
 		  				</tbody>
@@ -39,7 +44,7 @@
 		  				<tbody>
 		  					<tr class="my-tr-page-controller">
 		  						<td class="my-td-page-controller">
-		  							<!--
+		  						<!--
 						  			<div class="my-button-s my-button-bk-default">
 							  			<a href="#" onclick="gotoDataDetailForNew()">
 							  				<img src="myimg/btn-add.png"/>
@@ -69,7 +74,7 @@
 							  				<img src="myimg/cloud_upload.png" style="height:32px;"/>
 							  			</a>
 						  			</div>
-						  			-->
+						  		-->
 						  			
 						  			<div style="float: right;">
 							  			<div class="my-button-s my-button-bk-info" style="margin-right:72px;">
@@ -142,88 +147,70 @@
 	  					<tr class="my-head-tr">
 	  						<th id="th-checkbox" class="my-th" style="width:36px;"><input type="checkbox" id="table-check-all"></th>
 	  						<th id="th-row-num" class="my-th" style="width:36px;">No.</th>
+  						<!---->
+	  						<th class="my-th-sort nosort" listHead="table_name" onclick="setSortCol()"><span>Table Name</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="table_name" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="schedule_commit_time" onclick="setSortCol()"><span>Schedule Time</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="schedule_commit_time" onclick="setSortCol()"><span>time(utc) to commit data into production DB</span> <img src="myimg/empty.png"/> </th>
-	  					<!--
-	  						<th class="my-th-sort nosort" listHead="sql_primary_key" onclick="setSortCol()"><span>SQL condition clause of primary key (e.g, k1 = 'a' and k2 = 'b')</span> <img src="myimg/empty.png"/> </th>
-	  					-->
-	  					<!--
-	  						<th class="my-th-sort nosort" listHead="commit_time" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
-	  						<th class="my-th-sort nosort" listHead="retried_count" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
-	  						<th class="my-th-sort nosort" listHead="max_retry" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
-	  						<th class="my-th-sort nosort" listHead="commit_status" onclick="setSortCol()"><span>0:wait to commit 1:success -1:fail</span> <img src="myimg/empty.png"/> </th>
-	  					-->
+	  						<th class="my-th-sort nosort" listHead="task_bundle_status" onclick="setSortCol()" style="width:160px;"><span>Task Status</span> <br/> <span>(0:wait to start 1:started 2:finished)</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="error_msg" onclick="setSortCol()"><span>error msg at last committing</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="data_row_count_of_total" onclick="setSortCol()"><span>Total Data Count</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="update_time" onclick="setSortCol()"><span>task updated time</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="data_row_count_of_did_commit" onclick="setSortCol()"><span>Committed Data Count</span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
-	  						<th class="my-th-sort nosort" listHead="update_admin" onclick="setSortCol()"><span>admin</span> <img src="myimg/empty.png"/> </th>
+	  						<th class="my-th-sort nosort" listHead="commit_start_time" onclick="setSortCol()"><span>Start Time</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="commit_finish_time" onclick="setSortCol()"><span>Finish Time</span> <img src="myimg/empty.png"/> </th>
+	  					<!---->
+	  						<th class="my-th-sort nosort" listHead="update_time" onclick="setSortCol()"><span></span> <img src="myimg/empty.png"/> </th>
 	  					<!---->
 	  						<th class="my-th" style="width:36px;"></th>
 	  					</tr>
 	  				</thead>
 	  				<tbody id="data-tbody" style="" listData="List">
-	  					<tr id="tr-data" class="my-tr" listData="DODataModificationCommitTask" primaryKeytrue="DODataModificationCommitTask">
+	  					<tr id="tr-data" class="my-tr" listData="DODataModificationCommitTaskBundle" primaryKeytrue="DODataModificationCommitTaskBundle">
 	  						<td id="td-checkbox" class="my-td"><input type="checkbox" id="table-check-row"></td>
 	  						<td id="td-row-num" class="my-td"></td>
   						<!---->
   							<!---->
-	  						<td id="td-data-col" class="my-td" listData="task_id" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="true" primaryKeytrue="task_id"></td>
-	  					<!---->
-  							<!---->
 	  						<td id="td-data-col" class="my-td" listData="table_name" 
 	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="table_name"></td>
+	  							isPrimaryKey="true" primaryKeytrue="table_name"></td>
 	  					<!---->
   							<!---->
 	  						<td id="td-data-col" class="my-td" listData="schedule_commit_time" 
 	  							fieldDispFormat="yyyy-MM-dd HH:mm:ss" 
-	  							isPrimaryKey="false" primaryKeyfalse="schedule_commit_time"></td>
+	  							isPrimaryKey="true" primaryKeytrue="schedule_commit_time"></td>
 	  					<!---->
   							<!---->
-	  						<td id="td-data-col" class="my-td" listData="sql_primary_key" 
+	  						<td id="td-data-col" class="my-td" listData="task_bundle_status" 
 	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="sql_primary_key"></td>
+	  							isPrimaryKey="false" primaryKeyfalse="task_bundle_status"></td>
 	  					<!---->
   							<!---->
-	  						<td id="td-data-col" class="my-td" listData="commit_time" 
+	  						<td id="td-data-col" class="my-td" listData="data_row_count_of_total" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="data_row_count_of_total"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="data_row_count_of_did_commit" 
+	  							fieldDispFormat="" 
+	  							isPrimaryKey="false" primaryKeyfalse="data_row_count_of_did_commit"></td>
+	  					<!---->
+  							<!---->
+	  						<td id="td-data-col" class="my-td" listData="commit_start_time" 
 	  							fieldDispFormat="yyyy-MM-dd HH:mm:ss" 
-	  							isPrimaryKey="false" primaryKeyfalse="commit_time"></td>
+	  							isPrimaryKey="false" primaryKeyfalse="commit_start_time"></td>
 	  					<!---->
   							<!---->
-	  						<td id="td-data-col" class="my-td" listData="retried_count" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="retried_count"></td>
-	  					<!---->
-  							<!---->
-	  						<td id="td-data-col" class="my-td" listData="max_retry" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="max_retry"></td>
-	  					<!---->
-  							<!---->
-	  						<td id="td-data-col" class="my-td" listData="commit_status" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="commit_status"></td>
-	  					<!---->
-  							<!---->
-	  						<td id="td-data-col" class="my-td" listData="error_msg" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="error_msg"></td>
+	  						<td id="td-data-col" class="my-td" listData="commit_finish_time" 
+	  							fieldDispFormat="yyyy-MM-dd HH:mm:ss" 
+	  							isPrimaryKey="false" primaryKeyfalse="commit_finish_time"></td>
 	  					<!---->
   							<!---->
 	  						<td id="td-data-col" class="my-td" listData="update_time" 
 	  							fieldDispFormat="yyyy-MM-dd HH:mm:ss" 
 	  							isPrimaryKey="false" primaryKeyfalse="update_time"></td>
-	  					<!---->
-  							<!---->
-	  						<td id="td-data-col" class="my-td" listData="update_admin" 
-	  							fieldDispFormat="" 
-	  							isPrimaryKey="false" primaryKeyfalse="update_admin"></td>
 	  					<!---->
 	  						<td class="my-td"><a href="#" onclick="gotoDataDetail(this)"><img src="myimg/edit-blue.png" style="width: 16px; height: 16px;"/></a></td>
 	  					</tr>

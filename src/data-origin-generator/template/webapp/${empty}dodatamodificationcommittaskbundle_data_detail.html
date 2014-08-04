@@ -1,0 +1,142 @@
+<!---->
+		<!-- modified to load dynamicly 
+	    <script src="myjs/data/dodatamodificationcommittaskbundle_data_detail.js"></script>
+		-->
+	  		<!-- Content Header -->
+	  		<div id="detail-content-header" style="text-align: center; height:44px;background-color: #ffffff;">
+				<!-------- Search conditions ---------->		  		
+		  		<div style="line-height: 44px; padding-left: 12px;float: left;">
+		  			<div class="my-button-s my-button-bk-default">
+			  			<a href="#" onclick="$('#modal-data-detail').modal('hide')" style="">
+			  				Cancel
+			  			</a>
+		  			</div>
+		  		</div>
+		  		<div id="detail-content-button-region" style="line-height: 44px; padding-right: 12px;float: right;">
+		  			<a href="#" onclick="saveDetailData(this)" style="">
+		  				<img src="myimg/btn_save_blue.png" style="width: 28px;"/>
+		  			</a>
+		  		</div>
+	  			
+	  			<div style="height:44px;">
+	  				<h5 style="padding: 6px;">Data Modification Task Bundle</h5>
+	  			</div>
+	  			
+	  		</div>
+	  		
+	  		<!-- Content Table -->
+	  		<div id="detail-content-table" style="overflow: auto; height:640px;">
+	  			<table class="" style="width: 99%;">
+	  				<tbody id="detail-table-tbody" style="">
+	  					<tr class="">
+	  						<td class="my-td-detail" dataDetail="DataDetail">
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="table_name">
+	  								<input type="hidden" name="columnType" value="char(64)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,64}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="64" />
+	  								
+	  								<label>Table Name:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="table_name" placeholder="" maxlength="64"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="schedule_commit_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{1,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>Schedule Time:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="schedule_commit_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="task_bundle_status">
+	  								<input type="hidden" name="columnType" value="int(11)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,11}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="11" />
+	  								
+	  								<label>0:wait to start 1:started 2:finished:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="task_bundle_status" placeholder="" maxlength="11"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="data_row_count_of_total">
+	  								<input type="hidden" name="columnType" value="int(11)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,11}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="11" />
+	  								
+	  								<label>Total Data Count:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="data_row_count_of_total" placeholder="" maxlength="11"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="data_row_count_of_did_commit">
+	  								<input type="hidden" name="columnType" value="int(11)" />
+	  								<input type="hidden" name="fieldDispFormat" value="" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,11}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="11" />
+	  								
+	  								<label>Committed Data Count:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="data_row_count_of_did_commit" placeholder="" maxlength="11"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="commit_start_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>Start Time:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="commit_start_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="commit_finish_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>Finish Time:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="commit_finish_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  							<!---->
+	  							<div dataColBlock="update_time">
+	  								<input type="hidden" name="columnType" value="bigint(20)" />
+	  								<input type="hidden" name="fieldDispFormat" value="yyyy-MM-dd HH:mm:ss" />
+	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
+	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
+	  								
+	  								<label>:</label>
+	  							<!-- -->
+	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  							<!-- -->
+	  							</div>
+	  						<!---->
+	  						</td>
+	  					</tr>
+	  				</tbody>
+	  			</table>
+	  		</div>

@@ -22,7 +22,7 @@ CREATE  TABLE `DOUploadFileMeta` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Upload File';
 
 CREATE TABLE `DODataModificationCommitTask` (
-  `table_name` char(64) NOT NULL,
+  `table_name` char(64) NOT NULL COMMENT 'Table Name',
   `schedule_commit_time` bigint(20) NOT NULL COMMENT 'time(utc) to commit data into production DB',
   `sql_primary_key` varchar(255) NOT NULL COMMENT 'SQL condition clause of primary key (e.g, k1 = ''a'' and k2 = ''b'')',
   `mod_type` INT NULL DEFAULT 1 COMMENT '0: update  1:insert  -1:delete',
@@ -34,6 +34,17 @@ CREATE TABLE `DODataModificationCommitTask` (
   `update_time` bigint(20) DEFAULT NULL COMMENT 'task updated time',
   `update_admin` char(32) DEFAULT NULL COMMENT 'admin',
   PRIMARY KEY (`table_name`,`schedule_commit_time`,`sql_primary_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Data Modification Commit Task';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Data Modification Task';
 
-
+CREATE  TABLE `DODataModificationCommitTaskBundle` (
+  `table_name` CHAR(64) NOT NULL COMMENT 'Table Name' ,
+  `schedule_commit_time` BIGINT NOT NULL COMMENT 'Schedule Time' ,
+  `task_bundle_status` INT NULL DEFAULT 0 COMMENT '0:wait to start 1:started 2:finished' ,
+  `data_row_count_of_total` INT NULL DEFAULT 0 COMMENT 'Total Data Count' ,
+  `data_row_count_of_did_commit` INT NULL DEFAULT 0 COMMENT 'Committed Data Count' ,
+  `commit_start_time` BIGINT NULL DEFAULT 0 COMMENT 'Start Time' ,
+  `commit_finish_time` BIGINT NULL DEFAULT 0 COMMENT 'Finish Time' ,
+  `update_time` BIGINT NULL DEFAULT 0 ,
+  PRIMARY KEY (`table_name`, `schedule_commit_time`),
+  INDEX `IDX_1` (`task_bundle_status` ASC, `schedule_commit_time` ASC)
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = 'Data Modification Task Bundle';
