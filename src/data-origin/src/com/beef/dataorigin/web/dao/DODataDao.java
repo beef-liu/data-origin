@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hslf.blip.Metafile;
+import org.apache.poi.ss.formula.eval.StringValueEval;
 
 import CollectionCommon.ITreeNode;
 import MetoXML.AbstractReflectInfoCachedSerializer;
@@ -360,8 +361,6 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 		DBColumn dbCol;
 		PropertyDescriptor propDesc;
 		Object propVal;
-		int appendedKeyCount = 0;
-		Class<?> type;
 		for(int i = 0; i < dbTable.getColumns().size(); i++) {
 			dbCol = dbTable.getColumns().get(i);
 			
@@ -369,67 +368,61 @@ public class DODataDao extends AbstractReflectInfoCachedSerializer {
 				continue;
 			}
 			
-			if(appendedKeyCount > 0) {
-				sql.append(" and ");
-			}
-			
-			sql.append(DOSqlParamUtil.quoteSqlIdentifier(dbCol.getName())).append(" = ");
-			
 			propDesc = findPropertyDescriptor(dbCol.getName(), data.getClass());
 			propVal = propDesc.getReadMethod().invoke(data, (Object[])null);
 			
-			type = propDesc.getPropertyType();
-			if(
-				(
-					Byte.class.isAssignableFrom(type)
-					|| Short.class.isAssignableFrom(type)
-					|| Integer.class.isAssignableFrom(type)
-					|| Long.class.isAssignableFrom(type)
-					|| Float.class.isAssignableFrom(type)
-					|| Double.class.isAssignableFrom(type)
-					|| byte.class == type
-					|| short.class == type
-					|| int.class == type
-					|| long.class == type
-					|| float.class == type
-					|| double.class == type
-				)
-				&&
-				(
-					!dbCol.getColumnType().startsWith("char")
-					&& !dbCol.getColumnType().startsWith("varchar")
-				)
-			) {
-				if(propVal == null) {
-					sql.append("0");
-				} else {
-					String propValStr = String.valueOf(propVal);
-					//assure it is a number
-					if(propValStr.indexOf('.') >= 0) {
-						Double.parseDouble(propValStr);
-					} else {
-						Long.parseLong(propValStr);
-					}
-					sql.append(String.valueOf(propVal));
-				}
-			} else if(String.class.isAssignableFrom(type)) {
-				if(propVal == null) {
-					sql.append("''");
-				} else {
-					sql.append("'").append(DBUtil.replaceQuote((String) propVal)).append("'");
-				}
-			} else {
-				if(propVal == null) {
-					sql.append("''");
-				} else {
-					sql.append("'").append(DBUtil.replaceQuote(String.valueOf(propVal))).append("'");
-				}
-			}
-
-			appendedKeyCount++;
+			appendSqlConditionItem(sql, dbCol, propVal);
 		}
 		
 		return sql.toString();
+	}
+	
+	public static void appendSqlConditionItem(StringBuilder sqlCondition, DBColumn dbCol, Object colVal) {
+		
+		if(sqlCondition.length() > 0) {
+			sqlCondition.append(" and ");
+		}
+		
+		sqlCondition.append(DOSqlParamUtil.quoteSqlIdentifier(dbCol.getName())).append(" = ");
+		
+		String dbColType = dbCol.getColumnType().toLowerCase();
+		if(colVal == null) {
+			if(dbColType.startsWith("int")
+				|| dbColType.startsWith("bigint")
+				|| dbColType.startsWith("binary")
+				|| dbColType.startsWith("double")
+				|| dbColType.startsWith("float")
+				|| dbColType.startsWith("mediumint")
+				|| dbColType.startsWith("smallint")
+				|| dbColType.startsWith("tinyint")
+			) {
+				sqlCondition.append("0");
+			} else {
+				sqlCondition.append("''");
+			}
+		} else {
+			if(dbColType.startsWith("int")
+					|| dbColType.startsWith("bigint")
+					|| dbColType.startsWith("binary")
+					|| dbColType.startsWith("double")
+					|| dbColType.startsWith("float")
+					|| dbColType.startsWith("mediumint")
+					|| dbColType.startsWith("smallint")
+					|| dbColType.startsWith("tinyint")
+				) {
+				String colValStr = String.valueOf(colVal);
+				
+				//assure it is a number
+				if(colValStr.indexOf('.') >= 0) {
+					Double.parseDouble(colValStr);
+				} else {
+					Long.parseLong(colValStr);
+				}
+				sqlCondition.append(colValStr);
+			} else {
+				sqlCondition.append("'").append(DBUtil.replaceQuote(String.valueOf(colVal))).append("'");
+			}
+		}
 	}
 	
 	@Override

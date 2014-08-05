@@ -249,7 +249,7 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws IOException, MalformedPatternException, ParseException {
+			) throws IOException, MalformedPatternException, ParseException, IllegalArgumentException, SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
 		int beginCol = 0;
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
@@ -271,7 +271,7 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws IOException, MalformedPatternException, ParseException {
+			) throws IOException, MalformedPatternException, ParseException, IllegalArgumentException, SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
 		int beginCol = 0;
 		int maxCol = DEFAULT_MAX_COL;
 		int beginRow = 0;
@@ -292,7 +292,8 @@ public class DODataImportExportDao {
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
 			List<DataImportColValue> colValueAssignList
-			) throws MalformedPatternException, ParseException {
+			) throws MalformedPatternException, ParseException, IllegalArgumentException, SQLException, 
+			InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
 		
 		DODataImportResult dataImportResult = new DODataImportResult();
 		//dataImportResult.setOriginalFileName(originalFileName);
@@ -332,7 +333,7 @@ public class DODataImportExportDao {
 		String adminId = "";
 		long schedule_commit_time = DataOriginWebContext.getDefaultDataModificationCommitScheduleTime();
 		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(dbTable.getTableName());
-		
+		DataModificationCommitTaskModType modType = DataModificationCommitTaskModType.ModTypeInsert;
 
 		CellStyle cellStyleOfError = sheet.getWorkbook().createCellStyle();
 		cellStyleOfError.setFillForegroundColor(getExcelBGColor(dataImportSetting.getBgColorError(), DEFAULT_BG_COLOR_ERROR));
@@ -345,6 +346,8 @@ public class DODataImportExportDao {
 		CellStyle cellStyleOfUpdated = sheet.getWorkbook().createCellStyle();
 		cellStyleOfUpdated.setFillForegroundColor(getExcelBGColor(dataImportSetting.getBgColorDataRowUpdated(), DEFAULT_BG_COLOR_DATA_ROW_UPDATED));
 		cellStyleOfUpdated.setFillPattern(CellStyle.SOLID_FOREGROUND);
+
+		StringBuilder outputSqlConditionOfPrimaryKeys = new StringBuilder();
 		
 		for(int i = 1; i < allRowList.size(); i++) {
 			//verify data row
@@ -363,6 +366,8 @@ public class DODataImportExportDao {
 			errorMsg = null;
 			try {
 				updateCnt = insertOneRow(conn, dbTable, colMataList, allRowList.get(i), colValueAssignList);
+				
+				modType = DataModificationCommitTaskModType.ModTypeInsert;
 			} catch(Throwable e) {
 				if(e.getClass().getSimpleName().equalsIgnoreCase("MySQLIntegrityConstraintViolationException")) {
 					//duplicated key
@@ -381,6 +386,8 @@ public class DODataImportExportDao {
 					
 					if(updateCnt == 0) {
 						errorMsg = DOServiceMsgUtil.getDefinedMsg(DOServiceMsgUtil.ErrorDataImportUpdateFailDataNotExist).getMsg();
+					} else {
+						modType = DataModificationCommitTaskModType.ModTypeUpdate;
 					}
 				} catch(Throwable e) {
 					errorMsg = DOServiceMsgUtil.getStackTrace(e);
@@ -400,7 +407,10 @@ public class DODataImportExportDao {
 				
 				errorRowCount++;
 			} else {
-				DODataModificationCommitTaskSchedulerDao.createDataCommitTask(conn, mDBTable, data, modType, schedule_commit_time, adminId);
+				makeSqlConditionOfPrimaryKey(
+						outputSqlConditionOfPrimaryKeys, dbTable, colMataList, allRowList.get(i), colValueAssignList);
+				DODataModificationCommitTaskSchedulerDao.createDataCommitTaskBySqlPK(
+						conn, mDBTable, outputSqlConditionOfPrimaryKeys.toString(), modType, schedule_commit_time, adminId);
 
 				//success
 				if(isUpdate) {
@@ -415,6 +425,8 @@ public class DODataImportExportDao {
 			}
 		}
 
+		DODataModificationCommitTaskSchedulerDao.refreshDataCommitTaskBundle(conn, dbTable.getTableName(), schedule_commit_time);
+		
 		dataImportResult.setInsertedCount(insertedRowCount);
 		dataImportResult.setUpdatedCount(updatedRowCount);
 		dataImportResult.setErrorCount(errorRowCount);
@@ -503,7 +515,8 @@ public class DODataImportExportDao {
 			Connection conn,
 			DBTable dbTable,
 			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
-			List<DataImportColValue> colValueAssignList) throws SQLException, ParseException {
+			List<DataImportColValue> colValueAssignList
+		) throws SQLException, ParseException {
 		PreparedStatement pstmt = null;
 
 		try {
@@ -612,12 +625,55 @@ public class DODataImportExportDao {
 			}
 		}
 	}
+	
+	protected static void makeSqlConditionOfPrimaryKey(
+			StringBuilder outputSqlConditionOfPrimaryKeys,
+			DBTable dbTable,
+			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
+			List<DataImportColValue> colValueAssignList
+			) throws ParseException {
+		int i;
+		Object dbVal = null;
+		
+		for(i = 0; i < colMataList.size(); i++) {
+			DODataImportColMetaInfo colMeta = colMataList.get(i);
+
+			if(colMeta.getDbCol() == null) {
+				continue;
+			}
+			if(!colMeta.getDbCol().isPrimaryKey()) {
+				continue;
+			}
+
+			dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.getDbCol());
+			
+			//sql condition
+			DODataDao.appendSqlConditionItem(outputSqlConditionOfPrimaryKeys, colMeta.getDbCol(), dbVal);
+		}
+		if(colValueAssignList != null) {
+			DataImportColValue importColVal = null;
+			for(i = 0; i < colValueAssignList.size(); i++) {
+				importColVal = colValueAssignList.get(i);
+				
+				if(!importColVal.getDbCol().isPrimaryKey()) {
+					continue;
+				}
+				
+				dbVal = getDBValueFromExcelValue(importColVal.dbVal, importColVal.getDbCol());
+				
+				//sql condition
+				DODataDao.appendSqlConditionItem(outputSqlConditionOfPrimaryKeys, importColVal.getDbCol(), dbVal);
+			}
+		}
+		
+	}
 
 	protected static int updateOneRow(
 			Connection conn,
 			DBTable dbTable,
 			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
-			List<DataImportColValue> colValueAssignList) throws SQLException, ParseException {
+			List<DataImportColValue> colValueAssignList
+			) throws SQLException, ParseException {
 		PreparedStatement pstmt = null;
 
 		try {
@@ -666,7 +722,7 @@ public class DODataImportExportDao {
 			}
 			
 			sql.append(" where ");
-			
+
 			index = 0;
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
@@ -735,7 +791,7 @@ public class DODataImportExportDao {
 					pstmt.setObject(index++, dbVal);
 				}
 			}
-
+			
 			for(i = 0; i < colMataList.size(); i++) {
 				colMeta = colMataList.get(i);
 
@@ -912,14 +968,6 @@ public class DODataImportExportDao {
 		public void setDbVal(Object dbVal) {
 			this.dbVal = dbVal;
 		}
-	}
-	
-	protected void createDataCommitTask(Connection conn, String tableName, Object data,
-			DataModificationCommitTaskModType modType) throws IllegalArgumentException, SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
-		
-		DODataModificationCommitTaskSchedulerDao.createDataCommitTask(conn, mDBTable, data, modType, schedule_commit_time, adminId);
-		
-		DODataModificationCommitTaskSchedulerDao.refreshDataCommitTaskBundle(conn, tableName, schedule_commit_time);
 	}
 	
 }
