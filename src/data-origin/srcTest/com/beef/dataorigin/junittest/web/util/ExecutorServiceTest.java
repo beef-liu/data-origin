@@ -31,9 +31,15 @@ public class ExecutorServiceTest {
 			ScheduledExecutorService taskScheduler = Executors.newScheduledThreadPool(2);
 
 			Runnable periodTask = new Runnable() {
+				private int num = 0;
 				@Override
 				public void run() {
-					log("thread scheduler --------------");
+					log("thread scheduler --------------" + (num ++));
+					try {
+						Thread.sleep(5000);
+					} catch(Throwable e) {
+						e.printStackTrace();
+					}
 				}
 			};
 			

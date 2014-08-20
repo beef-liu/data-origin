@@ -37,12 +37,13 @@
 	  								<input type="hidden" name="fieldDispFormat" value="${metaDataField.fieldDispFormat}" />
 	  								<input type="hidden" name="fieldValidateRegex" value="${metaDataField.fieldValidateRegex}" />
 	  								<input type="hidden" name="fieldDispMaxLength" value="${metaDataField.fieldDispMaxLength}" />
+	  								<input type="hidden" />
 	  								
 	  								<label>$!{metaDataField.fieldDispName}:</label>
 	  							<!--#if(dbCol.columnType.startsWith("varchar") && metaDataField.fieldDispMaxLength > 50) -->
 	  								<textarea dataDetail="$!{metaDataField.fieldName}"></textarea>
 	  							<!--#else -->
-	  								<input type="text" dataDetail="$!{metaDataField.fieldName}" placeholder="${metaDataField.fieldDispFormat}" maxlength="${metaDataField.fieldDispMaxLength}"/>
+	  								<input type="text" dataDetail="$!{metaDataField.fieldName}" placeholder="${metaDataField.fieldDispFormat}" maxlength="${metaDataField.fieldDispMaxLength}" primarykey${dbCol.primaryKey} />
 	  							<!--#end -->
 	  							</div>
 	  						<!--#end-->

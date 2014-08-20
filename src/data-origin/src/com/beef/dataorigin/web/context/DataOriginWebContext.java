@@ -16,6 +16,7 @@ import MetoXML.XmlSerializer;
 import MetoXML.Base.XmlParseException;
 
 import com.beef.dataorigin.context.DataOriginContext;
+import com.beef.dataorigin.web.datacommittask.DODataModificationCommitTaskScheduler;
 import com.beef.dataorigin.web.upload.persistence.IDOUploadFilePersistence;
 import com.salama.service.clouddata.CloudDataAppContext;
 import com.salama.service.clouddata.core.AppContext;
@@ -44,6 +45,8 @@ public abstract class DataOriginWebContext implements CommonContext {
 	private static String _webContextPath;
 	private static File _thumbnailPersistenceDir;
 
+	private static DODataModificationCommitTaskScheduler _dataCommitTaskScheduler = null;
+	
 	
 	public static String getWebContextPath() {
 		return _webContextPath;
@@ -59,18 +62,23 @@ public abstract class DataOriginWebContext implements CommonContext {
 	public static IDOUploadFilePersistence getUploadFilePersistence() {
 		return _uploadFilePersistence;
 	}
+	public static DODataModificationCommitTaskScheduler getDataCommitTaskScheduler() {
+		return _dataCommitTaskScheduler;
+	}
 	
 	public static long getDefaultDataModificationCommitScheduleTime() {
 		GregorianCalendar cal = new GregorianCalendar();
-		cal.set(Calendar.HOUR_OF_DAY, 23);
-		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH) + 1);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
+		
 		
 		long curTime = System.currentTimeMillis();
 		long minAheadTime = 300*1000;
 		if((cal.getTimeInMillis() - curTime) <= minAheadTime) {
-			return curTime + minAheadTime;
+			return ((long)(curTime / 1000)) * 1000 + minAheadTime;
 		} else {
 			return cal.getTimeInMillis();
 		}
@@ -83,19 +91,24 @@ public abstract class DataOriginWebContext implements CommonContext {
 			XmlDeserializer xmlDes = new XmlDeserializer();
 			_dataOriginWebContextConfig = (DataOriginWebContextConfig) xmlDes.Deserialize(
 					configFilePath, DataOriginWebContextConfig.class, XmlDeserializer.DefaultCharset);
+			logger.info("reload() configFilePath:" + configFilePath);
 			
 			//init file persistenc --------------------------------------
 			_uploadFilePersistence = (IDOUploadFilePersistence) Class.forName(
 					_dataOriginWebContextConfig.getUploadFilePersistenceClass()).newInstance();
 			_uploadFilePersistence.init(servletContext);
+			logger.info("reload() UploadFilePersistenceClass:" + _dataOriginWebContextConfig.getUploadFilePersistenceClass());
 			
+			//web context path
 			_webContextPath = servletContext.getContextPath();
-			
+
+			//thumbnail persistence
 			String thumbnailPersistenceDirPath = servletContext.getRealPath(DEFAULT_THUMBNAIL_DIR_VIRTUAL_PATH);
 			_thumbnailPersistenceDir = new File(thumbnailPersistenceDirPath);
 			if(!_thumbnailPersistenceDir.exists()) {
 				_thumbnailPersistenceDir.mkdirs();
 			}
+			logger.info("reload() thumbnailPersistenceDirPath:" + thumbnailPersistenceDirPath);
 			
 
 			//base dir of DataOriginContext --------------------------------------
@@ -110,7 +123,11 @@ public abstract class DataOriginWebContext implements CommonContext {
 			
 			File baseDir = new File(baseDirPath);
 			initDataOriginContext(baseDir, appContext);
+			logger.info("reload() DataOriginContext inited:" + baseDirPath);
 			
+			//data commit task scheduler
+			_dataCommitTaskScheduler = new DODataModificationCommitTaskScheduler();
+			logger.info("reload() DataCommitTaskScheduler inited");
 		} catch(Throwable e) {
 			logger.error(null, e);
 			throw new RuntimeException(e);
@@ -123,6 +140,15 @@ public abstract class DataOriginWebContext implements CommonContext {
 			try {
 				_uploadFilePersistence.destroy();
 				_uploadFilePersistence = null;
+			} catch(Throwable e) {
+				logger.error(null, e);
+			}
+		}
+		
+		if(_dataCommitTaskScheduler != null) {
+			try {
+				_dataCommitTaskScheduler.stopSchedule();
+				_dataCommitTaskScheduler = null;
 			} catch(Throwable e) {
 				logger.error(null, e);
 			}

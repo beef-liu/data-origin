@@ -230,6 +230,7 @@ function myParseDateFromFormattedStr(dateStr, dateFormat) {
 	curTime.setHours(ymdhmsArray[indexTmp++]);
 	curTime.setMinutes(ymdhmsArray[indexTmp++]);
 	curTime.setSeconds(ymdhmsArray[indexTmp++]);
+	curTime.setMilliseconds(0);
 	
 	return curTime;
 }

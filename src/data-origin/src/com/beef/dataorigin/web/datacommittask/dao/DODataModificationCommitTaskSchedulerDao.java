@@ -86,10 +86,11 @@ public class DODataModificationCommitTaskSchedulerDao {
 	private static final String SQL_FIND_TASK_BUNDLE_WAIT_TO_EXECUTE = "select "
 			+ " *"
 			+ " from DODataModificationCommitTaskBundle"
-			+ " where task_bundle_status = 0"
+			+ " where task_bundle_status = 0 and schedule_commit_time <= ?"
 			+ " order by schedule_commit_time limit ?, ?"
 			;
-	public static List<DODataModificationCommitTaskBundle> findTaskBundleWaitToExecute(Connection conn, int maxCount
+	public static List<DODataModificationCommitTaskBundle> findTaskBundleWaitToExecute(Connection conn, 
+			int maxCount, long maxScheduleTime
 			) throws SQLException, IntrospectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		PreparedStatement stmt = null;
 		
@@ -97,6 +98,7 @@ public class DODataModificationCommitTaskSchedulerDao {
 			stmt = conn.prepareStatement(SQL_FIND_TASK_BUNDLE_WAIT_TO_EXECUTE);
 			
 			int index = 1;
+			stmt.setLong(index++, maxScheduleTime);
 			stmt.setInt(index++, 0);
 			stmt.setInt(index++, maxCount);
 			
@@ -245,16 +247,35 @@ public class DODataModificationCommitTaskSchedulerDao {
 		}
 		
 		try {
+			int totalDataCount = countOfWaitToCommit + countOfSuccess + countOfFail;
+			int committedDataCount = countOfSuccess + countOfFail;
+			long curTime = System.currentTimeMillis();
+			
 			stmt = conn.prepareStatement(SQL_REFRESH_DATA_COMMIT_TASK_BUNDLE);
 			
 			int index = 1;
-			stmt.setInt(index++, countOfWaitToCommit + countOfSuccess + countOfFail);
-			stmt.setInt(index++, countOfSuccess + countOfFail);
-			stmt.setLong(index++, System.currentTimeMillis());
+			stmt.setInt(index++, totalDataCount);
+			stmt.setInt(index++, committedDataCount);
+			stmt.setLong(index++, curTime);
 			stmt.setString(index++, table_name);
 			stmt.setLong(index++, schedule_commit_time);
 			
-			return stmt.executeUpdate();
+			int updCnt = stmt.executeUpdate();
+			if(updCnt == 0) {
+				//insert
+				DODataModificationCommitTaskBundle data = new DODataModificationCommitTaskBundle();
+				data.setTable_name(table_name);
+				data.setSchedule_commit_time(schedule_commit_time);
+				data.setData_row_count_of_total(totalDataCount);
+				data.setData_row_count_of_did_commit(committedDataCount);
+				data.setCommit_start_time(0);
+				data.setCommit_finish_time(0);
+				data.setUpdate_time(curTime);
+				
+				updCnt = UpdateDataDao.insertData(conn, "DODataModificationCommitTaskBundle", data);
+			}
+
+			return updCnt;
 		} finally {
 			try {
 				stmt.close();
@@ -311,12 +332,12 @@ public class DODataModificationCommitTaskSchedulerDao {
 		//insert or update to DB
 		int updCnt = 0;
 		try {
-			updCnt = UpdateDataDao.insertData(conn, dataCommitTask);
+			updCnt = UpdateDataDao.insertData(conn, "DODataModificationCommitTask", dataCommitTask);
 		} catch(SQLException sqle) {
 			if(sqle.getClass().getSimpleName().equalsIgnoreCase("MySQLIntegrityConstraintViolationException")) {
 				//duplicated key, then update
 				updCnt = UpdateDataDao.updateData(conn, 
-						mDBTable.getTableName(), dataCommitTask, mDBTable.getPrimaryKeys());
+						"DODataModificationCommitTask", dataCommitTask, mDBTable.getPrimaryKeys());
 			} else {
 				throw sqle;
 			}
@@ -324,5 +345,81 @@ public class DODataModificationCommitTaskSchedulerDao {
 		
 		return updCnt;
 	}
+
+	private static final String SQL_UPDATE_DATA_COMMIT_TASK_BUNDLE_SCHEDULE_TIME = " update DODataModificationCommitTaskBundle set"
+			+ "  schedule_commit_time = ?, "
+			+ "  update_time = ? "
+			+ " where table_name = ? and schedule_commit_time = ? "
+			;
+	public static int updateDataCommitTaskBundleScheduleTime(
+			Connection conn,
+			String table_name, long schedule_commit_time, long newSchedule_commit_time
+			) throws SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IllegalArgumentException, IntrospectionException {
+		PreparedStatement stmt = null;
+		
+		try {
+			stmt = conn.prepareStatement(SQL_UPDATE_DATA_COMMIT_TASK_BUNDLE_SCHEDULE_TIME);
+			
+			int index = 1;
+			stmt.setLong(index++, newSchedule_commit_time);
+			stmt.setLong(index++, System.currentTimeMillis());
+			
+			stmt.setString(index++, table_name);
+			stmt.setLong(index++, schedule_commit_time);
+
+			return stmt.executeUpdate();
+		} finally {
+			try {
+				stmt.close();
+			} catch(Throwable e) {
+				logger.error(null, e);
+			}
+		}
+	}
+
+	private static final String SQL_UPDATE_DATA_COMMIT_TASK_SCHEDULE_TIME = " update DODataModificationCommitTask set"
+			+ "  schedule_commit_time = ?, "
+			+ "  update_time = ? "
+			+ " where table_name = ? and schedule_commit_time = ? and commit_status = 0"
+			;
+	public static int updateDataCommitTaskScheduleTime(
+			Connection conn,
+			String table_name, long schedule_commit_time, long newSchedule_commit_time
+			) throws SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IllegalArgumentException, IntrospectionException {
+		PreparedStatement stmt = null;
+		
+		try {
+			stmt = conn.prepareStatement(SQL_UPDATE_DATA_COMMIT_TASK_SCHEDULE_TIME);
+			
+			int index = 1;
+			stmt.setLong(index++, newSchedule_commit_time);
+			stmt.setLong(index++, System.currentTimeMillis());
+			
+			stmt.setString(index++, table_name);
+			stmt.setLong(index++, schedule_commit_time);
+
+			return stmt.executeUpdate();
+		} finally {
+			try {
+				stmt.close();
+			} catch(Throwable e) {
+				logger.error(null, e);
+			}
+		}
+	}
 	
+	public static DODataModificationCommitTaskBundle copyData(DODataModificationCommitTaskBundle taskBundle) {
+		DODataModificationCommitTaskBundle newTaskBundle = new DODataModificationCommitTaskBundle();
+		
+		newTaskBundle.setCommit_finish_time(taskBundle.getCommit_finish_time());
+		newTaskBundle.setCommit_start_time(taskBundle.getCommit_start_time());
+		newTaskBundle.setData_row_count_of_did_commit(taskBundle.getData_row_count_of_did_commit());
+		newTaskBundle.setData_row_count_of_total(taskBundle.getData_row_count_of_total());
+		newTaskBundle.setSchedule_commit_time(taskBundle.getSchedule_commit_time());
+		newTaskBundle.setTable_name(taskBundle.getTable_name());
+		newTaskBundle.setTask_bundle_status(taskBundle.getTask_bundle_status());
+		newTaskBundle.setUpdate_time(taskBundle.getUpdate_time());
+
+		return newTaskBundle;
+	}
 }

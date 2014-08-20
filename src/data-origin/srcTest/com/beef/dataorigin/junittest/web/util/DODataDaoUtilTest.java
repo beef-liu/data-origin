@@ -2,8 +2,11 @@ package com.beef.dataorigin.junittest.web.util;
 
 import static org.junit.Assert.*;
 
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;

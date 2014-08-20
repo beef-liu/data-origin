@@ -18,6 +18,8 @@ public class DOServiceMsgUtil {
 	public final static String ErrorDataImportUpdateFailDataNotExist = "Error.DataImport.updateFail.DataNotExist";
 	
 	public final static String ErrorDataDetailDataNotExist = "Error.DataDetail.DataNotExist";
+
+	public final static String ErrorDataModificationCommitTaskBundleNotAllowModifyExecuteSoon = "Error.DataModificationCommitTaskBundle.NotAllowModifyExecuteSoon";
 	
 	public static String getDefinedMsgXml(String msgCode) {
 		return DataOriginWebContext.getDataOriginContext().getServiceMsgXml(msgCode);
@@ -61,6 +63,9 @@ public class DOServiceMsgUtil {
 		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorDataImportSheetMoreThanOne, "Please input sheet index"));
 
 		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorDataDetailDataNotExist, "Data not exist"));
+		
+		msgList.add(new DOServiceMsg(DOServiceMsg.MSG_LEVEL_ERROR, ErrorDataModificationCommitTaskBundleNotAllowModifyExecuteSoon, 
+				"Not allowed to modify task that will be executed soon"));
 		
 		return msgList;
 	}

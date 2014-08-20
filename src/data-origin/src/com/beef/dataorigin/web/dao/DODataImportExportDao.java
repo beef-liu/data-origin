@@ -248,6 +248,7 @@ public class DODataImportExportDao {
 			int sheetIndex,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
+			MDBTable mDBTable,
 			List<DataImportColValue> colValueAssignList
 			) throws IOException, MalformedPatternException, ParseException, IllegalArgumentException, SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
 		int beginCol = 0;
@@ -261,7 +262,7 @@ public class DODataImportExportDao {
 		return importDataExcel(conn, 
 				//originalFileName, 
 				sheet, beginCol, 
-				allRowList, dataImportSetting, dbTable, colValueAssignList);
+				allRowList, dataImportSetting, dbTable, mDBTable, colValueAssignList);
 	}
 	
 	public static DODataImportResult importDataExcel(
@@ -270,6 +271,7 @@ public class DODataImportExportDao {
 			//String originalFileName,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
+			MDBTable mDBTable,
 			List<DataImportColValue> colValueAssignList
 			) throws IOException, MalformedPatternException, ParseException, IllegalArgumentException, SQLException, InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
 		int beginCol = 0;
@@ -281,7 +283,7 @@ public class DODataImportExportDao {
 		return importDataExcel(conn, 
 				//originalFileName, 
 				sheet, beginCol, 
-				allRowList, dataImportSetting, dbTable, colValueAssignList);
+				allRowList, dataImportSetting, dbTable, mDBTable, colValueAssignList);
 	}
 	
 	protected static DODataImportResult importDataExcel(
@@ -291,6 +293,7 @@ public class DODataImportExportDao {
 			List<List<Object>> allRowList,
 			MetaDataImportSetting dataImportSetting,
 			DBTable dbTable,
+			MDBTable mDBTable,
 			List<DataImportColValue> colValueAssignList
 			) throws MalformedPatternException, ParseException, IllegalArgumentException, SQLException, 
 			InstantiationException, InvocationTargetException, IllegalAccessException, IntrospectionException {
@@ -332,7 +335,7 @@ public class DODataImportExportDao {
 		//TODO
 		String adminId = "";
 		long schedule_commit_time = DataOriginWebContext.getDefaultDataModificationCommitScheduleTime();
-		MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(dbTable.getTableName());
+		//MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(dbTable.getTableName());
 		DataModificationCommitTaskModType modType = DataModificationCommitTaskModType.ModTypeInsert;
 
 		CellStyle cellStyleOfError = sheet.getWorkbook().createCellStyle();
@@ -632,6 +635,10 @@ public class DODataImportExportDao {
 			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
 			List<DataImportColValue> colValueAssignList
 			) throws ParseException {
+		if(outputSqlConditionOfPrimaryKeys.length() > 0) {
+			outputSqlConditionOfPrimaryKeys.delete(0, outputSqlConditionOfPrimaryKeys.length());
+		}
+		
 		int i;
 		Object dbVal = null;
 		

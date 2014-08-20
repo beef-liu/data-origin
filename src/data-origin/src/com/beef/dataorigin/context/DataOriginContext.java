@@ -269,7 +269,7 @@ public class DataOriginContext implements ClassFinder {
 		}
 	};
 	
-	private static MDBTable convertDBTable(DBTable dbTable) {
+	public static MDBTable convertDBTable(DBTable dbTable) {
 		MDBTable mDBTable = new MDBTable();
 		
 		mDBTable.setTableName(dbTable.getTableName());
@@ -299,7 +299,7 @@ public class DataOriginContext implements ClassFinder {
 		return mDBTable;
 	}
 	
-	private static MMetaDataUISetting convertMetaDataUISetting(MetaDataUISetting dataSetting) {
+	public static MMetaDataUISetting convertMetaDataUISetting(MetaDataUISetting dataSetting) {
 		MMetaDataUISetting mDataSetting = new MMetaDataUISetting();
 		
 		mDataSetting.setDataClassName(dataSetting.getDataClassName());
@@ -315,7 +315,7 @@ public class DataOriginContext implements ClassFinder {
 		return mDataSetting;
 	}
 	
-	private static MMetaDataImportSetting convertMetaDataImportSetting(MetaDataImportSetting dataSetting) {
+	public static MMetaDataImportSetting convertMetaDataImportSetting(MetaDataImportSetting dataSetting) {
 		MMetaDataImportSetting mDataSetting = new MMetaDataImportSetting();
 		
 		mDataSetting.setDataClassName(dataSetting.getDataClassName());

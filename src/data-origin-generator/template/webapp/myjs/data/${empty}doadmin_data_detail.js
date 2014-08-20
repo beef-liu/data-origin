@@ -43,6 +43,7 @@ function deleteCheckedData() {
 					
 					setTimeout(function() {
 						myHideConfirmMsgDlg();
+						$('input#table-check-all').removeAttr('checked');
 						
 						setTimeout(function() {
 							searchData();
@@ -74,6 +75,10 @@ function gotoDataDetail(thisNode) {
 		trNode = $(thisNode).parents('[listData="DOAdmin"]')[0];
 	}
 	var dataXml = easyJsDomUtil.mappingDomNodeToDataXml(trNode, "primaryKeytrue");
+
+	var dataXmlDoc = easyJsDomUtil.parseXML(dataXml); 
+	reverseFormatColValXmlForListRow(dataXmlDoc, trNode);
+	dataXml = dataXmlDoc.firstChild.outerHTML; 
 	
 	//query data
 	myAjax({
@@ -190,6 +195,30 @@ function reverseFormatColValXml(dataXmlDoc) {
 			if(colXmlNodes.length > 0) {
 				$(colXmlNodes).text(
 					myReverseFormatDataColValue(dispFormat, dataColValNode.val())
+				);
+			}
+		}
+	}
+}
+
+function reverseFormatColValXmlForListRow(dataXmlDoc, trNode) {
+	var dataColNodes = $(trNode).find('td[listData]');
+	var i, dataColNode, dispFormat, dataColVal;
+	var colName, colXmlNodes;
+	for(i = 0; i < dataColNodes.length; i++) {
+		dataColNode = dataColNodes[i];
+		
+		dispFormat = $(dataColNode).attr('fieldDispFormat');
+		
+		if(dispFormat.length > 0) {
+			//reverse format
+			dataColVal = $(dataColNode).text();
+			colName = $(dataColNode).attr('listData');
+			
+			colXmlNodes = $(dataXmlDoc).find(colName);
+			if(colXmlNodes.length > 0) {
+				$(colXmlNodes).text(
+					myReverseFormatDataColValue(dispFormat, dataColVal)
 				);
 			}
 		}

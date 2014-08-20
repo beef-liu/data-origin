@@ -1,9 +1,12 @@
 package com.beef.dataorigin.web.datacommittask;
 
+import java.beans.IntrospectionException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,6 +40,8 @@ import com.salama.util.db.JDBCUtil;
  */
 public class DODataModificationCommitTaskScheduler {
 	private final static Logger logger = Logger.getLogger(DODataModificationCommitTaskScheduler.class);
+
+	private final static String[] DATA_COMMIT_TASK_BUNDLE_PRIMARY_KEY_NAMES = new String[]{"table_name", "schedule_commit_time"};
 	
 	/**
 	 * That number of running task is 1 will simplify the process of finding tasks.
@@ -48,15 +53,18 @@ public class DODataModificationCommitTaskScheduler {
 	
 	private final static int TASK_FINDER_DELAY_MS = 5000;
 	private final static int TASK_FINDER_PERIOD_MS = 60000;
+	private final static long TASK_FINDER_AHEAD_MS = 300000;
 	
 	private final static int MAX_TASK_IN_QUEUE = 32;
 	
-	private final static int TASK_EXECUTOR_MIN_DELAY_MS = 180000;
+	private final static int TASK_EXECUTOR_MIN_DELAY_MS = 60000;
 	
 	private final static int MAX_COMMIT_TASK_IN_ONE_LOOP = 1000; 
 	
 	private Timer _taskFinderTimer = null;
 	private ScheduledExecutorService _taskPool = null;
+	
+	private Object _lockForAddTaskToSchedule = new Object();
 	
 	/**
 	 * key: table_name (it means there is only 1 running task of the same table)
@@ -76,7 +84,7 @@ public class DODataModificationCommitTaskScheduler {
 		_taskFinderTimer = new Timer();
 		_taskFinderTimer.schedule(
 				_bundleTaskFinder, 
-				TASK_FINDER_DELAY_MS, TASK_FINDER_DELAY_MS);
+				TASK_FINDER_DELAY_MS, TASK_FINDER_PERIOD_MS);
 	}
 	
 	public void stopSchedule() throws InterruptedException {
@@ -90,12 +98,76 @@ public class DODataModificationCommitTaskScheduler {
 		boolean isAllCompleted = _taskPool.awaitTermination(WAIT_SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS);
 		logger.info("stopSchedule() isAllCompleted:" + isAllCompleted + " waiting_timeout(ms):" + WAIT_SHUTDOWN_TIMEOUT_MS);
 	}
+	
+	public boolean isAllowModifyDataCommitTaskBundleScheduleTime(
+			String table_name, long schedule_commit_time) {
+		
+		if(schedule_commit_time <= (System.currentTimeMillis() + TASK_FINDER_AHEAD_MS)) {
+			return false;
+		} else {
+			DODataModificationCommitTaskBundle taskBundle = _scheduleTaskBundleMap.get(taskBundleMapKey(table_name, schedule_commit_time));
+			if(taskBundle != null && taskBundle.getSchedule_commit_time() == schedule_commit_time) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+	}
 
+	public int modifyDataCommitTaskBundleScheduleTime(Connection conn, 
+			String table_name, long schedule_commit_time, long newSchedule_commit_time
+			) throws IllegalArgumentException, SQLException, InstantiationException, 
+			InvocationTargetException, IllegalAccessException, IntrospectionException, ParseException {
+		//update schedule_time of task which has not been committed
+		int updCntOfTask = DODataModificationCommitTaskSchedulerDao.updateDataCommitTaskScheduleTime(
+				conn, table_name, schedule_commit_time, newSchedule_commit_time);
+		logger.info("modifyDataCommitTaskBundleScheduleTime() updated task:" + updCntOfTask);
+		
+		/*
+		//insert new task bundle, old task bundle still be running, just will not have tasks to execute
+		DODataModificationCommitTaskBundle taskBundle = new DODataModificationCommitTaskBundle();
+		taskBundle.setTable_name(table_name);
+		taskBundle.setSchedule_commit_time(schedule_commit_time);
+		
+		taskBundle = (DODataModificationCommitTaskBundle) DODataDao.searchDataByPK(
+				conn, "DODataModificationCommitTaskBundle", taskBundle);
+		
+		DODataModificationCommitTaskBundle newTaskBundle = new DODataModificationCommitTaskBundle();
+		newTaskBundle.setTable_name(table_name);
+		newTaskBundle.setSchedule_commit_time(newSchedule_commit_time);
+		newTaskBundle.setCommit_finish_time(0);
+		newTaskBundle.setCommit_start_time(0);
+		newTaskBundle.setData_row_count_of_did_commit(0);
+		newTaskBundle.setData_row_count_of_total(updCntOfTask);
+		newTaskBundle.setTask_bundle_status(0);
+		newTaskBundle.setUpdate_time(System.currentTimeMillis());
+		
+		int updCntOfTaskBundle = UpdateDataDao.insertData(conn, "DODataModificationCommitTaskBundle", newTaskBundle);
+		
+		//add to schedule 
+		addTaskToSchedule(taskBundle);
+		logger.info("modifyDataCommitTaskBundleScheduleTime() table_name:" + table_name 
+				+ " old schedule time:" + schedule_commit_time + " new schedule time:" + newSchedule_commit_time);
+		*/
+		
+		int updCntOfTaskBundle = DODataModificationCommitTaskSchedulerDao.updateDataCommitTaskBundleScheduleTime(
+				conn, table_name, schedule_commit_time, newSchedule_commit_time);
+		
+		return updCntOfTaskBundle;
+	}
+	
 	protected TimerTask _bundleTaskFinder = new TimerTask() {
 		
 		@Override
 		public void run() {
+			findTaskBundleAndLoadIntoMap();
+		}
+	};
+	
+	protected void findTaskBundleAndLoadIntoMap() {
+		try {
 			Connection conn = null;
+			List<DODataModificationCommitTaskBundle> bundleList = null;
 			try {
 				int queryTaskCount = MAX_TASK_IN_QUEUE - _scheduleTaskBundleMap.size();
 				if(queryTaskCount <= 0) {
@@ -103,46 +175,15 @@ public class DODataModificationCommitTaskScheduler {
 					return;
 				}
 				
-				logger.info("_bundleTaskFinder start finding -----");
+				//logger.info("_bundleTaskFinder start finding -----");
 				
 				conn = DOServiceUtil.getOnEditingDBConnection();
 				
 				//find taskBundle and add them into task pool, order by schedule time
-				List<DODataModificationCommitTaskBundle> bundleList = 
-						DODataModificationCommitTaskSchedulerDao.findTaskBundleWaitToExecute(
-								conn, queryTaskCount);
+				bundleList = DODataModificationCommitTaskSchedulerDao.findTaskBundleWaitToExecute(
+								conn, queryTaskCount, System.currentTimeMillis());
 				logger.info("_bundleTaskFinder found:" + bundleList.size());
 				
-				DODataModificationCommitTaskBundle taskBundle;
-				long taskDelay;
-				String taskBundleMapKey;
-				for(int i = 0; i < bundleList.size(); i++) {
-					taskBundle = bundleList.get(i);
-					taskBundleMapKey = taskBundleMapKey(taskBundle.getTable_name(), taskBundle.getSchedule_commit_time());
-					if(_scheduleTaskBundleMap.containsKey(taskBundleMapKey)) {
-						//assure only 1 running task for the same table
-						continue;
-					}
-					
-					_scheduleTaskBundleMap.put(
-							taskBundleMapKey, 
-							taskBundle);
-					
-					//add to thread pool
-					BundleTaskExecutor taskExecutor = new BundleTaskExecutor(
-							taskBundle.getTable_name(), taskBundle.getSchedule_commit_time());
-					
-					taskDelay = taskBundle.getSchedule_commit_time() - System.currentTimeMillis();
-					if(taskDelay <= 0) {
-						taskDelay = TASK_EXECUTOR_MIN_DELAY_MS;
-					}
-					
-					_taskPool.schedule(taskExecutor, taskDelay, TimeUnit.MILLISECONDS);
-					logger.info("_bundleTaskFinder task added into queue. " + "taskBundleMapKey:" + taskBundleMapKey + " delay:" + taskDelay + " ms ");
-				}
-				
-			} catch(Throwable e) {
-				logger.error(null, e);
 			} finally {
 				try {
 					conn.close();
@@ -150,8 +191,44 @@ public class DODataModificationCommitTaskScheduler {
 					logger.error(null, e);
 				}
 			}
+			
+			DODataModificationCommitTaskBundle taskBundle;
+			for(int i = 0; i < bundleList.size(); i++) {
+				taskBundle = bundleList.get(i);
+			
+				addTaskToSchedule(taskBundle);
+			}
+		} catch(Throwable e) {
+			logger.error(null, e);
 		}
-	};
+		
+	}
+	
+	protected void addTaskToSchedule(DODataModificationCommitTaskBundle taskBundle) {
+		synchronized (_lockForAddTaskToSchedule) {
+			String taskBundleMapKey = taskBundleMapKey(taskBundle.getTable_name(), taskBundle.getSchedule_commit_time());
+			if(_scheduleTaskBundleMap.containsKey(taskBundleMapKey)) {
+				//assure only 1 running task for the same table
+				return;
+			}
+			
+			_scheduleTaskBundleMap.put(
+					taskBundleMapKey, 
+					taskBundle);
+			logger.info("_bundleTaskFinder added task bundle:" + taskBundle.getTable_name() + " " + taskBundle.getSchedule_commit_time());
+			
+			//add to thread pool
+			BundleTaskExecutor taskExecutor = new BundleTaskExecutor(taskBundle);
+			
+			long taskDelay = taskBundle.getSchedule_commit_time() - System.currentTimeMillis();
+			if(taskDelay <= 0) {
+				taskDelay = TASK_EXECUTOR_MIN_DELAY_MS;
+			}
+			
+			_taskPool.schedule(taskExecutor, taskDelay, TimeUnit.MILLISECONDS);
+			logger.info("_bundleTaskFinder task added into queue. " + "taskBundleMapKey:" + taskBundleMapKey + " delay:" + taskDelay + " ms ");
+		}
+	}
 	
 	protected final static String taskBundleMapKey(String table_name, long schedule_commit_time) {
 		//return  table_name + "." + schedule_commit_time;
@@ -159,28 +236,33 @@ public class DODataModificationCommitTaskScheduler {
 	}
 
 	protected class BundleTaskExecutor implements Callable<Long> {
-		private String _table_name;
-		private long _schedule_commit_time = 0;
-
-		public BundleTaskExecutor(String table_name, long schedule_commit_time) {
-			_table_name = table_name;
-			_schedule_commit_time = schedule_commit_time;
+		private DODataModificationCommitTaskBundle _taskBundle;
+		
+		public BundleTaskExecutor(DODataModificationCommitTaskBundle taskBundle) {
+			_taskBundle = taskBundle;
 		} 
 		
 		@Override
 		public Long call() throws Exception {
-			logger.info("BundleTaskExecutor() table_name:" + _table_name + " schedule_commit_time:" + _schedule_commit_time);
+			logger.info("BundleTaskExecutor() table_name:" + _taskBundle.getTable_name() 
+					+ " schedule_commit_time:" + _taskBundle.getSchedule_commit_time());
 			long startTime = System.currentTimeMillis();
 
+			MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(_taskBundle.getTable_name());
+			MMetaDataUISetting metaUISetting = DataOriginWebContext.getDataOriginContext().getMMetaDataUISetting(_taskBundle.getTable_name());
+			String dataClassName = metaUISetting.getDataClassName();
+			Class<?> dataClass = DataOriginWebContext.getDataOriginContext().findClass(dataClassName);
+			
 			//find DODataModificationCommitTask for assigned table_name, schedule_commit_time
 			Connection connOfProd = null;
 			Connection connOfEdit = null;
 			
 			boolean autoCommitOfProd = false;
 			boolean autoCommitOfEdit = false;
+			int updCnt = 0;
 			try {
-				connOfProd = DOServiceUtil.getOnEditingDBConnection();
-				connOfEdit = DOServiceUtil.getProductionDBConnection();
+				connOfEdit = DOServiceUtil.getOnEditingDBConnection();
+				connOfProd = DOServiceUtil.getProductionDBConnection();
 				
 				autoCommitOfProd = connOfProd.getAutoCommit();
 				autoCommitOfEdit = connOfEdit.getAutoCommit();
@@ -188,20 +270,20 @@ public class DODataModificationCommitTaskScheduler {
 				connOfProd.setAutoCommit(true);
 				connOfEdit.setAutoCommit(true);
 				
-				//find tasks until all did
-				MDBTable mDBTable = DataOriginWebContext.getDataOriginContext().getMDBTable(_table_name);
-				MMetaDataUISetting metaUISetting = DataOriginWebContext.getDataOriginContext().getMMetaDataUISetting(_table_name);
-				String dataClassName = metaUISetting.getDataClassName();
-				Class<?> dataClass = DataOriginWebContext.getDataOriginContext().findClass(dataClassName);
-				
+				//update status to started
+				_taskBundle.setCommit_start_time(System.currentTimeMillis());
+				_taskBundle.setTask_bundle_status(DODataModificationCommitTaskSchedulerDao.TASK_BUNDLE_STATUS_STARTED);
+				UpdateDataDao.updateData(connOfEdit, "DODataModificationCommitTaskBundle", _taskBundle, DATA_COMMIT_TASK_BUNDLE_PRIMARY_KEY_NAMES);
+
+				//commit data to production DB
 				List<DODataModificationCommitTask> taskList;
 				DODataModificationCommitTask dataCommitTask;
 				int i;
 				while(true) {
 					taskList = DODataModificationCommitTaskSchedulerDao.findTaskToExecute(
 							connOfEdit, MAX_COMMIT_TASK_IN_ONE_LOOP, 
-							_table_name, _schedule_commit_time);
-					logger.info("BundleTaskExecutor() found commit task:" + taskList.size());
+							_taskBundle.getTable_name(), _taskBundle.getSchedule_commit_time());
+					logger.info("BundleTaskExecutor() found task to execute:" + taskList.size());
 					if(taskList.size() == 0) {
 						break;
 					}
@@ -209,7 +291,7 @@ public class DODataModificationCommitTaskScheduler {
 					for(i = 0; i < taskList.size(); i++) {
 						dataCommitTask = taskList.get(i);
 
-						commitOneData(connOfProd, connOfEdit, mDBTable, dataClass, dataCommitTask);
+						updCnt += commitOneData(connOfProd, connOfEdit, mDBTable, dataClass, dataCommitTask);
 					}
 				}
 			} catch(Throwable e) {
@@ -225,6 +307,23 @@ public class DODataModificationCommitTaskScheduler {
 				} catch(Throwable e) {
 					logger.error(null, e);
 				}
+				
+				try {
+					//update status to finished
+					long curTime = System.currentTimeMillis();
+					_taskBundle.setCommit_finish_time(curTime);
+					_taskBundle.setTask_bundle_status(DODataModificationCommitTaskSchedulerDao.TASK_BUNDLE_STATUS_FINISHED);
+					_taskBundle.setData_row_count_of_did_commit(updCnt);
+					_taskBundle.setUpdate_time(curTime);
+					
+					UpdateDataDao.updateData(connOfEdit, "DODataModificationCommitTaskBundle", _taskBundle, DATA_COMMIT_TASK_BUNDLE_PRIMARY_KEY_NAMES);
+
+					//remove from map
+					_scheduleTaskBundleMap.remove(taskBundleMapKey(_taskBundle.getTable_name(), _taskBundle.getSchedule_commit_time()));
+				} catch(Throwable e) {
+					logger.error(null, e);
+				}
+				
 				try {
 					connOfEdit.setAutoCommit(autoCommitOfEdit);
 				} catch(Throwable e) {
@@ -235,18 +334,14 @@ public class DODataModificationCommitTaskScheduler {
 				} catch(Throwable e) {
 					logger.error(null, e);
 				}
-				
-				//remove from map
-				try {
-					_scheduleTaskBundleMap.remove(taskBundleMapKey(_table_name, _schedule_commit_time));
-				} catch(Throwable e) {
-					logger.error(null, e);
-				}
 			}
 			
 			long finishTime = System.currentTimeMillis();
 			long elapsedTime = finishTime - startTime;
-			logger.info("BundleTaskExecutor() table_name:" + _table_name + " schedule_commit_time:" + _schedule_commit_time + " elapsed(ms):" + elapsedTime);
+			logger.info("BundleTaskExecutor() table_name:" + _taskBundle.getTable_name() 
+					+ " schedule_commit_time:" + _taskBundle.getSchedule_commit_time() 
+					+ " updated count:" + updCnt + " elapsed(ms):" + elapsedTime
+					);
 			
 			return finishTime;
 		}
@@ -290,7 +385,7 @@ public class DODataModificationCommitTaskScheduler {
 					if(dataCommitTask.getMod_type() == DODataModificationCommitTaskSchedulerDao.TASK_MOD_TYPE_DELETE) {
 						//delete
 						StringBuilder sql = new StringBuilder();
-						sql.append("delete * from " + DOSqlParamUtil.quoteSqlIdentifier(dataCommitTask.getTable_name()));
+						sql.append("delete from " + DOSqlParamUtil.quoteSqlIdentifier(dataCommitTask.getTable_name()));
 						sql.append(" where " + dataCommitTask.getSql_primary_key());
 						
 						PreparedStatement stmtOfProd = null;
@@ -308,12 +403,12 @@ public class DODataModificationCommitTaskScheduler {
 						//insert or update
 						try {
 							//insert
-							updCnt = UpdateDataDao.insertData(connOfProd, _table_name, data);
+							updCnt = UpdateDataDao.insertData(connOfProd, mDBTable.getTableName(), data);
 						} catch(SQLException sqle) {
 							if(sqle.getClass().getSimpleName().equalsIgnoreCase("MySQLIntegrityConstraintViolationException")) {
 								//duplicated key, then update
 								updCnt = UpdateDataDao.updateData(connOfProd, 
-										_table_name, data, mDBTable.getPrimaryKeys());
+										mDBTable.getTableName(), data, mDBTable.getPrimaryKeys());
 							} else {
 								throw sqle;
 							}
@@ -322,7 +417,11 @@ public class DODataModificationCommitTaskScheduler {
 				} catch(Throwable e) {
 					logger.error(null, e);
 					dataCommitTask.setCommit_status(DODataModificationCommitTaskSchedulerDao.TASK_COMMIT_STATUS_FAIL);
-					dataCommitTask.setError_msg(DOServiceMsgUtil.getStackTrace(e).substring(0, 6000));
+					String errMsg = DOServiceMsgUtil.getStackTrace(e);
+					if(errMsg.length() > 6000) {
+						errMsg = errMsg.substring(0, 6000);
+					}
+					dataCommitTask.setError_msg(errMsg);
 				}
 				
 				return updCnt;

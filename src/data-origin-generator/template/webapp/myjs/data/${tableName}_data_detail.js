@@ -97,6 +97,10 @@ function gotoDataDetail(thisNode) {
 			
 			formatColValInput();
 			
+			//col which primarykey readonly
+			$('input[primarykeytrue]').attr('readonly', 'readonly');
+			$('input[primarykeyfalse]').removeAttr('readonly');
+			
 			$('#modal-data-detail').modal();
 		},
 	});

@@ -23,5 +23,15 @@
       <msgCode>Error.DataImport.SheetMoreThanOne</msgCode>
       <msgLevel>error</msgLevel>
     </DOServiceMsg>
+    <DOServiceMsg>
+      <msg>Data not exist</msg>
+      <msgCode>Error.DataDetail.DataNotExist</msgCode>
+      <msgLevel>error</msgLevel>
+    </DOServiceMsg>
+    <DOServiceMsg>
+      <msg>Not allowed to modify task that will be executed soon</msg>
+      <msgCode>Error.DataModificationCommitTaskBundle.NotAllowModifyExecuteSoon</msgCode>
+      <msgLevel>error</msgLevel>
+    </DOServiceMsg>
   </serviceMsgList>
 </DataOriginSetting>

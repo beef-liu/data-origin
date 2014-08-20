@@ -29,7 +29,7 @@
 	  			<table class="" style="width: 99%;">
 	  				<tbody id="detail-table-tbody" style="">
 	  					<tr class="">
-	  						<td class="my-td-detail" dataDetail="DataDetail">
+	  						<td class="my-td-detail" dataDetail="DataDetail" primarykey="DODataModificationCommitTaskBundle">
 	  						<!---->
 	  							<!---->
 	  							<div dataColBlock="table_name">
@@ -38,9 +38,10 @@
 	  								<input type="hidden" name="fieldValidateRegex" value="[a-zA-Z0-9 \\_\-\!\~`\@\#\$%\^&amp;\*\(\)\{\}\+\=\|\[\]&apos;&quot;:;\,\.\/\&lt;\&gt;\?]{1,64}" />
 	  								<input type="hidden" name="fieldDispMaxLength" value="64" />
 	  								
+	  								<input type="hidden" primarykey="table_name" />
 	  								<label>Table Name:</label>
 	  							<!-- -->
-	  								<input type="text" dataDetail="table_name" placeholder="" maxlength="64"/>
+	  								<input type="text" dataDetail="table_name" placeholder="" maxlength="64" readonly="readonly"/>
 	  							<!-- -->
 	  							</div>
 	  						<!---->
@@ -51,6 +52,7 @@
 	  								<input type="hidden" name="fieldValidateRegex" value=".{1,20}" />
 	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
 	  								
+	  								<input type="hidden" primarykey="schedule_commit_time" />
 	  								<label>Schedule Time:</label>
 	  							<!-- -->
 	  								<input type="text" dataDetail="schedule_commit_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
@@ -66,7 +68,7 @@
 	  								
 	  								<label>0:wait to start 1:started 2:finished:</label>
 	  							<!-- -->
-	  								<input type="text" dataDetail="task_bundle_status" placeholder="" maxlength="11"/>
+	  								<input type="text" dataDetail="task_bundle_status" placeholder="" maxlength="11" readonly="readonly"/>
 	  							<!-- -->
 	  							</div>
 	  						<!---->
@@ -79,7 +81,7 @@
 	  								
 	  								<label>Total Data Count:</label>
 	  							<!-- -->
-	  								<input type="text" dataDetail="data_row_count_of_total" placeholder="" maxlength="11"/>
+	  								<input type="text" dataDetail="data_row_count_of_total" placeholder="" maxlength="11" readonly="readonly"/>
 	  							<!-- -->
 	  							</div>
 	  						<!---->
@@ -92,7 +94,7 @@
 	  								
 	  								<label>Committed Data Count:</label>
 	  							<!-- -->
-	  								<input type="text" dataDetail="data_row_count_of_did_commit" placeholder="" maxlength="11"/>
+	  								<input type="text" dataDetail="data_row_count_of_did_commit" placeholder="" maxlength="11" readonly="readonly"/>
 	  							<!-- -->
 	  							</div>
 	  						<!---->
@@ -105,7 +107,7 @@
 	  								
 	  								<label>Start Time:</label>
 	  							<!-- -->
-	  								<input type="text" dataDetail="commit_start_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  								<input type="text" dataDetail="commit_start_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20" readonly="readonly"/>
 	  							<!-- -->
 	  							</div>
 	  						<!---->
@@ -118,7 +120,7 @@
 	  								
 	  								<label>Finish Time:</label>
 	  							<!-- -->
-	  								<input type="text" dataDetail="commit_finish_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  								<input type="text" dataDetail="commit_finish_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20" readonly="readonly"/>
 	  							<!-- -->
 	  							</div>
 	  						<!---->
@@ -129,9 +131,9 @@
 	  								<input type="hidden" name="fieldValidateRegex" value=".{0,20}" />
 	  								<input type="hidden" name="fieldDispMaxLength" value="20" />
 	  								
-	  								<label>:</label>
+	  								<label>Update Time:</label>
 	  							<!-- -->
-	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20"/>
+	  								<input type="text" dataDetail="update_time" placeholder="yyyy-MM-dd HH:mm:ss" maxlength="20" readonly="readonly"/>
 	  							<!-- -->
 	  							</div>
 	  						<!---->

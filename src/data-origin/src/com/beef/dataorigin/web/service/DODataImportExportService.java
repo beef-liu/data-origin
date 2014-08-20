@@ -346,7 +346,8 @@ public class DODataImportExportService {
 					conn, sheet, 
 					//originFileName, 
 					dataImportSetting, 
-					dbTable, importColValueList);
+					dbTable, mDbTable,
+					importColValueList);
 			
 			//save file which error indicated
 			String resultFileName = getResultExcelFileName(fileName); 

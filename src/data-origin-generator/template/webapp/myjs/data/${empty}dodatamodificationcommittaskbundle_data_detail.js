@@ -75,6 +75,10 @@ function gotoDataDetail(thisNode) {
 	}
 	var dataXml = easyJsDomUtil.mappingDomNodeToDataXml(trNode, "primaryKeytrue");
 	
+	var dataXmlDoc = easyJsDomUtil.parseXML(dataXml); 
+	reverseFormatColValXmlForListRow(dataXmlDoc, trNode);
+	dataXml = dataXmlDoc.firstChild.outerHTML; 
+	
 	//query data
 	myAjax({
 		url: WEB_APP + "/cloudDataService.do",
@@ -95,6 +99,11 @@ function gotoDataDetail(thisNode) {
 			);
 			
 			formatColValInput();
+
+			var primarykeyNode = $('[primarykey="DODataModificationCommitTaskBundle"]')[0]; 
+			easyJsDomUtil.mappingDataXmlNodeToDomNode(
+				dataDetailNode, "primarykey", dataXmlDoc.firstChild
+			);
 			
 			$('#modal-data-detail').modal();
 		},
@@ -104,6 +113,7 @@ function gotoDataDetail(thisNode) {
 function saveDetailData(thisNode) {
 	var serviceMethod;
 	var msgPrefix;
+	/*
 	if(_dataDetailMode == 1) {
 		//insert mode
 		serviceMethod = "insertData";
@@ -113,15 +123,22 @@ function saveDetailData(thisNode) {
 		serviceMethod = "updateDataByPK";
 		msgPrefix = "Updating data";
 	}
+	*/
+	serviceMethod = "modifyDataCommitTaskBundleScheduleTime";
 	
-	var dataDetailNode = $('[dataDetail="DataDetail"]')[0];
+	/*
+	var dataDetailNode = $('[primarykey="DODataModificationCommitTaskBundle"]')[0];
 	var dataXml = easyJsDomUtil.mappingDomNodeToDataXml(dataDetailNode, "dataDetail");
 
 	var dataXmlDoc = easyJsDomUtil.parseXML(dataXml); 
 	reverseFormatColValXml(dataXmlDoc);
-	dataXml = dataXmlDoc.firstChild.outerHTML; 
+	dataXml = dataXmlDoc.firstChild.outerHTML;
+	*/ 
 
 	//save data
+	var displayFormat = $('[dataColBlock="schedule_commit_time"]').find('input[name="fieldDispFormat"]').val();
+	var newSchedule_commit_time = $('[dataDetail="schedule_commit_time"]').val();
+	newSchedule_commit_time = myReverseFormatDataColValue(displayFormat, newSchedule_commit_time);
 	myAjax({
 		url: WEB_APP + "/cloudDataService.do",
 		type: "post",
@@ -129,11 +146,13 @@ function saveDetailData(thisNode) {
 		data: {
 			serviceType: "com.beef.dataorigin.test.ws.service.DODataModificationCommitTaskBundleDataDetailService",
 			serviceMethod: serviceMethod,
-			dataXml: dataXml,
+			table_name: $('[primarykey="table_name"]').val(),
+			schedule_commit_time: $('[primarykey="schedule_commit_time"]').val(),
+			newSchedule_commit_time: newSchedule_commit_time,
 		},
 		success: function(response) {
 			if(response == "success") {
-				myShowInfoMsg(msgPrefix + " succeeded.");
+				myShowInfoMsg("Update succeeded.");
 				
 				setTimeout(function() {
 					myHideConfirmMsgDlg();
@@ -190,6 +209,30 @@ function reverseFormatColValXml(dataXmlDoc) {
 			if(colXmlNodes.length > 0) {
 				$(colXmlNodes).text(
 					myReverseFormatDataColValue(dispFormat, dataColValNode.val())
+				);
+			}
+		}
+	}
+}
+
+function reverseFormatColValXmlForListRow(dataXmlDoc, trNode) {
+	var dataColNodes = $(trNode).find('td[listData]');
+	var i, dataColNode, dispFormat, dataColVal;
+	var colName, colXmlNodes;
+	for(i = 0; i < dataColNodes.length; i++) {
+		dataColNode = dataColNodes[i];
+		
+		dispFormat = $(dataColNode).attr('fieldDispFormat');
+		
+		if(dispFormat.length > 0) {
+			//reverse format
+			dataColVal = $(dataColNode).text();
+			colName = $(dataColNode).attr('listData');
+			
+			colXmlNodes = $(dataXmlDoc).find(colName);
+			if(colXmlNodes.length > 0) {
+				$(colXmlNodes).text(
+					myReverseFormatDataColValue(dispFormat, dataColVal)
 				);
 			}
 		}
