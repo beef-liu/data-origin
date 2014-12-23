@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import MetoXML.XmlDeserializer;
 
 import com.beef.dataorigin.setting.meta.MetaDataImportSetting;
-import com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataDetailService;
 import com.beef.dataorigin.web.context.DataOriginWebContext;
 import com.beef.dataorigin.web.dao.DODataDao;
 import com.beef.dataorigin.web.data.DOUploadFileMeta;

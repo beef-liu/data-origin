@@ -1,4 +1,4 @@
-package com.beef.dataorigin.test.ws.service;
+package ${basePackage}.service;
 
 import com.beef.dataorigin.web.service.DODataSearchService;
 

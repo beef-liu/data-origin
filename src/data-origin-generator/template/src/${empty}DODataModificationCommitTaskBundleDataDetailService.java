@@ -1,4 +1,4 @@
-package com.beef.dataorigin.test.ws.service;
+package ${basePackage}.service;
 
 import java.sql.Connection;
 
@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 
 import MetoXML.XmlDeserializer;
 
-import com.beef.dataorigin.test.ws.service.DODataModificationCommitTaskBundleDataDetailService;
 import com.beef.dataorigin.web.context.DataOriginWebContext;
 import com.beef.dataorigin.web.dao.DODataDao;
 import com.beef.dataorigin.web.data.DODataModificationCommitTaskBundle;
