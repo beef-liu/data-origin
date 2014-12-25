@@ -8,6 +8,7 @@
 	<property name="bin.dir"         value="bin"/>
 	<property name="bintemp.dir"     value="binTemp"/>
 	<property name="jar.name"        value="data-origin-generator.jar"/>
+		
 	
 	<!--
 	<target name="cleandir" description="clean the bin dir"> 
@@ -61,7 +62,7 @@
 			</fileset>
 		</delete>
 	</target>
-	
+
 	<target name="generateJar" description="create jar" 
 		depends="createBinTmp,copySrc,copyClass,deleteJUnitClass,deleteVssFile,deleteSVN"> 
 		<jar jarfile="${jar.name}" basedir="${bintemp.dir}" />
