@@ -211,7 +211,7 @@ function importFileChanged() {
 		form: $('#form-import-data'),
 		url: WEB_APP + "/cloudDataService.do",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOAdminDataImportExportService",
+			serviceType: "${basePackage}.service.DOAdminDataImportExportService",
 			serviceMethod: "checkDataExcelSheetCount",
 		},
 		success: function(response) {
@@ -280,7 +280,7 @@ function importFileCheckTitleRow(checkSheetResultXml, sheetIndex) {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOAdminDataImportExportService",
+			serviceType: "${basePackage}.service.DOAdminDataImportExportService",
 			serviceMethod: "checkDataExcelTitleRow",
 			fileName: fileName,
 			sheetIndex: sheetIndex
@@ -381,7 +381,7 @@ function importDataExcel() {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOAdminDataImportExportService",
+			serviceType: "${basePackage}.service.DOAdminDataImportExportService",
 			serviceMethod: "importDataExcel",
 			fileName: _dataimpImportFileName,
 			sheetIndex: _dataimpImportSheetIndex,
@@ -414,7 +414,7 @@ function showDataImportResult(dataImportResultXml) {
 		
 	myShowConfirmMsg(msg, function(){
 		window.location = WEB_APP + "/cloudDataService.do?" 
-			+ "serviceType=" + "com.beef.dataorigin.test.ws.service.DOAdminDataImportExportService"
+			+ "serviceType=" + "${basePackage}.service.DOAdminDataImportExportService"
 			+ "&serviceMethod=downloadTempExcel" 
 			+ "&fileName=" + importResultFile; 
 	});
@@ -428,7 +428,7 @@ function doExportData() {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOAdminDataImportExportService",
+			serviceType: "${basePackage}.service.DOAdminDataImportExportService",
 			serviceMethod: "exportDataExcel",
 			searchConditionXml: _searchConditionXml
 		},
@@ -440,7 +440,7 @@ function doExportData() {
 				"Total count of data:" + totalCount + "\nPlease click 'OK' button to download excel file",
 				function(){
 					window.location = WEB_APP + "/cloudDataService.do?" 
-						+ "serviceType=" + "com.beef.dataorigin.test.ws.service.DOAdminDataImportExportService"
+						+ "serviceType=" + "${basePackage}.service.DOAdminDataImportExportService"
 						+ "&serviceMethod=downloadTempExcel" 
 						+ "&fileName=" + exportResultFile; 
 				});			
@@ -460,7 +460,7 @@ function searchDataCount() {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOAdminDataSearchService",
+			serviceType: "${basePackage}.service.DOAdminDataSearchService",
 			serviceMethod: "searchDataCount",
 			//tableName: "doadmin",
 			searchConditionXml: _searchConditionXml
@@ -490,7 +490,7 @@ function searchData() {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOAdminDataSearchService",
+			serviceType: "${basePackage}.service.DOAdminDataSearchService",
 			serviceMethod: "searchData",
 			//tableName: "doadmin",
 			searchConditionXml: _searchConditionXml,

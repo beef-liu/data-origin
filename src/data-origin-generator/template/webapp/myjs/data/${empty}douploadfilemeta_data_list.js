@@ -239,7 +239,7 @@ function importFileChanged() {
 		form: $('#form-import-data'),
 		url: WEB_APP + "/cloudDataService.do",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataImportExportService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataImportExportService",
 			serviceMethod: "checkDataExcelSheetCount",
 		},
 		success: function(response) {
@@ -308,7 +308,7 @@ function importFileCheckTitleRow(checkSheetResultXml, sheetIndex) {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataImportExportService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataImportExportService",
 			serviceMethod: "checkDataExcelTitleRow",
 			fileName: fileName,
 			sheetIndex: sheetIndex
@@ -409,7 +409,7 @@ function importDataExcel() {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataImportExportService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataImportExportService",
 			serviceMethod: "importDataExcel",
 			fileName: _dataimpImportFileName,
 			sheetIndex: _dataimpImportSheetIndex,
@@ -442,7 +442,7 @@ function showDataImportResult(dataImportResultXml) {
 		
 	myShowConfirmMsg(msg, function(){
 		window.location = WEB_APP + "/cloudDataService.do?" 
-			+ "serviceType=" + "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataImportExportService"
+			+ "serviceType=" + "${basePackage}.service.DOUploadFileMetaDataImportExportService"
 			+ "&serviceMethod=downloadTempExcel" 
 			+ "&fileName=" + importResultFile; 
 	});
@@ -456,7 +456,7 @@ function doExportData() {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataImportExportService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataImportExportService",
 			serviceMethod: "exportDataExcel",
 			searchConditionXml: _searchConditionXml
 		},
@@ -468,7 +468,7 @@ function doExportData() {
 				"Total count of data:" + totalCount + "\nPlease click 'OK' button to download excel file",
 				function(){
 					window.location = WEB_APP + "/cloudDataService.do?" 
-						+ "serviceType=" + "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataImportExportService"
+						+ "serviceType=" + "${basePackage}.service.DOUploadFileMetaDataImportExportService"
 						+ "&serviceMethod=downloadTempExcel" 
 						+ "&fileName=" + exportResultFile; 
 				});			
@@ -488,7 +488,7 @@ function searchDataCount() {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataSearchService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataSearchService",
 			serviceMethod: "searchDataCount",
 			//tableName: "douploadfilemeta",
 			searchConditionXml: _searchConditionXml
@@ -524,7 +524,7 @@ function searchData(noLoadingAnimation) {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataSearchService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataSearchService",
 			serviceMethod: "searchData",
 			//tableName: "douploadfilemeta",
 			searchConditionXml: _searchConditionXml,

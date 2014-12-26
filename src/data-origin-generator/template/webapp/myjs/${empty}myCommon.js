@@ -298,3 +298,11 @@ function myUrlAddParam(url, paramStr) {
 	
 	return url;
 }  
+
+function myXmlDocToStr(xmlDoc) {
+    if (window.ActiveXObject){
+        return xmlDoc.xml;
+    } else {
+        return (new XMLSerializer()).serializeToString(xmlDoc);
+    }
+}

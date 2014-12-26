@@ -124,7 +124,8 @@ function saveDetailData(thisNode) {
 
 	var dataXmlDoc = easyJsDomUtil.parseXML(dataXml); 
 	reverseFormatColValXml(dataXmlDoc);
-	dataXml = dataXmlDoc.firstChild.outerHTML; 
+	//dataXml = dataXmlDoc.firstChild.outerHTML;
+	dataXml = myXmlDocToStr(dataXmlDoc);
 
 	//save data
 	myAjax({

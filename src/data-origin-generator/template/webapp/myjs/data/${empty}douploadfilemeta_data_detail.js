@@ -67,7 +67,7 @@ function deleteCheckedData() {
 				type: "post",
 				dataType: "text",
 				data: {
-					serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataDetailService",
+					serviceType: "${basePackage}.service.DOUploadFileMetaDataDetailService",
 					serviceMethod: "deleteDataByPKList",
 					dataListXml: dataListXml,
 				},
@@ -121,7 +121,7 @@ function gotoDataDetail(thisNode) {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataDetailService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataDetailService",
 			serviceMethod: "findDataByPK",
 			dataXml: dataXml,
 		},
@@ -169,7 +169,8 @@ function saveDetailData(thisNode) {
 
 	var dataXmlDoc = easyJsDomUtil.parseXML(dataXml); 
 	reverseFormatColValXml(dataXmlDoc);
-	dataXml = dataXmlDoc.firstChild.outerHTML; 
+	//dataXml = dataXmlDoc.firstChild.outerHTML;
+	dataXml = myXmlDocToStr(dataXmlDoc); 
 
 	//save data
 	myAjax({
@@ -177,7 +178,7 @@ function saveDetailData(thisNode) {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DOUploadFileMetaDataDetailService",
+			serviceType: "${basePackage}.service.DOUploadFileMetaDataDetailService",
 			serviceMethod: serviceMethod,
 			dataXml: dataXml,
 		},

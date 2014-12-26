@@ -140,6 +140,8 @@ public class DataOriginGeneratorContext {
 			//add dbTable into list -----------------------------------------------
 			addDBTableByTableName(conn, "DOAdmin");
 			addDBTableByTableName(conn, "DOUploadFileMeta");
+			addDBTableByTableName(conn, "DODataModificationCommitTask");
+			addDBTableByTableName(conn, "DODataModificationCommitTaskBundle");
 			
 		} catch(Throwable e) {
 			e.printStackTrace();

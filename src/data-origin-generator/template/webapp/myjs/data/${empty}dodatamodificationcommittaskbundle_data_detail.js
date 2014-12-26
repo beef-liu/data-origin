@@ -33,7 +33,7 @@ function deleteCheckedData() {
 				type: "post",
 				dataType: "text",
 				data: {
-					serviceType: "com.beef.dataorigin.test.ws.service.DODataModificationCommitTaskBundleDataDetailService",
+					serviceType: "${basePackage}.service.DODataModificationCommitTaskBundleDataDetailService",
 					serviceMethod: "deleteDataByPKList",
 					dataListXml: dataListXml,
 				},
@@ -77,7 +77,8 @@ function gotoDataDetail(thisNode) {
 	
 	var dataXmlDoc = easyJsDomUtil.parseXML(dataXml); 
 	reverseFormatColValXmlForListRow(dataXmlDoc, trNode);
-	dataXml = dataXmlDoc.firstChild.outerHTML; 
+	//dataXml = dataXmlDoc.firstChild.outerHTML;
+	dataXml = myXmlDocToStr(dataXmlDoc); 
 	
 	//query data
 	myAjax({
@@ -85,7 +86,7 @@ function gotoDataDetail(thisNode) {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DODataModificationCommitTaskBundleDataDetailService",
+			serviceType: "${basePackage}.service.DODataModificationCommitTaskBundleDataDetailService",
 			serviceMethod: "findDataByPK",
 			dataXml: dataXml,
 		},
@@ -144,7 +145,7 @@ function saveDetailData(thisNode) {
 		type: "post",
 		dataType: "text",
 		data: {
-			serviceType: "com.beef.dataorigin.test.ws.service.DODataModificationCommitTaskBundleDataDetailService",
+			serviceType: "${basePackage}.service.DODataModificationCommitTaskBundleDataDetailService",
 			serviceMethod: serviceMethod,
 			table_name: $('[primarykey="table_name"]').val(),
 			schedule_commit_time: $('[primarykey="schedule_commit_time"]').val(),
