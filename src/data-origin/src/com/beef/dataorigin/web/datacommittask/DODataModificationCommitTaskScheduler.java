@@ -82,7 +82,7 @@ public class DODataModificationCommitTaskScheduler {
 		_taskPool = Executors.newScheduledThreadPool(MAX_RUNNING_THREAD);
 
 		_taskFinderTimer = new Timer();
-		_taskFinderTimer.schedule(
+		_taskFinderTimer.scheduleAtFixedRate(
 				_bundleTaskFinder, 
 				TASK_FINDER_DELAY_MS, TASK_FINDER_PERIOD_MS);
 	}
