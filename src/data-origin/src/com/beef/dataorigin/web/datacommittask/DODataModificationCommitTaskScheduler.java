@@ -25,6 +25,7 @@ import com.beef.dataorigin.web.context.DataOriginWebContext;
 import com.beef.dataorigin.web.dao.DODataDao;
 import com.beef.dataorigin.web.data.DODataModificationCommitTask;
 import com.beef.dataorigin.web.data.DODataModificationCommitTaskBundle;
+import com.beef.dataorigin.web.datacommittask.DODataModificationCommitTaskCallback.DataUpdateType;
 import com.beef.dataorigin.web.datacommittask.dao.DODataModificationCommitTaskSchedulerDao;
 import com.beef.dataorigin.web.util.DOServiceMsgUtil;
 import com.beef.dataorigin.web.util.DOServiceUtil;
@@ -66,6 +67,8 @@ public class DODataModificationCommitTaskScheduler {
 	
 	private Object _lockForAddTaskToSchedule = new Object();
 	
+	private DODataModificationCommitTaskCallback _taskCallback = null;
+	
 	/**
 	 * key: table_name (it means there is only 1 running task of the same table)
 	 */
@@ -85,6 +88,10 @@ public class DODataModificationCommitTaskScheduler {
 		_taskFinderTimer.scheduleAtFixedRate(
 				_bundleTaskFinder, 
 				TASK_FINDER_DELAY_MS, TASK_FINDER_PERIOD_MS);
+	}
+	
+	public void setTaskCallback(DODataModificationCommitTaskCallback taskCallback) {
+		_taskCallback = taskCallback;
 	}
 	
 	public void stopSchedule() throws InterruptedException {
@@ -218,7 +225,7 @@ public class DODataModificationCommitTaskScheduler {
 			logger.info("_bundleTaskFinder added task bundle:" + taskBundle.getTable_name() + " " + taskBundle.getSchedule_commit_time());
 			
 			//add to thread pool
-			BundleTaskExecutor taskExecutor = new BundleTaskExecutor(taskBundle);
+			BundleTaskExecutor taskExecutor = new BundleTaskExecutor(taskBundle, _taskCallback);
 			
 			long taskDelay = taskBundle.getSchedule_commit_time() - System.currentTimeMillis();
 			if(taskDelay <= 0) {
@@ -237,9 +244,11 @@ public class DODataModificationCommitTaskScheduler {
 
 	protected class BundleTaskExecutor implements Callable<Long> {
 		private DODataModificationCommitTaskBundle _taskBundle;
+		private DODataModificationCommitTaskCallback _taskCallback;
 		
-		public BundleTaskExecutor(DODataModificationCommitTaskBundle taskBundle) {
+		public BundleTaskExecutor(DODataModificationCommitTaskBundle taskBundle, DODataModificationCommitTaskCallback taskCallback) {
 			_taskBundle = taskBundle;
+			_taskCallback = taskCallback;
 		} 
 		
 		@Override
@@ -353,6 +362,15 @@ public class DODataModificationCommitTaskScheduler {
 			Object data = null;
 			
 			try {
+				DataUpdateType updateType;
+				if(dataCommitTask.getMod_type() == DODataModificationCommitTaskSchedulerDao.TASK_MOD_TYPE_DELETE) {
+					updateType = DataUpdateType.Delete;
+				} else if(dataCommitTask.getMod_type() == DODataModificationCommitTaskSchedulerDao.TASK_MOD_TYPE_UPDATE) {
+					updateType = DataUpdateType.Update;
+				} else {
+					updateType = DataUpdateType.Insert;
+				}
+				
 				try {
 					if(dataCommitTask.getMod_type() != DODataModificationCommitTaskSchedulerDao.TASK_MOD_TYPE_DELETE) {
 						//insert or update
@@ -384,6 +402,8 @@ public class DODataModificationCommitTaskScheduler {
 					
 					if(dataCommitTask.getMod_type() == DODataModificationCommitTaskSchedulerDao.TASK_MOD_TYPE_DELETE) {
 						//delete
+						updateType = DataUpdateType.Delete;
+						
 						StringBuilder sql = new StringBuilder();
 						sql.append("delete from " + DOSqlParamUtil.quoteSqlIdentifier(dataCommitTask.getTable_name()));
 						sql.append(" where " + dataCommitTask.getSql_primary_key());
@@ -403,15 +423,27 @@ public class DODataModificationCommitTaskScheduler {
 						//insert or update
 						try {
 							//insert
+							updateType = DataUpdateType.Insert;
+							
 							updCnt = UpdateDataDao.insertData(connOfProd, mDBTable.getTableName(), data);
 						} catch(SQLException sqle) {
 							if(sqle.getClass().getSimpleName().equalsIgnoreCase("MySQLIntegrityConstraintViolationException")) {
 								//duplicated key, then update
+								updateType = DataUpdateType.Update;
+								
 								updCnt = UpdateDataDao.updateData(connOfProd, 
 										mDBTable.getTableName(), data, mDBTable.getPrimaryKeys());
 							} else {
 								throw sqle;
 							}
+						}
+					}
+					
+					if(_taskCallback != null) {
+						if(updCnt > 0) {
+							_taskCallback.didSuccessOfDataCommit(mDBTable, data, updateType);
+						} else {
+							_taskCallback.didFailOfDataCommit(mDBTable, data, updateType);
 						}
 					}
 				} catch(Throwable e) {
@@ -422,6 +454,10 @@ public class DODataModificationCommitTaskScheduler {
 						errMsg = errMsg.substring(0, 6000);
 					}
 					dataCommitTask.setError_msg(errMsg);
+					
+					if(_taskCallback != null) {
+						_taskCallback.didFailOfDataCommit(mDBTable, data, updateType);
+					}
 				}
 				
 				return updCnt;

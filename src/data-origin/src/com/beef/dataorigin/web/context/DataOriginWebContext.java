@@ -16,6 +16,7 @@ import MetoXML.XmlSerializer;
 import MetoXML.Base.XmlParseException;
 
 import com.beef.dataorigin.context.DataOriginContext;
+import com.beef.dataorigin.web.datacommittask.DODataModificationCommitTaskCallback;
 import com.beef.dataorigin.web.datacommittask.DODataModificationCommitTaskScheduler;
 import com.beef.dataorigin.web.upload.persistence.IDOUploadFilePersistence;
 import com.salama.service.clouddata.CloudDataAppContext;
@@ -82,6 +83,10 @@ public abstract class DataOriginWebContext implements CommonContext {
 		} else {
 			return cal.getTimeInMillis();
 		}
+	}
+	
+	protected void setDODataModificationCommitTaskCallback(DODataModificationCommitTaskCallback taskCallback) {
+		_dataCommitTaskScheduler.setTaskCallback(taskCallback);
 	}
 
 	protected void reload(ServletContext servletContext, String configLocation, AppContext appContext) {
