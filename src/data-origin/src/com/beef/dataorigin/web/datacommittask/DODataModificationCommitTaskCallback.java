@@ -7,8 +7,8 @@ public interface DODataModificationCommitTaskCallback {
 		Delete, Update, Insert
 	}; 
 	
-	public void didSuccessOfDataCommit(MDBTable mDBTable, Object data, DataUpdateType updateType);
+	public void didSuccessOfDataCommit(MDBTable mDBTable, String sqlPrimaryKey, Object data, DataUpdateType updateType);
 	
-	public void didFailOfDataCommit(MDBTable mDBTable, Object data, DataUpdateType updateType);
+	public void didFailOfDataCommit(MDBTable mDBTable, String sqlPrimaryKey, Object data, DataUpdateType updateType);
 	
 }

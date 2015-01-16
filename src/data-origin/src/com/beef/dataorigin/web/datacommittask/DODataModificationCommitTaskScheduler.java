@@ -441,9 +441,9 @@ public class DODataModificationCommitTaskScheduler {
 					
 					if(_taskCallback != null) {
 						if(updCnt > 0) {
-							_taskCallback.didSuccessOfDataCommit(mDBTable, data, updateType);
+							_taskCallback.didSuccessOfDataCommit(mDBTable, dataCommitTask.getSql_primary_key(), data, updateType);
 						} else {
-							_taskCallback.didFailOfDataCommit(mDBTable, data, updateType);
+							_taskCallback.didFailOfDataCommit(mDBTable, dataCommitTask.getSql_primary_key(), data, updateType);
 						}
 					}
 				} catch(Throwable e) {
@@ -456,7 +456,7 @@ public class DODataModificationCommitTaskScheduler {
 					dataCommitTask.setError_msg(errMsg);
 					
 					if(_taskCallback != null) {
-						_taskCallback.didFailOfDataCommit(mDBTable, data, updateType);
+						_taskCallback.didFailOfDataCommit(mDBTable, dataCommitTask.getSql_primary_key(), data, updateType);
 					}
 				}
 				
