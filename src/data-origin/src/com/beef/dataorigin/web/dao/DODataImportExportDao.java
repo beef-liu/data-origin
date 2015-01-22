@@ -195,6 +195,11 @@ public class DODataImportExportDao {
 			
 			stmt = conn.prepareStatement(sql.toString());
 			
+			int index = 1;
+			for(int i = 0; i < colValueListForStmt.size(); i++) {
+				stmt.setObject(index++, colValueListForStmt.get(i));
+			}
+			
 			rs = stmt.executeQuery();
 
 			int rowIndex = 1;
