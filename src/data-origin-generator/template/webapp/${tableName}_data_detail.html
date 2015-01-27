@@ -40,7 +40,7 @@
 	  								<input type="hidden" />
 	  								
 	  								<label>$!{metaDataField.fieldDispName}:</label>
-	  							<!--#if(dbCol.columnType.startsWith("varchar") && metaDataField.fieldDispMaxLength > 50) -->
+	  							<!--#if((dbCol.columnType.startsWith("varchar") && metaDataField.fieldDispMaxLength > 50) || dbCol.columnType.startsWith("text")) -->
 	  								<textarea dataDetail="$!{metaDataField.fieldName}"></textarea>
 	  							<!--#else -->
 	  								<input type="text" dataDetail="$!{metaDataField.fieldName}" placeholder="${metaDataField.fieldDispFormat}" maxlength="${metaDataField.fieldDispMaxLength}" primarykey${dbCol.primaryKey} />
