@@ -189,7 +189,9 @@ public class DODataModificationCommitTaskScheduler {
 				//find taskBundle and add them into task pool, order by schedule time
 				bundleList = DODataModificationCommitTaskSchedulerDao.findTaskBundleWaitToExecute(
 								conn, queryTaskCount, System.currentTimeMillis());
-				logger.info("_bundleTaskFinder found:" + bundleList.size());
+				if(bundleList.size() > 0) {
+					logger.info("_bundleTaskFinder found:" + bundleList.size());
+				}
 				
 			} finally {
 				try {
