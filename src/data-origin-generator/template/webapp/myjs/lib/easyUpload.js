@@ -50,7 +50,7 @@
 					if($.browser != undefined && $.browser.msie) {
 						response = $(this)[0].contentDocument.documentElement.innerText;
 					} else {
-						response = $(this).contents()[0].body.innerText;
+						response = $(this).contents()[0].body.textContent;
 					}
 
 					//The event of loading first time is caused by $(body).append
