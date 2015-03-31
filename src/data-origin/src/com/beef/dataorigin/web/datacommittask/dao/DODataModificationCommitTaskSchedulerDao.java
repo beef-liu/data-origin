@@ -337,7 +337,9 @@ public class DODataModificationCommitTaskSchedulerDao {
 			if(sqle.getClass().getSimpleName().equalsIgnoreCase("MySQLIntegrityConstraintViolationException")) {
 				//duplicated key, then update
 				updCnt = UpdateDataDao.updateData(conn, 
-						"DODataModificationCommitTask", dataCommitTask, mDBTable.getPrimaryKeys());
+						"DODataModificationCommitTask", dataCommitTask, 
+						new String[] {"table_name", "schedule_commit_time", "sql_primary_key"}
+				);
 			} else {
 				throw sqle;
 			}

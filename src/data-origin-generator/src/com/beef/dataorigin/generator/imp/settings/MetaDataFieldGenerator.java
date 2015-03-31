@@ -30,6 +30,44 @@ public class MetaDataFieldGenerator {
 					colMaxLen = Integer.parseInt(maxLenStr.trim()); 
 				}
 			}
+		} else {
+			if(colType.startsWith("text")) {
+				colMaxLen = 65535;
+			} else if (colType.startsWith("tinytext")) {
+				colMaxLen = 255;
+			} else if (colType.startsWith("mediumtext")) {
+				colMaxLen = 16777215;
+			} else if (colType.startsWith("longtext")) {
+				colMaxLen = Integer.MAX_VALUE;
+			} else if (colType.startsWith("tinyint")) {
+				colMaxLen = 4;
+			} else if (colType.startsWith("smallint")) {
+				colMaxLen = 6;
+			} else if (colType.startsWith("mediumint")) {
+				colMaxLen = 8;
+			} else if (colType.startsWith("int")) {
+				colMaxLen = 10;
+			} else if (colType.startsWith("bigint")) {
+				colMaxLen = 20;
+			} else if (colType.startsWith("float")) {
+				colMaxLen = 255;
+			} else if (colType.startsWith("double")) {
+				colMaxLen = 255;
+			} else if (colType.startsWith("decimal")) {
+				colMaxLen = 255;
+			} else if (colType.startsWith("datetime")) {
+				colMaxLen = 20;
+			} else if (colType.startsWith("date")) {
+				colMaxLen = 10;
+			} else if (colType.startsWith("time")) {
+				colMaxLen = 8;
+			} else if (colType.startsWith("timestamp")) {
+				colMaxLen = 14;
+			} else if (colType.startsWith("year")) {
+				colMaxLen = 4;
+			} else {
+				colMaxLen = 65535;
+			}
 		}
 		dataField.setFieldDispMaxLength(colMaxLen);
 		

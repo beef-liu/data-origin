@@ -224,13 +224,16 @@ function myParseDateFromFormattedStr(dateStr, dateFormat) {
 	}
 	
 	indexTmp = 0;
-	curTime.setFullYear(ymdhmsArray[indexTmp++]);
-	curTime.setMonth(ymdhmsArray[indexTmp++]);
-	curTime.setDate(ymdhmsArray[indexTmp++]);
-	curTime.setHours(ymdhmsArray[indexTmp++]);
-	curTime.setMinutes(ymdhmsArray[indexTmp++]);
-	curTime.setSeconds(ymdhmsArray[indexTmp++]);
-	curTime.setMilliseconds(0);
+
+	curTime = new Date(
+		ymdhmsArray[indexTmp++],
+		ymdhmsArray[indexTmp++],
+		ymdhmsArray[indexTmp++],
+		ymdhmsArray[indexTmp++],
+		ymdhmsArray[indexTmp++],
+		ymdhmsArray[indexTmp++],
+		0
+	);
 	
 	return curTime;
 }
