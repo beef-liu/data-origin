@@ -404,6 +404,10 @@ public class DODataImportExportService {
 	}
 	
 	protected File getTempExcelFile(RequestWrapper request, String fileName) {
+		if(fileName.indexOf(File.separatorChar) >= 0) {
+			throw new RuntimeException("Invalid fileName:" + fileName);
+		}
+		
 		String dirPath = request.getServletContext().getRealPath("/WEB-INF/tempxls");
 		File dir = new File(dirPath);
 		if(!dir.exists()) {
