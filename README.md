@@ -1,7 +1,7 @@
 data-origin
 ===========
 
-A tool to generate a Java Web of Data Management System (Under coding, 1st runnable version is coming soon)
+A tool to generate a Java Web of Data Management System
 
 ----------------------------------
 1. Generate web source through data-origin-generator
