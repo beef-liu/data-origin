@@ -382,8 +382,8 @@ public class DODataImportExportDao {
 					isDuplicatedKey = true;
 				} else {
 					errorMsg = DOServiceMsgUtil.getStackTrace(e);
-					logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
 				}
+				logger.error("importDataExcel() Error(insert) at line(from 1):" + (i+1), e);
 			}
 			
 			if(isDuplicatedKey) {
@@ -399,7 +399,7 @@ public class DODataImportExportDao {
 					}
 				} catch(Throwable e) {
 					errorMsg = DOServiceMsgUtil.getStackTrace(e);
-					logger.error("importDataExcel() Error at line(from 1):" + (i+1), e);
+					logger.error("importDataExcel() Error(update) at line(from 1):" + (i+1), e);
 				}
 			}
 			
@@ -414,6 +414,8 @@ public class DODataImportExportDao {
 				cell.setCellStyle(cellStyleOfError);
 				
 				errorRowCount++;
+				
+				logDataRow(dbTable, colMataList, allRowList.get(i), colValueAssignList);
 			} else {
 				makeSqlConditionOfPrimaryKey(
 						outputSqlConditionOfPrimaryKeys, dbTable, colMataList, allRowList.get(i), colValueAssignList);
@@ -440,6 +442,43 @@ public class DODataImportExportDao {
 		dataImportResult.setErrorCount(errorRowCount);
 		
 		return dataImportResult;
+	}
+	
+	private static void logDataRow(
+			DBTable dbTable,
+			List<DODataImportColMetaInfo> colMataList, List<Object> excelRow,
+			List<DataImportColValue> colValueAssignList
+			) throws ParseException {
+		StringBuilder msg = new StringBuilder();
+		msg.append("table: " + dbTable.getTableName());
+		msg.append(" cols: {");
+		
+		int index = 1;
+		Object dbVal = null;
+		for(int i = 0; i < colMataList.size(); i++) {
+			DODataImportColMetaInfo colMeta = colMataList.get(i);
+
+			if(colMeta.getDbCol() == null) {
+				continue;
+			}
+
+			dbVal = getDBValueFromExcelValue(excelRow.get(i), colMeta.getDbCol());
+			
+			msg.append(colMeta.getDbCol().getName() + ": \"" + dbVal + "\", ");
+		}
+		if(colValueAssignList != null) {
+			DataImportColValue importColVal = null;
+			for(int i = 0; i < colValueAssignList.size(); i++) {
+				importColVal = colValueAssignList.get(i);
+				
+				dbVal = getDBValueFromExcelValue(importColVal.dbVal, importColVal.getDbCol());
+				
+				msg.append(importColVal.getDbCol().getName() + ": \"" + importColVal.dbVal + "\", ");
+			}
+		}
+		msg.append("}");
+		
+		logger.info(msg);
 	}
 	
 	private static void setCellStyleToRow(
